@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
 
 import json
 import logging
@@ -120,15 +120,13 @@ def show_playing_daily(request, dev=""):
 
 
 def playinfo(request):
-    result = "ok"
-    if request.method == "POST":
+    result="ok"
+    if request.method=="POST":
         try:
-            contents = json.loads(request.body)
+            contents=json.loads(request.body)
             for item in contents:
-                create_date = '%s-%s-%s' % (
-                    item['date'][0:4], item['date'][4:6], item['date'][6:8])
-                playinfo_obj = playinfo(
-                    ServiceType=item['servicetype'],
+                create_date='%s-%s-%s'%(item['date'][0:4], item['date'][4:6], item['date'][6:8])
+                playinfo_obj=BestvPlayinfo(ServiceType=item['servicetype'],
                     DeviceType=item['dev'],
                     ISP=item['isp'],
                     Area=item['area'],
@@ -137,15 +135,15 @@ def playinfo(request):
                     Hour=item['hour'],
                     Records=item['records'],
                     Users=item['users'],
-                    AvgTimeOfUser=item['avg'])
-                playinfo_obj.save(force_update=true)
+                    AverageTime=item['avg'])
+                playinfo_obj.save()
         except ValueError, e:
-            result = "error: %s" % e
+            result="error: %s"%e
         except Exception, e:
-            result = "error: %s" % e
+            result="error: %s"%e
     else:
-        result = "error"
+        result="error"
 
-    respStr = json.dumps({"result": result})
-    logger.debug("update_playinfo: %s" % (respStr))
+    respStr=json.dumps({"result":result})
+    logger.debug("update_playinfo: %s"%(respStr))
     return HttpResponse(respStr, content_type="application/json")
