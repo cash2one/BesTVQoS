@@ -85,7 +85,7 @@ class Navi(object):
     def __init__(self):
         self.navi = None
 
-        html = open("./templates/navi_menu.html").read()
+        html = open("common/templates/navi_menu.html").read()
         parser = NaviTreeParser()
         parser.feed(html)
         self.navi = parser.get_navi()
