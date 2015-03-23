@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'common.views.home', name='home1'),
 
+    url(r'^update/playinfo$', 'tplay.views.playinfo'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
