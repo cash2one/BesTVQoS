@@ -20,10 +20,10 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': path.join(PROJECT_ROOT, 'db.sqlite3'),
-        'USER': '',
-        'PASSWORD': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'BesTVQoS'),
+        'USER': 'root',
+        'PASSWORD': 'funshion',
         'HOST': '',
         'PORT': '',
     }
