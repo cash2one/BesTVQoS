@@ -16,7 +16,12 @@ urlpatterns = patterns(
     url(r'^$', 'common.views.home'),
     url(r'^m/$', 'common.views.m_home'),
 
-    url(r'^update/playinfo$', 'tplay.views.playinfo'),
+    # data interface
+    url(r'^update/playprofile$', 'tplay.update_views.playprofile'),
+    url(r'^update/playinfo$', 'tplay.update_views.playinfo'),
+    url(r'^update/playtime$', 'tplay.update_views.playtime'),
+    url(r'^update/fbuffer$', 'tplay.update_views.fbuffer'),
+    url(r'^update/fluency$', 'tplay.update_views.fluency'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
