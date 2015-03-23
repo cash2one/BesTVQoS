@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-class playinfo(models.Model):
+class BestvPlayinfo(models.Model):
     ServiceType=models.CharField(max_length=30)
     DeviceType=models.CharField(max_length=255)
     ISP=models.CharField(max_length=255)
