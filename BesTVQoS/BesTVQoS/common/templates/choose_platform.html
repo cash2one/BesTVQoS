@@ -1,0 +1,14 @@
+{% if platforms %}
+<div class="ctrlitem">  
+    <label>设备</label>
+    <select name="platformlist" onchange="get_version(this.value)" id="platformlist">
+        {% for item in platforms %}
+            {% ifequal item default_platform %}
+                <option value="{{ item }}" selected>{{ item }}</option>
+            {% else %}
+                <option value="{{ item }}" >{{ item }}</option>
+            {% endifequal %}
+        {% endfor %}
+    </select>
+</div>
+{% endif %}

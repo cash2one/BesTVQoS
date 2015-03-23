@@ -1,0 +1,13 @@
+{% if versions or default_version%}
+<div class="ctrlitem"> 
+    <label>版本</label>
+    <select name="versionlist" id="versionlist">
+        {% for item in default_version %}
+            <option value="{{ item }}" selected>{{ item }}</option>
+        {% endfor %}
+        {% for item in versions %}
+            <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endif %}

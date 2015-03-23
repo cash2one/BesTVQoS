@@ -1,0 +1,12 @@
+
+{% include 'home.html' %}
+
+<body>
+    <div id="content1">
+        <ul class="pageitem">
+            {% for item in navi %}
+                <li class="menu"><a href="{{item.url}}"><span class="name">{{item.name}}</span><span class="arrow"></span></a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>

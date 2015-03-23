@@ -2,7 +2,7 @@
 Definition of urls for BesTVQoS.
 """
 
-from datetime import datetime
+# from datetime import datetime
 from django.conf.urls import patterns, url
 
 # Uncomment the next lines to enable the admin:
@@ -10,9 +10,11 @@ from django.conf.urls import patterns, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Examples:
-    url(r'^$', 'common.views.home', name='home1'),
+    url(r'^$', 'common.views.home'),
+    url(r'^m/$', 'common.views.m_home'),
 
     url(r'^update/playinfo$', 'tplay.views.playinfo'),
 

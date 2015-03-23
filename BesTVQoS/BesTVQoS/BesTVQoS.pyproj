@@ -31,7 +31,9 @@
     <Compile Include="BesTVQoS\urls.py" />
     <Compile Include="BesTVQoS\wsgi.py" />
     <Compile Include="common\forms.py" />
+    <Compile Include="common\mobile.py" />
     <Compile Include="common\models.py" />
+    <Compile Include="common\navi.py" />
     <Compile Include="common\tests.py" />
     <Compile Include="common\views.py" />
     <Compile Include="common\__init__.py" />
@@ -44,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="common\" />
-    <Folder Include="common\static\" />
     <Folder Include="tplay\" />
     <Folder Include="tplay\templates\" />
     <Folder Include="BesTVQoS\" />

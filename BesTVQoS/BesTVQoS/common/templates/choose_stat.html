@@ -1,0 +1,14 @@
+{% if task_stats %}
+<div class="ctrlitem"> 
+    <label>状态</label>
+    <select name="task_stats">
+        {% for item in task_stats %}
+            {% ifequal item default_task_stat %}
+                <option value="{{ item }}" selected>{{ item }}</option>
+            {% else %}
+                <option value="{{ item }}" >{{ item }}</option>
+            {% endifequal %}
+        {% endfor %}
+    </select>
+</div>
+{% endif %}

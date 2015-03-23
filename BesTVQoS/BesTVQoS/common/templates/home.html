@@ -1,0 +1,18 @@
+{% if is_mobile %}
+
+    {% include 'm_topbar.html' %}
+
+{% else %}
+
+    <head><link rel="stylesheet" href="/static/css/table_style.css"></head>
+    <script language="javascript" type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+
+    <br><br>
+    <h1>BesTV QoS</h1>
+    <br><br>
+    <hr />
+    <br> <br>
+
+    {% include 'navi_menu.html' %}
+
+{% endif %}

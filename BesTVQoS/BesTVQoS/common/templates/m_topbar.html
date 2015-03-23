@@ -1,0 +1,14 @@
+
+{% include 'm_home.html' %}
+
+<div id="topbar">   
+    <div id='title'>{{top_title}}</div>
+    {% if show_topbar %}
+        <div id="leftnav">
+            <a href="/m"><img alt="home" src="/static/mobile/images/home.png" /></a>
+            {% for p in path %}
+                <a href="{{p.url}}">{{p.name}}</a>                
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
