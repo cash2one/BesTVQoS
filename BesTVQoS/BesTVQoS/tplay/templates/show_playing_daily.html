@@ -1,0 +1,44 @@
+
+{% include 'home.html' %}
+
+<div id ="content" >
+    <form method="post" class="bordered1" >
+        <span style="padding-left:1%;"></span>
+        <b>{{table.mtitle}}</b>
+        <br>
+        <div class="pageitem">
+            <div class="ctrlbox">  
+                <div class="ctrlitem">  
+                    <label>服务类型</label>
+                    <select name="service_type">
+                        {% for item in service_types %}
+                            {% ifequal item default_service_types %}
+                                <option value="{{ item }}" selected>{{ item }}</option>
+                            {% else %}
+                                <option value="{{ item }}" >{{ item }}</option>
+                            {% endifequal %}
+                        {% endfor %}
+                    </select>
+                </div>        
+                <div class="ctrlitem">  
+                    <label>日期</label>
+                    {% if is_mobile %}
+                        <input name="date" type="date" value="{{default_date}}">
+                    {% else %}
+                        <input class="Wdate" name="date" value="{{default_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})">
+                    {% endif %}
+                </div>  
+                <div class="ctrlitem">    
+                    <label>最小记录数</label>
+                    <input name="min_rec" type="number" step=500 value="{{default_min_rec}}" maxlength="200px" style = "width:100px"/>
+                </div> 
+                <div class="ctrlitem">
+                    <input type="submit" value="查询"> 
+                </div>
+            </div>  
+        </div>
+    </form>
+    
+    {% include 'basic_table.html' %}
+    
+</div>
