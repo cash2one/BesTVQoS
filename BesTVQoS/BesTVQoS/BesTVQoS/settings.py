@@ -21,7 +21,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'BesTVQoS'),
+        'NAME': 'BesTVQoS',
         'USER': 'root',
         'PASSWORD': 'funshion',
         'HOST': '',
