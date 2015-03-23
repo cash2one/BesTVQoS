@@ -16,7 +16,6 @@ class BestvPlayprofile(models.Model):
         db_table="playprofile"
         unique_together=('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
 
-
 class BestvPlayinfo(models.Model):
     ServiceType=models.CharField(max_length=30)
     DeviceType=models.CharField(max_length=255)
