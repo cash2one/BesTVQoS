@@ -12,7 +12,7 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'common.views.home', name='home'),
+    url(r'^$', 'common.views.home', name='home1'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
