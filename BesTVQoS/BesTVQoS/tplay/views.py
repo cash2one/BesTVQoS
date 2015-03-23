@@ -120,34 +120,3 @@ def show_playing_daily(request, dev=""):
     do_mobile_support(request, dev, context)
 
     return render_to_response('show_playing_daily.html', context)
-
-
-def playinfo(request):
-    result = "ok"
-    if request.method == "POST":
-        try:
-            contents = json.loads(request.body)
-            for item in contents:
-                create_date = '%s-%s-%s' % (
-                    item['date'][0:4], item['date'][4:6], item['date'][6:8])
-                playinfo_obj = BestvPlayinfo(ServiceType=item['servicetype'],
-                                             DeviceType=item['dev'],
-                                             ISP=item['isp'],
-                                             Area=item['area'],
-                                             ViewType=item['viewtype'],
-                                             Date=create_date,
-                                             Hour=item['hour'],
-                                             Records=item['records'],
-                                             Users=item['users'],
-                                             AverageTime=item['avg'])
-                playinfo_obj.save()
-        except ValueError, e:
-            result = "error: %s" % e
-        except Exception, e:
-            result = "error: %s" % e
-    else:
-        result = "error"
-
-    respStr = json.dumps({"result": result})
-    logger.debug("update_playinfo: %s" % (respStr))
-    return HttpResponse(respStr, content_type="application/json")
