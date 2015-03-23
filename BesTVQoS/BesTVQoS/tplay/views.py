@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 import json
 import logging
 import time
 
+from django.shortcuts import render_to_response
 from django.http import HttpResponse
 from django.db import connection
 from django import forms
@@ -22,7 +23,7 @@ class HtmlTable:
 
 
 class DateForm(forms.Form):
-    platformlist = forms.CharField()
+    service_type = forms.CharField()
     date = forms.CharField()
     min_rec = forms.CharField()
 
@@ -33,9 +34,11 @@ class PlayProfile:
         self.service_type = "All"
         self.date = time.strftime(
             '%Y-%m-%d', time.localtime(time.time() - 86400))
-        self.min_rec = 500
+        self.min_rec = 0
 
         self.common_filter = ""
+        self.service_type_filter = ""
+        self.date_filter = ""
         self.min_rec_filter = ""
 
         self.read_date_form(request)
@@ -53,7 +56,7 @@ class PlayProfile:
         self.get_common_filter()
 
     def get_common_filter(self):
-        date_filter = " Date = '%s'" % (self.date)
+        self.date_filter = " Date = '%s'" % (self.date)
 
         if (self.service_type == "All"):
             self.service_type_filter = ""
@@ -63,7 +66,7 @@ class PlayProfile:
 
         self.min_rec_filter = " and Records >= %s" % (self.min_rec)
 
-        self.common_filter = date_filter + self.service_type_filter
+        self.common_filter = self.date_filter + self.service_type_filter
 
 
 def show_playing_daily(request, dev=""):
@@ -90,7 +93,7 @@ def show_playing_daily(request, dev=""):
     play_profile.cu.execute(sql_command)
     context = {}
     table = HtmlTable()
-    table.mtitle = "%s 用户播放统计信息" % play_profile.date
+    table.mtitle = "%s 用户播放统计信息" % play_profile.date.encode('utf-8')
     table.mheader = [
         "服务类型", "设备类型", "播放数", '播放百分比%', '用户数', '用户百分比%', '人均播放时间', '人均播放次数']
     table.msub = []
@@ -111,7 +114,7 @@ def show_playing_daily(request, dev=""):
     context['table'] = table
     context['default_date'] = play_profile.date
     context['default_min_rec'] = play_profile.min_rec
-    context['default_service_types'] = stat.platform
+    context['default_service_types'] = play_profile.service_type
     context['service_types'] = SERVICE_TYPES
 
     do_mobile_support(request, dev, context)
@@ -120,30 +123,31 @@ def show_playing_daily(request, dev=""):
 
 
 def playinfo(request):
-    result="ok"
-    if request.method=="POST":
+    result = "ok"
+    if request.method == "POST":
         try:
-            contents=json.loads(request.body)
+            contents = json.loads(request.body)
             for item in contents:
-                create_date='%s-%s-%s'%(item['date'][0:4], item['date'][4:6], item['date'][6:8])
-                playinfo_obj=BestvPlayinfo(ServiceType=item['servicetype'],
-                    DeviceType=item['dev'],
-                    ISP=item['isp'],
-                    Area=item['area'],
-                    ViewType=item['viewtype'],
-                    Date=create_date,
-                    Hour=item['hour'],
-                    Records=item['records'],
-                    Users=item['users'],
-                    AverageTime=item['avg'])
+                create_date = '%s-%s-%s' % (
+                    item['date'][0:4], item['date'][4:6], item['date'][6:8])
+                playinfo_obj = BestvPlayinfo(ServiceType=item['servicetype'],
+                                             DeviceType=item['dev'],
+                                             ISP=item['isp'],
+                                             Area=item['area'],
+                                             ViewType=item['viewtype'],
+                                             Date=create_date,
+                                             Hour=item['hour'],
+                                             Records=item['records'],
+                                             Users=item['users'],
+                                             AverageTime=item['avg'])
                 playinfo_obj.save()
         except ValueError, e:
-            result="error: %s"%e
+            result = "error: %s" % e
         except Exception, e:
-            result="error: %s"%e
+            result = "error: %s" % e
     else:
-        result="error"
+        result = "error"
 
-    respStr=json.dumps({"result":result})
-    logger.debug("update_playinfo: %s"%(respStr))
+    respStr = json.dumps({"result": result})
+    logger.debug("update_playinfo: %s" % (respStr))
     return HttpResponse(respStr, content_type="application/json")

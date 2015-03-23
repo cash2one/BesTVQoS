@@ -15,6 +15,7 @@ urlpatterns = patterns(
     # Examples:
     url(r'^$', 'common.views.home'),
     url(r'^m/$', 'common.views.m_home'),
+    url(r'^navi/(?P<target_url>\w*)', 'common.views.navi'),
 
     url(r'^((?P<dev>m)/)?show_playing_daily$',
         'tplay.views.show_playing_daily'),

@@ -23,7 +23,7 @@ def home(request):
 def m_home(reuest):
     context = {}
     context["is_mobile"] = True
-    context["top_title"] = "Funtv QoS Monitor"
+    context["top_title"] = "BesTV QoS Monitor"
     context["navi"] = Navi().get_sub_items()
 
     return render_to_response('m_navi_menu.html', context)
