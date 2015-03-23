@@ -12,7 +12,7 @@ class playinfo(models.Model):
     Hour=models.IntegerField()    
     Records=models.IntegerField()
     Users=models.IntegerField()
-    AvgTimeOfUser=models.IntegerField()
+    AverageTime=models.IntegerField()
 
     class Meta:
         db_table="playinfo"

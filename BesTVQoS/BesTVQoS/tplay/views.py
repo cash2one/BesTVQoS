@@ -18,14 +18,14 @@ def playinfo(request):
                 playinfo_obj=playinfo(
                     ServiceType=item['servicetype'],
                     DeviceType=item['dev'],
-                    ISP=item['ISP'],
-                    Area=item['Area'],
+                    ISP=item['isp'],
+                    Area=item['area'],
                     ViewType=item['viewtype'],
                     Date=create_date,
                     Hour=item['hour'],
                     Records=item['records'],
                     Users=item['users'],
-                    AvgTimeOfUser=item['avgtime'])
+                    AvgTimeOfUser=item['avg'])
                 playinfo_obj.save(force_update=true)
         except ValueError, e:
             result="error: %s"%e
