@@ -51,8 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
-    <Content Include="db.sqlite3" />
-    <Content Include="tplay\templates\index.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.mht">
