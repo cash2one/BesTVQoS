@@ -38,10 +38,10 @@ datadir=${svrtype}/${date}/${dev}
 
 for playtype in ${pt[@]}
 do
-	python.exe update_data_into_db_date.py ${svrtype} ${dev} ${date} ${hour} ${playtype} ${datadir}/pchoke_by_hour_${playtype} ${datadir}/fbuffer_data_by_hour_${playtype}
+	python update_data_into_db_date.py ${svrtype} ${dev} ${date} ${hour} ${playtype} ${datadir}/pchoke_by_hour_${playtype} ${datadir}/fbuffer_data_by_hour_${playtype}
 done
 
 # playtype '' .eq. 5
-python.exe update_data_into_db_date.py ${svrtype} ${dev} ${date} ${hour} 5 ${datadir}/pchoke_by_hour_ ${datadir}/fbuffer_data_by_hour_
+python update_data_into_db_date.py ${svrtype} ${dev} ${date} ${hour} 5 ${datadir}/pchoke_by_hour_ ${datadir}/fbuffer_data_by_hour_
 
 
