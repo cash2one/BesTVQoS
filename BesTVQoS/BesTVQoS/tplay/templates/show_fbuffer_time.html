@@ -1,0 +1,14 @@
+
+{% include 'home.html' %}
+
+<div id ="content" >
+    {% include 'filter_group.html' %}
+	
+	{% if has_data %}
+	{% include 'highcharts_plot.html' %}
+	{% for item in contents %}
+	<div id="tabs_{{item.index}}" style="min-width:700px;height:400px" >
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
