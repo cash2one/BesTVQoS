@@ -2,50 +2,52 @@
 <script type="text/javascript" src="/static/js/highcharts/modules/exporting.js"></script>
 
 <script type="text/javascript">
-$(function(){
-    {% for item in contents %}
-    $('#tabs_{{item.index}}').highcharts({
-            title: {
-	            text: '{{item.title}}',
-	            x: -20 //center
-	        },
-	        subtitle: {
-	            text: '{{item.subtitle}}',
-	            x: -20
-	        },
-	        xAxis: {
-	            categories: [{{item.xAxis}}],
-                tickInterval:{{item.t_interval}},
-                labels:{
-                    rotation:45
-                }
-	        },
-	        yAxis: [{ 
-                labels: {                   
-                    style: {
-                        color: '#89A54E'
+    $(function(){
+        {% for item in contents %}
+            $('#tabs_{{item.index}}').highcharts({
+                title: {
+                    text: '{{item.title}}',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: '{{item.subtitle}}',
+                    x: -20
+                },
+                xAxis: {
+                    categories: {{item.xAxis|safe}},
+                    tickInterval:{{item.t_interval}},
+                    labels:{
+                        rotation:45
                     }
                 },
-                title: {
-                    text: {{item.y_title}},
-                    style: {
-                        color: '#89A54E'
+                yAxis: [{ 
+                    labels: {                   
+                        style: {
+                            color: '#89A54E'
+                        }
+                    },
+                    title: {
+                        text: '{{item.y_title}}',
+                        style: {
+                            color: '#89A54E'
+                        }
                     }
-                }
-            }],
-	        tooltip: {
-	            valueSuffix: '',
-                shared: true  
-	        },
-	        legend: {
-	            layout: 'vertical',
-	            align: 'right',
-	            verticalAlign: 'middle',
-	            borderWidth: 0
-	        },
-	        series: [{{item.series|safe}}]
+                }],
+                tooltip: {
+                    valueSuffix: '',
+                    shared: true  
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                series: [{{item.series|safe}}]
+            });
+        {% endfor %}
     });
-});
+</script>
 
 
 
