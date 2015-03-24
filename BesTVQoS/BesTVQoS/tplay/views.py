@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import json
+# import json
 import logging
 import time
 
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
 from django.db import connection
 from django import forms
 from common.mobile import do_mobile_support
@@ -46,8 +45,8 @@ class PlayProfile:
         self.cu = connection.cursor()
 
     def read_date_form(self, request):
-        if(request.method == 'POST'):
-            date_form = DateForm(request.POST)
+        if(request.method == 'GET'):
+            date_form = DateForm(request.GET)
             if date_form.is_valid():
                 self.service_type = date_form.cleaned_data['service_type']
                 self.date = date_form.cleaned_data['date']
@@ -76,7 +75,7 @@ def show_playing_daily(request, dev=""):
     sql_command = "select sum(Records), sum(Users) %s" % (filter)
     logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)
-    
+
     context = {}
     table = HtmlTable()
     table.mtitle = "%s 用户播放统计信息" % play_profile.date.encode('utf-8')
@@ -118,9 +117,23 @@ def show_playing_daily(request, dev=""):
     context['table'] = table
     context['default_date'] = play_profile.date
     context['default_min_rec'] = play_profile.min_rec
-    context['default_service_types'] = play_profile.service_type
+    context['default_service_type'] = play_profile.service_type
     context['service_types'] = SERVICE_TYPES
 
     do_mobile_support(request, dev, context)
 
     return render_to_response('show_playing_daily.html', context)
+
+
+def show_playing_trend(request, dev=""):
+    context = {}
+    context['default_service_type'] = "All"
+    context['service_types'] = SERVICE_TYPES
+    context['default_service_type'] = "BesTV_OS_ABC_1.0.1"
+    context['device_types'] = ['BesTV_OS_ABC_1.0.1', 'BesTV_OS_ABC_1.0.2']
+    context['default_begin_date'] = "2015-03-24"
+    context['default_end_date'] = "2015-03-24"
+
+    do_mobile_support(request, dev, context)
+
+    return render_to_response('show_playing_trend.html', context)

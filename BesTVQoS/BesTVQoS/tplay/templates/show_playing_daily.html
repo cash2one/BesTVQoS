@@ -2,7 +2,7 @@
 {% include 'home.html' %}
 
 <div id ="content" >
-    <form method="post" class="bordered1" >
+    <form method="get" class="bordered1" >
         <span style="padding-left:1%;"></span>
         <b>{{table.mtitle}}</b>
         <br>
@@ -12,7 +12,7 @@
                     <label>服务类型</label>
                     <select name="service_type">
                         {% for item in service_types %}
-                            {% ifequal item default_service_types %}
+                            {% ifequal item default_service_type %}
                                 <option value="{{ item }}" selected>{{ item }}</option>
                             {% else %}
                                 <option value="{{ item }}" >{{ item }}</option>

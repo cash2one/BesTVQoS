@@ -19,6 +19,8 @@ urlpatterns = patterns(
 
     url(r'^((?P<dev>m)/)?show_playing_daily$',
         'tplay.views.show_playing_daily'),
+    url(r'^((?P<dev>m)/)?show_playing_trend$',
+        'tplay.views.show_playing_trend'),
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),

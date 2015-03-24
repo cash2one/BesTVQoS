@@ -1,76 +1,63 @@
-<link rel="stylesheet" type="text/css" href="/static-src/js/multiselectSrc/jquery.multiselect.css" />
-<link rel="stylesheet" type="text/css" href="/static-src/js/ui/jquery-ui.css" />
-<script type="text/javascript" src="/static-src/js/ui/jquery.ui.core.js"></script>
-<script type="text/javascript" src="/static-src/js/ui/jquery.ui.widget.js"></script>
-<script type="text/javascript" src="/static-src/js/multiselectSrc/jquery.multiselect.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/js/multiselectSrc/jquery.multiselect.css" />
+<link rel="stylesheet" type="text/css" href="/static/js/ui/jquery-ui.css" />
+<script type="text/javascript" src="/static/js/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
 
 <script type="text/javascript">
 $(function(){
-    $("#platformlist").multiselect({
+    $("#service_type").multiselect({
         selectedList:1,
         height:110,
         multiple:false,
         header:false,
         minWidth:100
     });
-    $("#netlist").multiselect({
+    $("#device_type").multiselect({
         selectedList:1,
         height:110,
         multiple:false,
         header:false,
         minWidth:100
-    });
-    $("#versionlist").multiselect({
-        selectedList:1,
-        height:110,
-        multiple:false,
-        header:false,
-        minWidth:130
     });
 });
 
-function get_version(platform) {
-    platform = $("#platformlist").val()
+function get_device_type(platform) {
+    var service_type = $("#service_type").val()
+    var begin_date = $("#begin_date").val()
     var end_date = $("#end_date").val()
     $.ajax({
-        type: "POST",
+        type: "GET",
         dataType: "json",
-        url: "get_version",
+        url: "get_device_type",
         data: { 
-            'platform': platform,
+            'service_type': service_type,
+            'begin_date': begin_date,
             'end_date': end_date,
         },
         success: function (data) {
-            $("#versionlist").empty()
-            versions = data["version_choices"];
-            is_cdf = data["is_cdf"];
-            if(is_cdf == "0")
+            $("#device_type").empty()
+            device_types = data["device_types"];
+
+            for(i=0;i<device_types.length;i++)
             {
-                $("#versionlist").append("<option value='"+"all"+"' selected>"+"all"+"</option>");
-            }
-            for(i=0;i<versions.length;i++)
-            {
-                $("#versionlist").append("<option value='"+versions[i]+"'>"+versions[i]+"</option>");
+                $("#device_type").append("<option value='"+device_types[i]+"'>"+device_types[i]+"</option>");
             }
 
-            $("#versionlist").multiselect('refresh');
-
+            $("#device_type").multiselect('refresh');
         }
     });
 }   
 </script>
 
 
-<form method="post">
+<form method="get">
     <div class="pageitem">
-        <span style="float:left;padding-left:1%;"></span>
-            {% include 'choose_platform.html'%}
-            {% include 'choose_single_version.html'%}
-            {% include 'choose_net.html'%}
-            {% include 'choose_stat.html' %}
+        <span style="float:left;padding-left:1%;">
+            {% include 'filter_service_type.html'%}
+            {% include 'filter_device_type.html'%}
         </span>
         <div class="ctrlbox">
-            {% include 'choose_record_limit.html' %}
             <div class="ctrlitem">  
                 <label>起始日期</label>
                 {% if is_mobile %}

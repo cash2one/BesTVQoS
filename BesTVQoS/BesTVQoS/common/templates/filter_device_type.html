@@ -1,9 +1,9 @@
-{% if task_stats %}
+{% if device_types %}
 <div class="ctrlitem"> 
-    <label>状态</label>
-    <select name="task_stats">
-        {% for item in task_stats %}
-            {% ifequal item default_task_stat %}
+    <label>设备类型</label>
+    <select name="device_type" id="device_type">
+        {% for item in device_types %}   
+            {% ifequal item default_service_type %}
                 <option value="{{ item }}" selected>{{ item }}</option>
             {% else %}
                 <option value="{{ item }}" >{{ item }}</option>

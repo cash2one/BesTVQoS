@@ -1,9 +1,9 @@
-{% if platforms %}
+{% if service_types %}
 <div class="ctrlitem">  
-    <label>设备</label>
-    <select name="platformlist" onchange="get_version(this.value)" id="platformlist">
-        {% for item in platforms %}
-            {% ifequal item default_platform %}
+    <label>服务类型</label>
+    <select name="service_type" onchange="get_device_type(this.value)" id="service_type">
+        {% for item in service_types %}
+            {% ifequal item default_service_type %}
                 <option value="{{ item }}" selected>{{ item }}</option>
             {% else %}
                 <option value="{{ item }}" >{{ item }}</option>
