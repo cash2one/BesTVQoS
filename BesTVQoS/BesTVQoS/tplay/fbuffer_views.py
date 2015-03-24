@@ -94,6 +94,8 @@ def show_fbuffer_sucratio(request, dev=""):
             if len(device_types)>0:
                 device_type = device_types[0]
             else:
+                device_types.append("")
+                device_type = ""
                 raise NoDataError("No data between %s - %s"%(begin_date, end_date))
 
         device_filter_ojbs = BestvFbuffer.objects.filter(DeviceType=device_type,
@@ -219,14 +221,17 @@ def show_fbuffer_time(request, dev=""):
         begin_date=request.GET.get("begin_date", last_date)
         end_date=request.GET.get("end_date", last_date)
 
-        objs = BestvFbuffer.objects.filter( 
-                                           Date__gte=begin_date, Date__lte=end_date)
+        device_types = get_device_types("fbuffer", service_type, begin_date, end_date)
         if device_type is None: # init device type first time
-            if len(objs)>0:
-                device_type = objs[0].DeviceType
+            if len(device_types)>0:
+                device_type = device_types[0]
             else:
+                device_types.append("")
+                device_type = ""
                 raise NoDataError("No data between %s - %s"%(begin_date, end_date))
-        device_filter_ojbs=objs.filter(DeviceType=device_type)
+
+        device_filter_ojbs = BestvFbuffer.objects.filter(DeviceType=device_type,
+                                           Date__gte=begin_date, Date__lte=end_date)
 
         # process data from databases;
         if begin_date==end_date:
@@ -240,6 +245,7 @@ def show_fbuffer_time(request, dev=""):
         else:
             days_region=get_days_region(begin_date, end_date)
             data_by_day=prepare_fbuffer_pnvalue_daily_data(device_filter_ojbs, days_region)
+            item_idx=0
             for view_type_idx in VIEW_TYPES:
                 item=make_fbuffer_pnvalue_item(data_by_day[view_type_idx], item_idx, days_region, u"缓冲成PN值", 
                                                u"全天24小时%s"%(VIEW_TYPES_DES[view_type_idx]), u"秒")
@@ -252,10 +258,10 @@ def show_fbuffer_time(request, dev=""):
         logger.info("query fbuffer sucratio error: %s"%(e))
 
     context = {}
-    context['default_service_type'] = "All"
+    context['default_service_type'] = service_type
     context['service_types'] = SERVICE_TYPES
     context['default_device_type'] = device_type
-    context['device_types'] = ['BesTV_OS_ABC_1.0.1', 'BesTV_OS_ABC_1.0.2']
+    context['device_types'] = device_types
     context['default_begin_date'] = str(begin_date)
     context['default_end_date'] = str(end_date)
     context['contents']=items
