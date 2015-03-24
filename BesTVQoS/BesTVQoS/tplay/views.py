@@ -3,16 +3,51 @@
 # import json
 import logging
 import time
+import datetime
 
 from django.shortcuts import render_to_response
 from django.db import connection
-from django import forms
 from common.mobile import do_mobile_support
+from common.views import get_device_types
 from tplay.models import *
 
 logger = logging.getLogger("django.request")
 
 SERVICE_TYPES = ["All", "B2B", "B2C"]
+
+VIEW_TYPES = [1, 2, 3, 4, 5]
+VIEW_TYPES_DES = {1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"unknown"}
+
+HOUR_XALIS = ["0", "1", "2", "3", "4", "5", "6", "7",
+              "8", "9", "10", "11", "12", "13", "14", "15",
+              "16", "17", "18", "19", "20", "21", "22", "23"]
+
+
+def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
+    item = {}
+    item["index"] = item_idx
+    item["title"] = title
+    item["subtitle"] = subtitle
+    item["y_title"] = y_title
+    item["xAxis"] = xAlis
+    item["t_interval"] = 1
+
+    try:
+        series = []
+        for i in VIEW_TYPES:
+            serie_item = '''{
+                name: '%s',
+                yAxis: 0,
+                type: 'spline',
+                data: [%s]
+            }''' % (VIEW_TYPES_DES[i], ",".join(key_values[i]))
+            series.append(serie_item)
+    except Exception, e:
+        raise e
+
+    item["series"] = ",".join(series)
+
+    return item
 
 
 class HtmlTable:
@@ -21,64 +56,142 @@ class HtmlTable:
     mysub = [['sub1'], ['sub2']]
 
 
-class DateForm(forms.Form):
-    service_type = forms.CharField()
-    date = forms.CharField()
-    min_rec = forms.CharField()
-
-
-class PlayProfile:
+class PlayInfo:
 
     def __init__(self, request):
         self.service_type = "All"
-        self.date = time.strftime(
+        self.end_date = time.strftime(
             '%Y-%m-%d', time.localtime(time.time() - 86400))
+        self.begin_date = self.end_date
+        self.device_type = u""
+        self.device_types = []
         self.min_rec = 0
 
-        self.common_filter = ""
-        self.service_type_filter = ""
-        self.date_filter = ""
-        self.min_rec_filter = ""
-
-        self.read_date_form(request)
+        self.common_filter = u""
+        self.service_type_filter = u""
+        self.device_type_filter = u""
+        self.date_filter = u""
 
         self.cu = connection.cursor()
 
-    def read_date_form(self, request):
+    def read_filter_profile_form(self, request):
         if(request.method == 'GET'):
-            date_form = DateForm(request.GET)
-            if date_form.is_valid():
-                self.service_type = date_form.cleaned_data['service_type']
-                self.date = date_form.cleaned_data['date']
-                self.min_rec = date_form.cleaned_data['min_rec']
+            self.service_type = request.GET.get('service_type', 'All')
+            self.end_date = request.GET.get('date', self.end_date)
+            self.begin_date = self.end_date
+            self.min_rec = request.GET.get('min_rec', 0)
+
+        self.get_common_filter()
+
+    def read_filter_group_form(self, request):
+        if(request.method == 'GET'):
+            self.service_type = request.GET.get('service_type', 'All')
+            self.device_type = request.GET.get('device_type', '')
+            self.begin_date = request.GET.get('begin_date', self.begin_date)
+            self.end_date = request.GET.get('end_date', self.end_date)
+
+        self.device_types = get_device_types(
+            "PlayInfo", self.service_type, self.begin_date,
+            self.end_date, self.cu)
+
+        if len(self.device_types) == 0:
+            self.device_types.append("")
 
         self.get_common_filter()
 
     def get_common_filter(self):
-        self.date_filter = " Date = '%s'" % (self.date)
+        self.date_filter = " Date >= '%s' and Date <= '%s'" % (
+            self.begin_date, self.end_date)
 
-        if (self.service_type == "All"):
-            self.service_type_filter = ""
-        else:
+        if (self.service_type != "All"):
             self.service_type_filter = " and ServiceType = '%s' " % (
                 self.service_type)
+        else:
+            self.service_type_filter = ""
+
+        if (self.device_type != ""):
+            self.device_type_filter = " and DeviceType = '%s'" % (
+                self.device_type)
 
         self.min_rec_filter = " and Records >= %s" % (self.min_rec)
 
         self.common_filter = self.date_filter + self.service_type_filter
 
+    def get_playinfo_item(self, item_index):
+        x_axis = []
+        y_axises = {}
+
+        if self.begin_date == self.end_date:
+            '''24 hours view'''
+            fn_get_sql_cmd = self.get_hourly_sql_command
+            for m in range(0, 24):
+                x_axis.append('%s' % m)
+        else:
+            '''multidays view'''
+            fn_get_sql_cmd = self.get_daily_sql_command
+            tmp_end_date = datetime.datetime.strptime(
+                self.end_date, '%Y-%m-%d')
+            tmp_begin_date = datetime.datetime.strptime(
+                self.begin_date, '%Y-%m-%d')
+            for i in range((tmp_end_date - tmp_begin_date).days + 1):
+                day = tmp_begin_date + datetime.timedelta(days=i)
+                day_str = day.strftime('%Y-%m-%d')
+                x_axis.append("'%s'" % day_str)
+
+        for vt in VIEW_TYPES:
+            y_axise = []
+            for x in x_axis:
+                sql_command = fn_get_sql_cmd(x, vt)
+                self.cu.execute(sql_command)
+
+                records = '0'
+                for item in self.cu.fetchall():
+                    if item[0]:
+                        records = '%d' % (item[0])
+                y_axise.append(records)
+
+            y_axises[vt] = y_axise
+
+        return make_chart_item(y_axises, item_index, u'用户观看量',
+                               u'', u'观看量', x_axis)
+
+    def get_daily_sql_command(self, date, view_type):
+        sql_command = "select Records from PlayInfo where Date = %s " % (
+            date)
+        sql_command += self.service_type_filter
+        sql_command += self.device_type_filter
+        sql_command += " and Hour = 24"
+        sql_command += " and ViewType = '%s'" % (view_type)
+
+        logger.debug("PlayInfo Daily SQL %s" % sql_command)
+
+        return sql_command
+
+    def get_hourly_sql_command(self, hour, view_type):
+        sql_command = "select Records from PlayInfo where %s" % (
+            self.date_filter)
+        sql_command += self.service_type_filter
+        sql_command += self.device_type_filter
+        sql_command += " and Hour = %s" % (hour)
+        sql_command += " and ViewType = '%s'" % (view_type)
+
+        logger.debug("PlayInfo Hourly SQL %s" % sql_command)
+
+        return sql_command
+
 
 def show_playing_daily(request, dev=""):
-    play_profile = PlayProfile(request)
+    play_profile = PlayInfo(request)
+    play_profile.read_filter_profile_form(request)
 
-    filter = "from playprofile where %s" % (play_profile.common_filter)
+    filter = "from PlayProfile where %s" % (play_profile.common_filter)
     sql_command = "select sum(Records), sum(Users) %s" % (filter)
     logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)
 
     context = {}
     table = HtmlTable()
-    table.mtitle = "%s 用户播放统计信息" % play_profile.date.encode('utf-8')
+    table.mtitle = "%s 用户播放统计信息" % play_profile.end_date.encode('utf-8')
     table.mheader = [
         "服务类型", "设备类型", "播放数", '播放百分比%', '用户数', '用户百分比%', '人均播放时间', '人均播放次数']
     table.msub = []
@@ -115,7 +228,7 @@ def show_playing_daily(request, dev=""):
             table.msub.append(sub)
 
     context['table'] = table
-    context['default_date'] = play_profile.date
+    context['default_date'] = play_profile.end_date
     context['default_min_rec'] = play_profile.min_rec
     context['default_service_type'] = play_profile.service_type
     context['service_types'] = SERVICE_TYPES
@@ -126,14 +239,19 @@ def show_playing_daily(request, dev=""):
 
 
 def show_playing_trend(request, dev=""):
+    play_trend = PlayInfo(request)
+    play_trend.read_filter_group_form(request)
+
+    chart_item = play_trend.get_playinfo_item(0)
 
     context = {}
-    context['default_service_type'] = "All"
+    context['contents'] = [chart_item]
+    context['default_service_type'] = play_trend.service_type
     context['service_types'] = SERVICE_TYPES
-    context['default_device_type'] = "BesTV_OS_ABC_1.0.1"
-    context['device_types'] = ['BesTV_OS_ABC_1.0.1', 'BesTV_OS_ABC_1.0.2']
-    context['default_begin_date'] = "2015-03-24"
-    context['default_end_date'] = "2015-03-24"
+    context['default_device_type'] = play_trend.device_type
+    context['device_types'] = play_trend.device_types
+    context['default_begin_date'] = play_trend.begin_date
+    context['default_end_date'] = play_trend.end_date
 
     do_mobile_support(request, dev, context)
 
