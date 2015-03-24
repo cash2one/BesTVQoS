@@ -126,10 +126,11 @@ def show_playing_daily(request, dev=""):
 
 
 def show_playing_trend(request, dev=""):
+
     context = {}
     context['default_service_type'] = "All"
     context['service_types'] = SERVICE_TYPES
-    context['default_service_type'] = "BesTV_OS_ABC_1.0.1"
+    context['default_device_type'] = "BesTV_OS_ABC_1.0.1"
     context['device_types'] = ['BesTV_OS_ABC_1.0.1', 'BesTV_OS_ABC_1.0.2']
     context['default_begin_date'] = "2015-03-24"
     context['default_end_date'] = "2015-03-24"
