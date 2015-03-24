@@ -5,6 +5,7 @@ import logging
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from tplay.models import *
+from common.views import *
 from common.date_time_tool import *
 
 logger = logging.getLogger("django.request")
@@ -87,14 +88,16 @@ def show_fbuffer_sucratio(request, dev=""):
         begin_date=request.GET.get("begin_date", last_date)
         end_date=request.GET.get("end_date", last_date)
 
-        objs = BestvFbuffer.objects.filter( 
-                                           Date__gte=begin_date, Date__lte=end_date)
+   
+        device_types = get_device_types("fbuffer", service_type, begin_date, end_date)
         if device_type is None: # init device type first time
-            if len(objs)>0:
-                device_type = objs[0].DeviceType
+            if len(device_types)>0:
+                device_type = device_types[0]
             else:
                 raise NoDataError("No data between %s - %s"%(begin_date, end_date))
-        device_filter_ojbs=objs.filter(DeviceType=device_type)
+
+        device_filter_ojbs = BestvFbuffer.objects.filter(DeviceType=device_type,
+                                           Date__gte=begin_date, Date__lte=end_date)
 
         # process data from databases;
         if begin_date==end_date:
