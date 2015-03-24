@@ -76,21 +76,7 @@ def show_playing_daily(request, dev=""):
     sql_command = "select sum(Records), sum(Users) %s" % (filter)
     logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)
-    records_total = 0
-    users_total = 0
-    for item in play_profile.cu.fetchall():
-        records_total = int(item[0])
-        users_total = int(item[1])
-
-    if records_total == 0 or users_total == 0:
-        logger.error("Unexpected Value: records_total: %d, users_total: %d" % (
-            records_total, users_total))
-
-    filter = filter + play_profile.min_rec_filter
-    sql_command = "select ServiceType, DeviceType, Records, Users, \
-        AverageTime, (Records/Users) %s" % (filter)
-    logger.debug("SQL %s" % sql_command)
-    play_profile.cu.execute(sql_command)
+    
     context = {}
     table = HtmlTable()
     table.mtitle = "%s 用户播放统计信息" % play_profile.date.encode('utf-8')
@@ -98,18 +84,36 @@ def show_playing_daily(request, dev=""):
         "服务类型", "设备类型", "播放数", '播放百分比%', '用户数', '用户百分比%', '人均播放时间', '人均播放次数']
     table.msub = []
     subs = []
+
+    records_total = 0
+    users_total = 0
     for item in play_profile.cu.fetchall():
-        sub = []
-        sub.append(item[0])
-        sub.append(item[1])
-        sub.append(item[2])
-        sub.append(round(100.0 * item[2] / records_total, 2))
-        sub.append(item[3])
-        sub.append(round(100.0 * item[3] / users_total, 2))
-        sub.append(item[4])
-        sub.append(int(float(item[5])))
-        subs.append(sub)
-        table.msub.append(sub)
+        if item[0] and item[1]:
+            records_total = int(item[0])
+            users_total = int(item[1])
+
+    if records_total == 0 or users_total == 0:
+        logger.error("Unexpected Value: records_total: %d, users_total: %d" % (
+            records_total, users_total))
+    else:
+        filter = filter + play_profile.min_rec_filter
+        sql_command = "select ServiceType, DeviceType, Records, Users, \
+            AverageTime, (Records/Users) %s" % (filter)
+        logger.debug("SQL %s" % sql_command)
+        play_profile.cu.execute(sql_command)
+
+        for item in play_profile.cu.fetchall():
+            sub = []
+            sub.append(item[0])
+            sub.append(item[1])
+            sub.append(item[2])
+            sub.append(round(100.0 * item[2] / records_total, 2))
+            sub.append(item[3])
+            sub.append(round(100.0 * item[3] / users_total, 2))
+            sub.append(item[4])
+            sub.append(int(float(item[5])))
+            subs.append(sub)
+            table.msub.append(sub)
 
     context['table'] = table
     context['default_date'] = play_profile.date
