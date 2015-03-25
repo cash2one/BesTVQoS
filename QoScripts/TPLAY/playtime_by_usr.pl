@@ -71,7 +71,7 @@ foreach $filename (@ARGV) {
 	$tw += $_ for @ptime;
 	$avgw = ($suc_total==0)?0:$tw/$suc_total;
 	
-	open OUT, ">>$savedir/playtm_by_usr";
+	open OUT, ">$savedir/playtm_by_usr";
 	printf OUT ("|%d|%d|%d|%d|%d|%d|%.2f|%d|%d|\n", $date, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $suc_total, $records);
 	close OUT;
 }
