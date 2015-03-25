@@ -338,7 +338,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
             for (view_type_idx, view_des) in view_types:
                 item = make_plot_item(data_by_hour[view_type_idx], pnvalue_types,
                                       item_idx, hour_xalis,
-                                      u"缓冲成PN值", u"全天24小时%s" % (view_des), u"秒")
+                                      title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
         else:
@@ -352,7 +352,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
             for (view_type_idx, view_des) in view_types:
                 item = make_plot_item(data_by_day[view_type_idx], pnvalue_types, 
                                       item_idx, days_region,
-                                      u"缓冲成PN值", u"全天24小时%s" % (view_des), u"秒")
+                                      title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
 
