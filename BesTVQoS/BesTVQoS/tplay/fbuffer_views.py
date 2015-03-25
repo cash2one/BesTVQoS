@@ -20,6 +20,7 @@ hour_xalis=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
             "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]
 
 PNVALUES_LIST=["P25", "P50", "P75", "P90", "P95", "AVG"]
+PNVALUES_LIST_DES={"P25":"P25", "P50":"P50", "P75":"P75", "P90":"P90", "P95":"P95", "AVG":"AVG"}
 
 class NoDataError(Exception):
     def __init__(self, value):
@@ -27,8 +28,27 @@ class NoDataError(Exception):
     def __str__(self):
         return repr(self.value)
 
+def get_filter_values(request, table_name):
+    service_type=request.GET.get("service_type", "All")
+    device_type=request.GET.get("device_type")
+    last_date=str(today())
+    begin_date=request.GET.get("begin_date", last_date)
+    end_date=request.GET.get("end_date", last_date)
+
+    logger.info("get_filter_values: %s - %s"%(service_type, device_type))
+
+    device_types = get_device_types(table_name, service_type, begin_date, end_date)
+    if device_type is None or device_type=="": # init device type first time
+        if len(device_types)>0:
+            device_type = device_types[0]
+        else:
+            device_types.append("")
+            device_type = ""
+
+    return service_type, device_type, device_types, begin_date, end_date
+
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key is viewtype, lists contain each hour's data
-def make_fbuffer_sucratio_item(key_values, item_idx, xAlis, title, subtitle, ytitle):
+def make_plot_item(key_values, keys, keys_description, item_idx, xAlis, title, subtitle, ytitle):
     item={}
     item["index"]=item_idx
     item["title"]=title #u"首次缓冲成功率"
@@ -38,13 +58,13 @@ def make_fbuffer_sucratio_item(key_values, item_idx, xAlis, title, subtitle, yti
     item["t_interval"]=1
 
     series=[]
-    for i in VIEW_TYPES:
+    for i in keys:
         serie_item='''{
             name: '%s',
             yAxis: 0,
             type: 'spline',
             data: [%s]
-        }'''%(VIEW_TYPES_DES[i], ",".join(key_values[i]))
+        }'''%(keys_description[i], ",".join(key_values[i]))
         series.append(serie_item)
     item["series"]=",".join(series)
     return item
@@ -80,23 +100,10 @@ def show_fbuffer_sucratio(request, dev=""):
     items=[]
 
     try:
-        # init params
-        service_type=request.GET.get("service_type", "All")
-        device_type=request.GET.get("device_type")   
-
-        last_date=str(get_day_of_day(-1))
-        begin_date=request.GET.get("begin_date", last_date)
-        end_date=request.GET.get("end_date", last_date)
-
-   
-        device_types = get_device_types("fbuffer", service_type, begin_date, end_date)
-        if device_type is None: # init device type first time
-            if len(device_types)>0:
-                device_type = device_types[0]
-            else:
-                device_types.append("")
-                device_type = ""
-                raise NoDataError("No data between %s - %s"%(begin_date, end_date))
+        # get fileter params
+        service_type, device_type, device_types, begin_date, end_date = get_filter_values(request, "fbuffer")
+        if device_type=="":
+            raise NoDataError("No data between %s - %s"%(begin_date, end_date))
 
         device_filter_ojbs = BestvFbuffer.objects.filter(DeviceType=device_type,
                                            Date__gte=begin_date, Date__lte=end_date)
@@ -104,12 +111,12 @@ def show_fbuffer_sucratio(request, dev=""):
         # process data from databases;
         if begin_date==end_date:
             data_by_hour=prepare_fbuffer_sucratio_hour_data(device_filter_ojbs)         
-            item=make_fbuffer_sucratio_item(data_by_hour, 0, hour_xalis, u"首次缓冲成功率", u"全天24小时/全类型", u"成功率")
+            item=make_plot_item(data_by_hour, VIEW_TYPES, VIEW_TYPES_DES, 0, hour_xalis, u"首次缓冲成功率", u"全天24小时/全类型", u"成功率")
             items.append(item)
         else:
             days_region=get_days_region(begin_date, end_date)
             data_by_day=prepare_fbuffer_sucratio_daily_data(device_filter_ojbs, days_region)
-            item=make_fbuffer_sucratio_item(data_by_day, 0, days_region, u"首次缓冲成功率", u"全类型", u"成功率")
+            item=make_plot_item(data_by_day, VIEW_TYPES, VIEW_TYPES_DES, 0, days_region, u"首次缓冲成功率", u"全类型", u"成功率")
             items.append(item)
 
     except Exception, e:
@@ -214,21 +221,9 @@ def show_fbuffer_time(request, dev=""):
 
     try:
         # init params
-        service_type=request.GET.get("service_type", "All")
-        device_type=request.GET.get("device_type")   
-
-        last_date=str(get_day_of_day(-1))
-        begin_date=request.GET.get("begin_date", last_date)
-        end_date=request.GET.get("end_date", last_date)
-
-        device_types = get_device_types("fbuffer", service_type, begin_date, end_date)
-        if device_type is None: # init device type first time
-            if len(device_types)>0:
-                device_type = device_types[0]
-            else:
-                device_types.append("")
-                device_type = ""
-                raise NoDataError("No data between %s - %s"%(begin_date, end_date))
+        service_type, device_type, device_types, begin_date, end_date = get_filter_values(request, "fbuffer")
+        if device_type=="":
+            raise NoDataError("No data between %s - %s"%(begin_date, end_date))
 
         device_filter_ojbs = BestvFbuffer.objects.filter(DeviceType=device_type,
                                            Date__gte=begin_date, Date__lte=end_date)
@@ -238,8 +233,9 @@ def show_fbuffer_time(request, dev=""):
             data_by_hour=prepare_fbuffer_pnvalue_hour_data(device_filter_ojbs)       
             item_idx=0
             for view_type_idx in VIEW_TYPES:
-                item=make_fbuffer_pnvalue_item(data_by_hour[view_type_idx], item_idx, hour_xalis, u"缓冲成PN值", 
-                                               u"全天24小时%s"%(VIEW_TYPES_DES[view_type_idx]), u"秒")
+                item=make_plot_item(data_by_hour[view_type_idx], PNVALUES_LIST, PNVALUES_LIST_DES,
+                                    item_idx, hour_xalis, 
+                                    u"缓冲成PN值", u"全天24小时%s"%(VIEW_TYPES_DES[view_type_idx]), u"秒")
                 items.append(item)
                 item_idx+=1
         else:
@@ -247,13 +243,12 @@ def show_fbuffer_time(request, dev=""):
             data_by_day=prepare_fbuffer_pnvalue_daily_data(device_filter_ojbs, days_region)
             item_idx=0
             for view_type_idx in VIEW_TYPES:
-                item=make_fbuffer_pnvalue_item(data_by_day[view_type_idx], item_idx, days_region, u"缓冲成PN值", 
-                                               u"全天24小时%s"%(VIEW_TYPES_DES[view_type_idx]), u"秒")
+                item=make_plot_item(data_by_day[view_type_idx], PNVALUES_LIST, PNVALUES_LIST_DES,
+                                    item_idx, days_region, 
+                                    u"缓冲成PN值", u"全天24小时%s"%(VIEW_TYPES_DES[view_type_idx]), u"秒")
                 items.append(item)
                 item_idx+=1
-            item=make_fbuffer_pnvalue_item(data_by_day, 0, days_region, u"缓冲成PN值", u"全类型", u"秒")
-            items.append(item)
-
+            
     except Exception, e:
         logger.info("query fbuffer sucratio error: %s"%(e))
 
