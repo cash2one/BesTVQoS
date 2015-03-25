@@ -139,58 +139,70 @@ def show_fbuffer_sucratio(request, dev=""):
 def prepare_fbuffer_pnvalue_hour_data(fbuffer_objs):
     sucratio_by_hour={}
     for i in VIEW_TYPES:
-        sucratio_by_hour[i]={}
         filter_objs=fbuffer_objs.filter(ViewType=i)
-
+        display_data={}
         for pn_idx in PNVALUES_LIST:
-            sucratio_by_hour[i][pn_idx]=[]
+            display_data[pn_idx]=[]
 
+        display_if_has_data=False
         for hour in range(24):
             try:
                 obj=filter_objs.get(Hour=hour)
-                sucratio_by_hour[i][PNVALUES_LIST[0]].append("%s"%(obj.P25))
-                sucratio_by_hour[i][PNVALUES_LIST[1]].append("%s"%(obj.P50))
-                sucratio_by_hour[i][PNVALUES_LIST[2]].append("%s"%(obj.P75))
-                sucratio_by_hour[i][PNVALUES_LIST[3]].append("%s"%(obj.P90))
-                sucratio_by_hour[i][PNVALUES_LIST[4]].append("%s"%(obj.P95))
-                sucratio_by_hour[i][PNVALUES_LIST[5]].append("%s"%(obj.AverageTime))
+                display_data[PNVALUES_LIST[0]].append("%s"%(obj.P25))
+                display_data[PNVALUES_LIST[1]].append("%s"%(obj.P50))
+                display_data[PNVALUES_LIST[2]].append("%s"%(obj.P75))
+                display_data[PNVALUES_LIST[3]].append("%s"%(obj.P90))
+                display_data[PNVALUES_LIST[4]].append("%s"%(obj.P95))
+                display_data[PNVALUES_LIST[5]].append("%s"%(obj.AverageTime))
+                display_if_has_data=True
             except Exception, e:
-                sucratio_by_hour[i][PNVALUES_LIST[0]].append("%s"%(0))
-                sucratio_by_hour[i][PNVALUES_LIST[1]].append("%s"%(0))
-                sucratio_by_hour[i][PNVALUES_LIST[2]].append("%s"%(0))
-                sucratio_by_hour[i][PNVALUES_LIST[3]].append("%s"%(0))
-                sucratio_by_hour[i][PNVALUES_LIST[4]].append("%s"%(0))
-                sucratio_by_hour[i][PNVALUES_LIST[5]].append("%s"%(0))
+                display_data[PNVALUES_LIST[0]].append("%s"%(0))
+                display_data[PNVALUES_LIST[1]].append("%s"%(0))
+                display_data[PNVALUES_LIST[2]].append("%s"%(0))
+                display_data[PNVALUES_LIST[3]].append("%s"%(0))
+                display_data[PNVALUES_LIST[4]].append("%s"%(0))
+                display_data[PNVALUES_LIST[5]].append("%s"%(0))
 
+        if display_if_has_data:
+            sucratio_by_hour[i]=display_data
+
+    if len(sucratio_by_hour)==0:
+        return None
     return sucratio_by_hour
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
 def prepare_fbuffer_pnvalue_daily_data(fbuffer_objs, days_duration):
     sucratio_by_day={}
-    for i in VIEW_TYPES:
-        sucratio_by_day[i]={}
+    for i in VIEW_TYPES:                
         filter_objs=fbuffer_objs.filter(ViewType=i)
-
+        display_data={}
         for pn_idx in PNVALUES_LIST:
-            sucratio_by_day[i][pn_idx]=[]
+            display_data[pn_idx]=[]
 
+        display_if_has_data=False
         for date_idx in days_duration:
             try:
                 obj=filter_objs.get(Date=date_idx, Hour=24)
-                sucratio_by_day[i][PNVALUES_LIST[0]].append("%s"%(obj.P25))
-                sucratio_by_day[i][PNVALUES_LIST[1]].append("%s"%(obj.P50))
-                sucratio_by_day[i][PNVALUES_LIST[2]].append("%s"%(obj.P75))
-                sucratio_by_day[i][PNVALUES_LIST[3]].append("%s"%(obj.P90))
-                sucratio_by_day[i][PNVALUES_LIST[4]].append("%s"%(obj.P95))
-                sucratio_by_day[i][PNVALUES_LIST[5]].append("%s"%(obj.AverageTime))
+                display_data[PNVALUES_LIST[0]].append("%s"%(obj.P25))
+                display_data[PNVALUES_LIST[1]].append("%s"%(obj.P50))
+                display_data[PNVALUES_LIST[2]].append("%s"%(obj.P75))
+                display_data[PNVALUES_LIST[3]].append("%s"%(obj.P90))
+                display_data[PNVALUES_LIST[4]].append("%s"%(obj.P95))
+                display_data[PNVALUES_LIST[5]].append("%s"%(obj.AverageTime))
+                display_if_has_data=True
             except Exception, e:
-                sucratio_by_day[i][PNVALUES_LIST[0]].append("%s"%(0))
-                sucratio_by_day[i][PNVALUES_LIST[1]].append("%s"%(0))
-                sucratio_by_day[i][PNVALUES_LIST[2]].append("%s"%(0))
-                sucratio_by_day[i][PNVALUES_LIST[3]].append("%s"%(0))
-                sucratio_by_day[i][PNVALUES_LIST[4]].append("%s"%(0))
-                sucratio_by_day[i][PNVALUES_LIST[5]].append("%s"%(0))
+                display_data[PNVALUES_LIST[0]].append("%s"%(0))
+                display_data[PNVALUES_LIST[1]].append("%s"%(0))
+                display_data[PNVALUES_LIST[2]].append("%s"%(0))
+                display_data[PNVALUES_LIST[3]].append("%s"%(0))
+                display_data[PNVALUES_LIST[4]].append("%s"%(0))
+                display_data[PNVALUES_LIST[5]].append("%s"%(0))
 
+        if display_if_has_data:
+            sucratio_by_day[i]=display_data
+
+    if len(sucratio_by_day)==0:
+        return None
     return sucratio_by_day
 
 # key-values: key: P25, values:[...]
