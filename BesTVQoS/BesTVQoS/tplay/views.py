@@ -91,7 +91,7 @@ class PlayInfo:
             self.end_date = request.GET.get('end_date', self.end_date)
 
         self.device_types = get_device_types(
-            "PlayInfo", self.service_type, self.begin_date,
+            "playinfo", self.service_type, self.begin_date,
             self.end_date, self.cu)
 
         if len(self.device_types) == 0:
@@ -156,7 +156,7 @@ class PlayInfo:
                                u'', u'观看量', x_axis)
 
     def get_daily_sql_command(self, date, view_type):
-        sql_command = "select Records from PlayInfo where Date = %s " % (
+        sql_command = "select Records from playinfo where Date = %s " % (
             date)
         sql_command += self.service_type_filter
         sql_command += self.device_type_filter
@@ -168,7 +168,7 @@ class PlayInfo:
         return sql_command
 
     def get_hourly_sql_command(self, hour, view_type):
-        sql_command = "select Records from PlayInfo where %s" % (
+        sql_command = "select Records from playinfo where %s" % (
             self.date_filter)
         sql_command += self.service_type_filter
         sql_command += self.device_type_filter
@@ -184,7 +184,7 @@ def show_playing_daily(request, dev=""):
     play_profile = PlayInfo(request)
     play_profile.read_filter_profile_form(request)
 
-    filter = "from PlayProfile where %s" % (play_profile.common_filter)
+    filter = "from playprofile where %s" % (play_profile.common_filter)
     sql_command = "select sum(Records), sum(Users) %s" % (filter)
     logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)

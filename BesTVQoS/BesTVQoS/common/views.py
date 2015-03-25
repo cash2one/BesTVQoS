@@ -73,9 +73,9 @@ def get_device_type(request, dev=""):
 
             table_name = ""
             if url.find("playing") != -1:
-                table_name = "PlayInfo"
+                table_name = "playinfo"
             elif url.find("fbuffer") != -1:
-                table_name = "Fbuffer"
+                table_name = "fbuffer"
 
             device_types = get_device_types(
                 table_name, service_type, begin_date, end_date)
