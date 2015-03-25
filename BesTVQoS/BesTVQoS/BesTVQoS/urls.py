@@ -29,6 +29,16 @@ urlpatterns = patterns(
     url(r'^((?P<dev>m)/)?show_fbuffer_time$',
         'tplay.fbuffer_views.show_fbuffer_time'),
 
+    url(r'^((?P<dev>m)/)?show_fluency$',
+        'tplay.fbuffer_views.show_fluency'),
+    url(r'^((?P<dev>m)/)?show_fluency_pratio$',
+        'tplay.fbuffer_views.show_fluency_pratio'),
+    url(r'^((?P<dev>m)/)?show_fluency_allpratio$',
+        'tplay.fbuffer_views.show_fluency_allpratio'),
+    url(r'^((?P<dev>m)/)?show_fluency_avgcount$',
+        'tplay.fbuffer_views.show_fluency_avgcount'),
+
+
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),
     url(r'^update/playinfo$', 'tplay.update_views.playinfo'),
