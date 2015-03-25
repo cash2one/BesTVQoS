@@ -15,7 +15,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-def update_playprofile(svrtype, dev, isp, date, area, avg, records, users):
+def update_playprofile(svrtype, dev, isp, date, area, avg, users, records):
 
    url = "http://10.100.12.5:80/update/playprofile"
 
