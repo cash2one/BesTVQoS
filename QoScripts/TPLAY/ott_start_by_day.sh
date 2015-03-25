@@ -1,4 +1,6 @@
-#! /usr/bin/bash
+#! /usr/bin/env bash
+
+export PYTHONPATH=/usr/bin/python:/usr/bin/python2.6:/usr/lib/python2.6/site-packages
 
 date=$(date -d yesterday +"%Y%m%d")
 #date=$1 
