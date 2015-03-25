@@ -213,7 +213,7 @@ def get_play_info_today(context, playinfo):
             sub.append(item[0])
             sub.append(item[1])
             sub.append(item[2])
-            sub.append(round(100.0 * item[2] / records_total, 2))
+            sub.append(round(100.0 * float(item[2]) / records_total, 2))
             subs.append(sub)
             table.msub.append(sub)
 
