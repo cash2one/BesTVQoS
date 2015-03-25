@@ -339,10 +339,12 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                     "No hour data between %s - %s" % (begin_date, end_date))
 
             item_idx = 0
-            for key in data_by_hour:
-                item = make_plot_item(data_by_hour[key], pnvalue_types,
+            for (view_type_idx, view_des) in view_types:
+                if view_type_idx not in data_by_hour:
+                    continue
+                item = make_plot_item(data_by_hour[view_type_idx], pnvalue_types,
                                       item_idx, hour_xalis,
-                                      title, u"%s %s" % (subtitle, view_types[key]), ytitle)
+                                      title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
         else:
@@ -353,10 +355,12 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                     "No daily data between %s - %s" % (begin_date, end_date))
 
             item_idx = 0
-            for key in data_by_day:
-                item = make_plot_item(data_by_day[key], pnvalue_types, 
+            for (view_type_idx, view_des) in view_types:
+                if view_type_idx not in data_by_day:
+                    continue
+                item = make_plot_item(data_by_day[view_type_idx], pnvalue_types, 
                                       item_idx, days_region,
-                                      title, u"%s %s" % (subtitle, view_types[key]), ytitle)
+                                      title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
 
