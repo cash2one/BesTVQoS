@@ -262,7 +262,8 @@ def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
                 display_data[pnvalue_types[3][0]].append("%s" % (obj.P90))
                 display_data[pnvalue_types[4][0]].append("%s" % (obj.P95))
                 display_data[pnvalue_types[5][0]].append("%s" % (obj.AverageTime))
-                display_if_has_data = True
+                if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
+                    display_if_has_data = True
             except Exception, e:
                 display_data[pnvalue_types[0][0]].append("%s" % (0))
                 display_data[pnvalue_types[1][0]].append("%s" % (0))
