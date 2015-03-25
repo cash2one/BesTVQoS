@@ -5,6 +5,7 @@ import logging
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from tplay.models import *
+from common.mobile import do_mobile_support
 from common.views import *
 from common.date_time_tool import *
 
@@ -42,8 +43,10 @@ def get_filter_values(request, table_name):
         if len(device_types)>0:
             device_type = device_types[0]
         else:
-            device_types.append("")
             device_type = ""
+    
+    if len(device_types):
+        device_types.append("")
 
     return service_type, device_type, device_types, begin_date, end_date
 
@@ -71,6 +74,7 @@ def make_plot_item(key_values, keys, keys_description, item_idx, xAlis, title, s
 
 def prepare_fbuffer_sucratio_hour_data(fbuffer_objs):
     sucratio_by_hour={}
+    display_if_has_data=False
     for i in VIEW_TYPES:
         sucratio_by_hour[i]=[]
         filter_objs=fbuffer_objs.filter(ViewType=i)
@@ -78,12 +82,17 @@ def prepare_fbuffer_sucratio_hour_data(fbuffer_objs):
             try:
                 obj=filter_objs.get(Hour=hour)
                 sucratio_by_hour[i].append("%s"%(obj.SucRatio))
+                display_if_has_data=True
             except Exception, e:
                 sucratio_by_hour[i].append("0")
+
+    if display_if_has_data==False:
+        return None
     return sucratio_by_hour
 
 def prepare_fbuffer_sucratio_daily_data(fbuffer_objs, days_duration):
     sucratio_by_day={}
+    display_if_has_data=False
     for i in VIEW_TYPES:
         sucratio_by_day[i]=[]
         filter_objs=fbuffer_objs.filter(ViewType=i)
@@ -91,12 +100,17 @@ def prepare_fbuffer_sucratio_daily_data(fbuffer_objs, days_duration):
             try:
                 obj=filter_objs.get(Date=date_idx, Hour=24)
                 sucratio_by_day[i].append("%s"%(obj.SucRatio))
+                display_if_has_data=True
             except Exception, e:
                 sucratio_by_day[i].append("%s"%(0))
+
+    if display_if_has_data==False:
+        return None
     return sucratio_by_day
 
 
 def show_fbuffer_sucratio(request, dev=""):
+    logger.info("query fbuffer sucratio")
     items=[]
 
     try:
@@ -110,12 +124,16 @@ def show_fbuffer_sucratio(request, dev=""):
 
         # process data from databases;
         if begin_date==end_date:
-            data_by_hour=prepare_fbuffer_sucratio_hour_data(device_filter_ojbs)         
+            data_by_hour=prepare_fbuffer_sucratio_hour_data(device_filter_ojbs)      
+            if data_by_hour is None:
+                raise NoDataError("No hour data between %s - %s"%(begin_date, end_date))
             item=make_plot_item(data_by_hour, VIEW_TYPES, VIEW_TYPES_DES, 0, hour_xalis, u"首次缓冲成功率", u"全天24小时/全类型", u"成功率")
             items.append(item)
         else:
             days_region=get_days_region(begin_date, end_date)
             data_by_day=prepare_fbuffer_sucratio_daily_data(device_filter_ojbs, days_region)
+            if data_by_day is None:
+                raise NoDataError("No daily data between %s - %s"%(begin_date, end_date))
             item=make_plot_item(data_by_day, VIEW_TYPES, VIEW_TYPES_DES, 0, days_region, u"首次缓冲成功率", u"全类型", u"成功率")
             items.append(item)
 
@@ -132,6 +150,8 @@ def show_fbuffer_sucratio(request, dev=""):
     context['contents']=items
     if len(items)>0:
         context['has_data']=True
+
+    do_mobile_support(request, dev, context)
 
     return render_to_response('show_fbuffer_sucratio.html', context)
 
@@ -243,7 +263,10 @@ def show_fbuffer_time(request, dev=""):
 
         # process data from databases;
         if begin_date==end_date:
-            data_by_hour=prepare_fbuffer_pnvalue_hour_data(device_filter_ojbs)       
+            data_by_hour=prepare_fbuffer_pnvalue_hour_data(device_filter_ojbs) 
+            if data_by_hour is None:
+                raise NoDataError("No hour data between %s - %s"%(begin_date, end_date))
+                  
             item_idx=0
             for view_type_idx in VIEW_TYPES:
                 item=make_plot_item(data_by_hour[view_type_idx], PNVALUES_LIST, PNVALUES_LIST_DES,
@@ -254,6 +277,9 @@ def show_fbuffer_time(request, dev=""):
         else:
             days_region=get_days_region(begin_date, end_date)
             data_by_day=prepare_fbuffer_pnvalue_daily_data(device_filter_ojbs, days_region)
+            if data_by_day is None:
+                raise NoDataError("No daily data between %s - %s"%(begin_date, end_date))
+
             item_idx=0
             for view_type_idx in VIEW_TYPES:
                 item=make_plot_item(data_by_day[view_type_idx], PNVALUES_LIST, PNVALUES_LIST_DES,
@@ -275,5 +301,7 @@ def show_fbuffer_time(request, dev=""):
     context['contents']=items
     if len(items)>0:
         context['has_data']=True
+
+    do_mobile_support(request, dev, context)
 
     return render_to_response('show_fbuffer_time.html', context)
