@@ -82,8 +82,7 @@ class PlayInfo:
         if(request.method == 'GET'):
             self.service_type = request.GET.get('service_type', 'All')
             self.device_type = request.GET.get('device_type', '')
-            self.begin_date = request.GET.get('begin_date', time.strftime(
-                '%Y-%m-%d', time.localtime(time.time() - 30 * 86400)))
+            self.begin_date = request.GET.get('begin_date', self.begin_date)
             self.end_date = request.GET.get('end_date', self.end_date)
 
         self.device_types = get_device_types(
