@@ -20,7 +20,7 @@ while(<FILE>) {
 	#print "$key\n";
 	if ($element[31] == 1) {
 		
-		if ( ($element[11] !~ /^$date/) || ($element[12] !~ /^$date/) ) {
+		if ( ($element[12] !~ /^$date/) ) {
 			#print ERR "@element\n";
 			next;
 		}
