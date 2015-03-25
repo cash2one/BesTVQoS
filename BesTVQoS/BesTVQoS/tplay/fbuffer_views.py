@@ -204,28 +204,28 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
 
 def show_fbuffer_sucratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"全类型", u"成功率(100%)", VIEW_TYPES[1:], 100)
+        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"全类型", u"成功率(%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fbuffer_sucratio.html', context)
 
 
 def show_fluency(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "Fluency", u"一次不卡比例", u"全类型", u"百分比(100%)", VIEW_TYPES[1:], 100)
+        request, BestvFluency, "Fluency", u"一次不卡比例", u"全类型", u"百分比(%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency.html', context)
 
 
 def show_fluency_pratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"全类型", u"百分比(100%)", VIEW_TYPES[1:],100)
+        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"全类型", u"百分比(%)", VIEW_TYPES[1:],100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency_pratio.html', context)
 
 
 def show_fluency_allpratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"全类型", u"百分比(100%)", VIEW_TYPES[1:], 100)
+        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"全类型", u"百分比(%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency_allpratio.html', context)
 
