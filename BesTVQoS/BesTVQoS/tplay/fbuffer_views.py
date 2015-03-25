@@ -340,6 +340,8 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
 
             item_idx = 0
             for (view_type_idx, view_des) in view_types:
+                if data_by_hour[view_type_idx] is None:
+                    continue
                 item = make_plot_item(data_by_hour[view_type_idx], pnvalue_types,
                                       item_idx, hour_xalis,
                                       title, u"%s %s" % (subtitle, view_des), ytitle)
@@ -354,6 +356,8 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
 
             item_idx = 0
             for (view_type_idx, view_des) in view_types:
+                if data_by_day[view_type_idx] is None:
+                    continue
                 item = make_plot_item(data_by_day[view_type_idx], pnvalue_types, 
                                       item_idx, days_region,
                                       title, u"%s %s" % (subtitle, view_des), ytitle)
