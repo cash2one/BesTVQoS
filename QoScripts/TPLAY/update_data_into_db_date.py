@@ -15,7 +15,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-def update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, records, users):
+def update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, records):
 
    url = "http://10.100.12.5:80/update/playinfo"
 
@@ -28,7 +28,6 @@ def update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, records, user
    request['hour'] = hour
    request['viewtype'] = viewtype
    request['records'] = '%s'%(records)
-   request['users'] = users
    
    items = []
    items.append(request)
@@ -41,7 +40,8 @@ def update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, records, user
    response = opener.open(req)
 
    print response.read()
-   
+
+
 def update_playtime(svrtype, dev, isp, date, area, hour, viewtype, p25, p50, p75, p90, p95, avg):
 
    url = "http://10.100.12.5:80/update/playtime"
@@ -171,15 +171,16 @@ def save_fbuffer_to_DB(filename, svrtype, dev, isp, date, area, hour, viewtype):
         update_fbuffer(svrtype, dev, isp, date, area, hour, viewtype, data['sucratio'], data['25'], data['50'], data['75'], data['90'], data['95'], data['avg'])
         print svrtype, dev, isp, date, area, hour, viewtype, data['sucratio'], data['25'], data['50'], data['75'], data['90'], data['95'], data['avg']
         
-        update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, data['records'], '0')
-        print svrtype, dev, isp, date, area, hour, viewtype, data['records'], 0
+        update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, data['records'])
+        print svrtype, dev, isp, date, area, hour, viewtype, data['records']
     
     if i > 0:
         update_fbuffer(svrtype, dev, isp, date, area, hour, viewtype, data['sucratio'][i], data['25'][i], data['50'][i], data['75'][i], data['90'][i], data['95'][i], data['avg'][i])
         print svrtype, dev, isp, date, area, hour, viewtype, data['sucratio'][i], data['25'][i], data['50'][i], data['75'][i], data['90'][i], data['95'][i], data['avg'][i]
         
-        update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, data['records'][i], '0')
-        print svrtype, dev, isp, date, area, hour, viewtype, data['records'][i], 0
+        update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, data['records'][i])
+        print svrtype, dev, isp, date, area, hour, viewtype, data['records'][i]
+
 
 def main(svrtype, dev, date, hour, viewtype, filename1, filename2):
     isp = 'all'
@@ -187,7 +188,9 @@ def main(svrtype, dev, date, hour, viewtype, filename1, filename2):
     
     save_playtm_to_DB(filename1, svrtype, dev, isp, date, area, hour, viewtype)
     save_fbuffer_to_DB(filename2, svrtype, dev, isp, date, area, hour, viewtype)
+           
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
 
+   
