@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 
-# $(date +"%Y%m%d")
-date=$1 
+date=$(date -d yesterday +"%Y%m%d")
+#date=$1 
 
 hour=24
 
