@@ -3,20 +3,17 @@
 use Time::Local;
 
 $date = shift @ARGV;
-$playtype = shift @ARGV;
 $savedir = shift @ARGV;
 
 foreach $filename (@ARGV) {
 
 	open FILE, "<$filename";
 	
+	$tw = 0;
+	$records = 0;
 	while(<FILE>) {
 		chomp;
 		@element = split /\|/;
-
-		if ($element[34] != $playtype) {
-			next;
-		}
 		
 		$key = $element[7];
 		#print "$key\n";
@@ -47,7 +44,9 @@ foreach $filename (@ARGV) {
 			
 			$watch_time = $endTime - $beginTime;
 			
-			$play_time{$key} += $watch_time;	
+			$play_time{$key} += $watch_time;
+			
+			$records += 1;	
 		}
 	}
 	
@@ -71,8 +70,8 @@ foreach $filename (@ARGV) {
 	$tw += $_ for @ptime;
 	$avgw = ($suc_total==0)?0:$tw/$suc_total;
 	
-	open OUT, ">>$savedir/playtim_by_usr_$playtype";
-	printf OUT ("|%d|%d|%d|%d|%d|%d|%.2f|%d|\n", $date, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $suc_total);
+	open OUT, ">>$savedir/playtm_by_usr";
+	printf OUT ("|%d|%d|%d|%d|%d|%d|%.2f|%d|%d|\n", $date, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $suc_total, $records);
 	close OUT;
 }
 
