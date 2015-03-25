@@ -24,6 +24,9 @@ urlpatterns = patterns(
     url(r'^((?P<dev>m)/)?show_playing_trend$',
         'tplay.views.show_playing_trend'),
 
+    url(r'^((?P<dev>m)/)?show_play_time$',
+        'tplay.fbuffer_views.show_play_time'),
+
     url(r'^((?P<dev>m)/)?show_fbuffer_sucratio$',
         'tplay.fbuffer_views.show_fbuffer_sucratio'),
     url(r'^((?P<dev>m)/)?show_fbuffer_time$',

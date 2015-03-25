@@ -4,6 +4,7 @@ import json
 import logging
 
 from django.http import HttpResponse
+from django.db import IntegrityError
 from tplay.models import *
 
 logger = logging.getLogger("django.request")
@@ -58,9 +59,20 @@ def playinfo(request):
                     Records=item['records'])
                 playinfo_obj.save()
         except ValueError, e:
-            result = "error: %s" % e
+            result = "ValueError: %s" % e
+        except IntegrityError, e:
+            result = "update record: %s" % e
+            obj=BestvPlayinfo.objects.get(ServiceType=item['servicetype'],
+                    DeviceType=item['dev'],
+                    ISP=item['isp'],
+                    Area=item['area'],
+                    ViewType=item['viewtype'],
+                    Date=create_date,
+                    Hour=item['hour'])
+            obj.Records=item['records']
+            obj.save()            
         except Exception, e:
-            result = "error: %s" % e
+            result = "Exception: %s" % e
     else:
         result = "error"
 
