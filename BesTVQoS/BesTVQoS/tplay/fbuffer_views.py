@@ -89,7 +89,7 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
     return item
 
 
-def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name):
+def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
     data_by_hour = {}
     display_if_has_data = False
     for i in view_types:
@@ -106,8 +106,9 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name):
                 tmp = obj["sum"]
                 if tmp is None:
                     tmp = 0
-                data_by_hour[view_idx].append("%s" % (tmp))
-                display_if_has_data = True
+                data_by_hour[view_idx].append("%s" % (tmp*base_radix))
+                if tmp != 0:
+                    display_if_has_data = True
             except Exception, e:
                 data_by_hour[view_idx].append("0")
 
@@ -116,7 +117,7 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name):
     return data_by_hour
 
 
-def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name):
+def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, base_radix):
     data_by_day = {}
     display_if_has_data = False
     for i in view_types:
@@ -134,8 +135,9 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name):
                 tmp = obj["sum"]
                 if tmp is None:
                     tmp = 0
-                data_by_day[view_idx].append("%s" % (tmp))
-                display_if_has_data = True
+                data_by_day[view_idx].append("%s" % (tmp*base_radix))
+                if tmp != 0:
+                    display_if_has_data = True
             except Exception, e:
                 data_by_day[view_idx].append("%s" % (0))
 
@@ -144,7 +146,7 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name):
     return data_by_day
 
 
-def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_types):
+def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_types, base_radix=1):
     begin_time = current_time()
     items = []
 
@@ -162,7 +164,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
         # process data from databases;
         if begin_date == end_date:
             data_by_hour = prepare_hour_data_of_single_Qos(
-                device_filter_ojbs, view_types, Qos_name)
+                device_filter_ojbs, view_types, Qos_name, base_radix)
             if data_by_hour is None:
                 raise NoDataError(
                     "No hour data between %s - %s" % (begin_date, end_date))
@@ -172,7 +174,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
         else:
             days_region = get_days_region(begin_date, end_date)
             data_by_day = prepare_daily_data_of_single_Qos(
-                device_filter_ojbs, days_region, view_types, Qos_name)
+                device_filter_ojbs, days_region, view_types, Qos_name, base_radix)
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
@@ -202,35 +204,35 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
 
 def show_fbuffer_sucratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"全类型", u"成功率", VIEW_TYPES[1:])
+        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"全类型", u"成功率(100%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fbuffer_sucratio.html', context)
 
 
 def show_fluency(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "Fluency", u"一次不卡比例", u"全类型", u"百分比", VIEW_TYPES[1:])
+        request, BestvFluency, "Fluency", u"一次不卡比例", u"全类型", u"百分比(100%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency.html', context)
 
 
 def show_fluency_pratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"全类型", u"百分比", VIEW_TYPES[1:])
+        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"全类型", u"百分比(100%)", VIEW_TYPES[1:],100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency_pratio.html', context)
 
 
 def show_fluency_allpratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"全类型", u"百分比", VIEW_TYPES[1:])
+        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"全类型", u"百分比(100%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency_allpratio.html', context)
 
 
 def show_fluency_avgcount(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AvgCount", u"卡用户平均卡次数", u"全类型", u"百分比", VIEW_TYPES[1:])
+        request, BestvFluency, "AvgCount", u"卡用户平均卡次数", u"全类型", u"次数", VIEW_TYPES[1:])
     do_mobile_support(request, dev, context)
     return render_to_response('show_fluency_avgcount.html', context)
 
@@ -295,7 +297,8 @@ def prepare_pnvalue_daily_data(objs, days_duration, view_types, pnvalue_types):
                 display_data[pnvalue_types[3][0]].append("%s" % (obj.P90))
                 display_data[pnvalue_types[4][0]].append("%s" % (obj.P95))
                 display_data[pnvalue_types[5][0]].append("%s" % (obj.AverageTime))
-                display_if_has_data = True
+                if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
+                    display_if_has_data = True
             except Exception, e:
                 display_data[pnvalue_types[0][0]].append("%s" % (0))
                 display_data[pnvalue_types[1][0]].append("%s" % (0))
@@ -375,13 +378,13 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
     return context
 
 def show_fbuffer_time(request, dev=""):
-    context = process_multi_plot(request, BestvFbuffer, u"缓冲PN值", u"", u"秒", VIEW_TYPES[1:], PNVALUES_LIST)
+    context = process_multi_plot(request, BestvFbuffer, u"缓冲PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
     do_mobile_support(request, dev, context)    
 
     return render_to_response('show_fbuffer_time.html', context)
 
 def show_play_time(request, dev=""):
-    context = process_multi_plot(request, BestvPlaytime, u"播放时长PN值", u"", u"秒", VIEW_TYPES[1:], PNVALUES_LIST)
+    context = process_multi_plot(request, BestvPlaytime, u"播放时长PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
     do_mobile_support(request, dev, context)    
 
     return render_to_response('show_play_time.html', context)
