@@ -42,8 +42,7 @@ def navi(request, target_url=""):
     else:
         return m_home(request)
 
-
-def get_device_types(table, service_type, begin_date, end_date, cu=None):
+def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
         fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
@@ -61,6 +60,19 @@ def get_device_types(table, service_type, begin_date, end_date, cu=None):
 
     return device_types
 
+def get_device_types(table, service_type, begin_date, end_date, cu=None):
+    if service_type=="All":
+        q = table.objects.filter(Date__gte=begin_date, Date__lte=end_date).values('DeviceType').distinct()
+    else:
+        q = table.objects.filter(ServiceType=service_type,Date__gte=begin_date, Date__lte=end_date).values('DeviceType').distinct()
+    
+    if len(q)>0:
+        device_types=[]
+        for i in q:
+            device_types.append(i["DeviceType"])
+    else:
+        device_types=[""]
+    return device_types
 
 def get_device_type(request, dev=""):
     respStr = json.dumps({"device_types": []})
@@ -77,7 +89,7 @@ def get_device_type(request, dev=""):
             elif url.find("fbuffer") != -1:
                 table_name = "fbuffer"
 
-            device_types = get_device_types(
+            device_types = get_device_types1(
                 table_name, service_type, begin_date, end_date)
             respStr = json.dumps({"device_types": device_types})
 
