@@ -381,7 +381,7 @@ def show_fbuffer_time(request, dev=""):
     return render_to_response('show_fbuffer_time.html', context)
 
 def show_play_time(request, dev=""):
-    context = process_multi_plot(request, BestvFbuffer, u"播放时长PN值", u"", u"秒", VIEW_TYPES[1:], PNVALUES_LIST)
+    context = process_multi_plot(request, BestvPlaytime, u"播放时长PN值", u"", u"秒", VIEW_TYPES[1:], PNVALUES_LIST)
     do_mobile_support(request, dev, context)    
 
     return render_to_response('show_play_time.html', context)
