@@ -93,6 +93,9 @@ class PlayInfo:
         if len(self.device_types) == 0:
             self.device_types.append("")
 
+        if self.device_type == '':
+            self.device_type = self.device_types[0]
+
         self.get_common_filter()
 
     def get_common_filter(self):
