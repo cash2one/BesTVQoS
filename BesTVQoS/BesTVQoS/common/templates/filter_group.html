@@ -4,7 +4,7 @@
 <script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
 <script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
 
-<script type="text/javascript">
+<script type="text/javascript">     
 $(function(){
     $("#service_type").multiselect({
         selectedList:1,
@@ -66,7 +66,7 @@ function get_device_type(platform) {
                 {% if is_mobile %}
                     <input name="begin_date" type="date" value="{{default_begin_date}}" id="begin_date">
                 {% else %}
-                    <input class="Wdate" name="begin_date" type="text" value="{{default_begin_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})" id="begin_date">
+                    <input class="Wdate" name="begin_date" type="text" value="{{default_begin_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true,maxDate:'{{default_end_date}}'})" id="begin_date">
                 {% endif %}
             </div>
             <div class="ctrlitem">  

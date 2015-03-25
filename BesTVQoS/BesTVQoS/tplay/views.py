@@ -178,17 +178,55 @@ class PlayInfo:
         return sql_command
 
 
-def show_playing_daily(request, dev=""):
-    play_profile = PlayInfo(request)
-    play_profile.read_filter_profile_form(request)
+def get_play_info_today(context, playinfo):
+    table = HtmlTable()
+    table.mtitle = "%s 用户播放统计信息（每小时更新）" % playinfo.end_date.encode('utf-8')
+    table.mheader = ["服务类型", "设备类型", "播放数", '播放百分比%']
+    table.msub = []
+    subs = []
+    today = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+    if playinfo.end_date != today:
+        return table
 
-    filter = "from playprofile where %s" % (play_profile.common_filter)
-    sql_command = "select sum(Records), sum(Users) %s" % (filter)
+    filters = "from playinfo where %s" % (playinfo.common_filter)
+    sql_command = "select sum(Records) %s" % (filters)
+    logger.debug("show_playing_today() SQL %s" % sql_command)
+    playinfo.cu.execute(sql_command)
+
+    records_total = 0
+    for item in playinfo.cu.fetchall():
+        if item[0]:
+            records_total = int(item[0])
+
+    if records_total == 0:
+        logger.error("Unexpected Value: records_total: %d" % (records_total))
+    else:
+        filters = filters + playinfo.min_rec_filter
+        sql_command = "select ServiceType, DeviceType, sum(Records) %s" % (
+            filters)
+        sql_command += " group by DeviceType order by sum(Records) desc"
+        logger.debug("show_playing_today() SQL %s" % sql_command)
+        playinfo.cu.execute(sql_command)
+
+        for item in playinfo.cu.fetchall():
+            sub = []
+            sub.append(item[0])
+            sub.append(item[1])
+            sub.append(item[2])
+            sub.append(round(100.0 * item[2] / records_total, 2))
+            subs.append(sub)
+            table.msub.append(sub)
+
+    return table
+
+
+def get_play_profile_history(context, play_profile):
+    table = HtmlTable()
+    filters = "from playprofile where %s" % (play_profile.common_filter)
+    sql_command = "select sum(Records), sum(Users) %s" % (filters)
     logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)
 
-    context = {}
-    table = HtmlTable()
     table.mtitle = "%s 用户播放统计信息" % play_profile.end_date.encode('utf-8')
     table.mheader = [
         "服务类型", "设备类型", "播放数", '播放百分比%', '用户数', '用户百分比%', '人均播放时间', '人均播放次数']
@@ -206,9 +244,9 @@ def show_playing_daily(request, dev=""):
         logger.error("Unexpected Value: records_total: %d, users_total: %d" % (
             records_total, users_total))
     else:
-        filter = filter + play_profile.min_rec_filter
+        filters = filters + play_profile.min_rec_filter
         sql_command = "select ServiceType, DeviceType, Records, Users, \
-            AverageTime, (Records/Users) %s" % (filter)
+            AverageTime, (Records/Users) %s" % (filters)
         logger.debug("SQL %s" % sql_command)
         play_profile.cu.execute(sql_command)
 
@@ -224,6 +262,22 @@ def show_playing_daily(request, dev=""):
             sub.append(int(float(item[5])))
             subs.append(sub)
             table.msub.append(sub)
+
+    return table
+
+
+def show_playing_daily(request, dev=""):
+    context = {}
+    table = HtmlTable()
+
+    play_profile = PlayInfo(request)
+    play_profile.read_filter_profile_form(request)
+
+    today = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+    if play_profile.end_date == today:
+        table = get_play_info_today(context, play_profile)
+    else:
+        table = get_play_profile_history(context, play_profile)
 
     context['table'] = table
     context['default_date'] = play_profile.end_date
