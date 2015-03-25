@@ -16,7 +16,7 @@ SERVICE_TYPES = ["All", "B2B", "B2C"]
 
 VIEW_TYPES = [0, 1, 2, 3, 4, 5]
 VIEW_TYPES_DES = {
-    0: u"总计", 1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"unknown"}
+    0: u"总计", 1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"未知"}
 
 
 def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
