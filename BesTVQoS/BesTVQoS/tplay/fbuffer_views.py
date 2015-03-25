@@ -110,7 +110,7 @@ def prepare_fbuffer_sucratio_daily_data(fbuffer_objs, days_duration):
 
 
 def show_fbuffer_sucratio(request, dev=""):
-    logger.info("query fbuffer sucratio")
+    begin_time=current_time()
     items=[]
 
     try:
@@ -152,6 +152,8 @@ def show_fbuffer_sucratio(request, dev=""):
         context['has_data']=True
 
     do_mobile_support(request, dev, context)
+
+    logger.info("query fbuffer sucratio, cost: %s"%(current_time()-begin_time))
 
     return render_to_response('show_fbuffer_sucratio.html', context)
 
@@ -249,7 +251,7 @@ def make_fbuffer_pnvalue_item(key_values, item_idx, xAlis, title, subtitle, ytit
 
 
 def show_fbuffer_time(request, dev=""):
-    logger.info("query fbuffer time")
+    begin_time=current_time()
     items=[]
 
     try:
@@ -303,5 +305,7 @@ def show_fbuffer_time(request, dev=""):
         context['has_data']=True
 
     do_mobile_support(request, dev, context)
+
+    logger.info("query fbuffer time, cost: %s"%(current_time()-begin_time))
 
     return render_to_response('show_fbuffer_time.html', context)

@@ -2,7 +2,7 @@
 
 '''获取当前日期前后N天或N月的日期'''
 
-from time import strftime, localtime
+from time import strftime, localtime, time
 from datetime import timedelta, date, datetime
 import calendar
 
@@ -12,6 +12,9 @@ day  = strftime("%d",localtime())
 hour = strftime("%H",localtime())
 min  = strftime("%M",localtime())
 sec  = strftime("%S",localtime())
+
+def current_time():
+    return time()
 
 def today():
     '''''
