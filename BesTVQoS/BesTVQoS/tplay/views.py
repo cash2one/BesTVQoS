@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# import json
 import logging
 import time
 import datetime
@@ -17,10 +16,6 @@ SERVICE_TYPES = ["All", "B2B", "B2C"]
 
 VIEW_TYPES = [1, 2, 3, 4, 5]
 VIEW_TYPES_DES = {1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"unknown"}
-
-HOUR_XALIS = ["0", "1", "2", "3", "4", "5", "6", "7",
-              "8", "9", "10", "11", "12", "13", "14", "15",
-              "16", "17", "18", "19", "20", "21", "22", "23"]
 
 
 def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
@@ -61,7 +56,7 @@ class PlayInfo:
     def __init__(self, request):
         self.service_type = "All"
         self.end_date = time.strftime(
-            '%Y-%m-%d', time.localtime(time.time() - 86400))
+            '%Y-%m-%d', time.localtime(time.time()))
         self.begin_date = self.end_date
         self.device_type = u""
         self.device_types = []
@@ -87,7 +82,8 @@ class PlayInfo:
         if(request.method == 'GET'):
             self.service_type = request.GET.get('service_type', 'All')
             self.device_type = request.GET.get('device_type', '')
-            self.begin_date = request.GET.get('begin_date', self.begin_date)
+            self.begin_date = request.GET.get('begin_date', time.strftime(
+                '%Y-%m-%d', time.localtime(time.time() - 30 * 86400)))
             self.end_date = request.GET.get('end_date', self.end_date)
 
         self.device_types = get_device_types(
