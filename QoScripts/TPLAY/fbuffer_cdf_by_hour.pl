@@ -46,7 +46,7 @@ $tw += $_ for @ptime;
 $avgw = ($suc_total == 0)?0:$tw/$suc_total;
 
 open OUT, ">>$savedir/fbuffer_data_by_hour_$playtype";
-printf OUT ("|%d|%.2f|%d|%d|%d|%d|%d|%d|%d|\n", $k, $ratio, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $total);
+printf OUT ("|%s|%.2f|%d|%d|%d|%d|%d|%d|%d|\n", $k, $ratio, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $total);
 close OUT;
 
 delete @suc{keys %suc};

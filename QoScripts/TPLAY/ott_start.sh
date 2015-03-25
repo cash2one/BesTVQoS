@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 
-# $(date +"%Y%m%d")
-date=$1 
+date=$(date +"%Y%m%d")
+#date=$1 
 
 # $(date -d -1hour +%H)
 hour=$2 

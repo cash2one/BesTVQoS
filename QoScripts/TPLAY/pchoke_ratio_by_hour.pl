@@ -93,6 +93,6 @@ $tw += $_ for @ptime;
 $avgw = ($total==0)?0:$tw/$total;
 	
 open OUT, ">>$savedir/pchoke_by_hour_$playtype";
-printf OUT ("|%d|%.3f|%.3f|%.3f|%.2f|%d|%d|%d|%d|%d|%.2f|%d|\n", $k, $pchoke_time_rate, $all_pchoke_time_rate, $ratio, $avg, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $suc{$k}+$fail{$k});
+printf OUT ("|%s|%.3f|%.3f|%.3f|%.2f|%d|%d|%d|%d|%d|%.2f|%d|\n", $k, $pchoke_time_rate, $all_pchoke_time_rate, $ratio, $avg, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $suc{$k}+$fail{$k});
 close OUT;
 
