@@ -3,7 +3,7 @@
 # $(date +"%Y%m%d")
 date=$1 
 
-# $(date +"%H")
+# $(date -d -1hour +%H)
 hour=$2 
 
 bash prepare_for_qos.sh ${date} ${hour}
@@ -21,9 +21,6 @@ do
 
 	bash ott_qos_by_dev.sh ${type} ${date} ${hour} ${type}/${date}/distribution_data_dev_${hour} 
 
-	if [ ${hour} -ne 24 ]; then
-		rm ${type}/${date}/distribution_data_dev_${hour}
-	fi
-
+	rm ${type}/${date}/distribution_data_dev_${hour}
 	rm log/${type}/TPLAY_${date}*
 done
