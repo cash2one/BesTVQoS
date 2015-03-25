@@ -27,7 +27,21 @@ def playprofile(request):
                     Records=item['records'],
                     Users=item['users'],
                     AverageTime=item['avg'])
-                playprofile_obj.save()
+                try:
+                    playprofile_obj.save()
+                except IntegrityError, e:
+                    logger.info("playprofile record already exists : %s" % (e))
+                    obj=BestvPlayprofile.objects.get(
+                        ServiceType=item['servicetype'],
+                        DeviceType=item['dev'],
+                        ISP=item['isp'],
+                        Area=item['area'],
+                        Date=create_date)
+                    obj.Records=item['records']
+                    obj.Users=item['users']
+                    obj.AverageTime=item['avg']
+                    obj.save()
+
         except ValueError, e:
             result = "error: %s" % e
         except Exception, e:
@@ -57,20 +71,22 @@ def playinfo(request):
                     Date=create_date,
                     Hour=item['hour'],
                     Records=item['records'])
-                playinfo_obj.save()
+                try:
+                    playinfo_obj.save()
+                except IntegrityError, e:
+                    logger.info("playinfo record already exists : %s" % (e))
+                    obj=BestvPlayinfo.objects.get(ServiceType=item['servicetype'],
+                            DeviceType=item['dev'],
+                            ISP=item['isp'],
+                            Area=item['area'],
+                            ViewType=item['viewtype'],
+                            Date=create_date,
+                            Hour=item['hour'])
+                    obj.Records=item['records']
+                    obj.save()     
+                     
         except ValueError, e:
             result = "ValueError: %s" % e
-        except IntegrityError, e:
-            result = "update record: %s" % e
-            obj=BestvPlayinfo.objects.get(ServiceType=item['servicetype'],
-                    DeviceType=item['dev'],
-                    ISP=item['isp'],
-                    Area=item['area'],
-                    ViewType=item['viewtype'],
-                    Date=create_date,
-                    Hour=item['hour'])
-            obj.Records=item['records']
-            obj.save()            
         except Exception, e:
             result = "Exception: %s" % e
     else:
@@ -103,7 +119,26 @@ def playtime(request):
                     P90=item['P90'],
                     P95=item['P95'],
                     AverageTime=item['avg'])
-                playtime_obj.save()
+                try:
+                    playtime_obj.save()
+                except IntegrityError, e:
+                    logger.info("playtime record already exists : %s" % (e))
+                    obj=BestvPlaytime.objects.get(
+                        ServiceType=item['servicetype'],
+                        DeviceType=item['dev'],
+                        ISP=item['isp'],
+                        Area=item['area'],
+                        ViewType=item['viewtype'],
+                        Date=create_date,
+                        Hour=item['hour'])
+                    obj.P25=item['P25']
+                    obj.P50=item['P50']
+                    obj.P75=item['P75']
+                    obj.P90=item['P90']
+                    obj.P95=item['P95']
+                    obj.AverageTime=item['avg']
+                    obj.save()
+
         except ValueError, e:
             result = "error: %s" % e
         except Exception, e:
@@ -139,7 +174,27 @@ def fbuffer(request):
                     P90=item['P90'],
                     P95=item['P95'],
                     AverageTime=item['avg'])
-                fbuffer_obj.save()
+                try:
+                    fbuffer_obj.save()
+                except IntegrityError, e:
+                    logger.info("fbuffer record already exists : %s" % (e))
+                    obj=BestvFbuffer.objects.get(
+                        ServiceType=item['servicetype'],
+                        DeviceType=item['dev'],
+                        ISP=item['isp'],
+                        Area=item['area'],
+                        ViewType=item['viewtype'],
+                        Date=create_date,
+                        Hour=item['hour'])
+                    obj.SucRatio=item['sucratio']
+                    obj.P25=item['P25']
+                    obj.P50=item['P50']
+                    obj.P75=item['P75']
+                    obj.P90=item['P90']
+                    obj.P95=item['P95']
+                    obj.AverageTime=item['avg']
+                    obj.save()
+
         except ValueError, e:
             result = "error: %s" % e
         except Exception, e:
@@ -172,7 +227,24 @@ def fluency(request):
                     PRatio=item['pratio'],
                     AllPRatio=item['apratio'],
                     AvgCount=item['avg'])
-                fluency_obj.save()
+                try:
+                    fluency_obj.save()
+                except IntegrityError, e:
+                    logger.info("fluency record already exists : %s" % (e))
+                    obj=BestvFluency.objects.get(
+                        ServiceType=item['servicetype'],
+                        DeviceType=item['dev'],
+                        ISP=item['isp'],
+                        Area=item['area'],
+                        ViewType=item['viewtype'],
+                        Date=create_date,
+                        Hour=item['hour'])
+                    obj.Fluency=item['fluency']
+                    obj.PRatio=item['pratio']
+                    obj.AllPRatio=item['apratio']
+                    obj.AvgCount=item['avg']
+                    obj.save()
+
         except ValueError, e:
             result = "error: %s" % e
         except Exception, e:
