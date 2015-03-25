@@ -7,7 +7,7 @@ import datetime
 from django.shortcuts import render_to_response
 from django.db import connection
 from common.mobile import do_mobile_support
-from common.views import get_device_types
+from common.views import get_device_types1
 from tplay.models import *
 
 logger = logging.getLogger("django.request")
@@ -86,7 +86,7 @@ class PlayInfo:
             self.begin_date = request.GET.get('begin_date', self.begin_date)
             self.end_date = request.GET.get('end_date', self.end_date)
 
-        self.device_types = get_device_types(
+        self.device_types = get_device_types1(
             "playinfo", self.service_type, self.begin_date,
             self.end_date, self.cu)
 
