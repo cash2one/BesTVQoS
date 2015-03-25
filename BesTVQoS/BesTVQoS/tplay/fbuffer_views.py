@@ -22,7 +22,7 @@ VIEW_TYPES = [
 hour_xalis = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
               "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]
 
-PNVALUES_LIST = ["P25", "P50", "P75", "P90", "P95", "AVG"]
+PNVALUES_LIST = [("P25","P25"), ("P50", "P50"), ("P75", "P75"), ("P90", "P90"), ("P95", "P95"), ("AVG", "AVG")]
 PNVALUES_LIST_DES = {"P25": "P25", "P50": "P50",
                      "P75": "P75", "P90": "P90", "P95": "P95", "AVG": "AVG"}
 
@@ -42,7 +42,7 @@ class NoDataError(Exception):
 '''
 
 
-def get_filter_param_values(request, table_name):
+def get_filter_param_values(request, table):
     service_type = request.GET.get("service_type", "All")
     device_type = request.GET.get("device_type")
     last_date = str(today())
@@ -52,7 +52,7 @@ def get_filter_param_values(request, table_name):
     logger.info("get_filter_values: %s - %s" % (service_type, device_type))
 
     device_types = get_device_types(
-        table_name, service_type, begin_date, end_date)
+        table, service_type, begin_date, end_date)
     if device_type is None or device_type == "":  # init device type first time
         device_type = device_types[0]
 
@@ -154,7 +154,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
             request, table)
         if device_type == "":
             raise NoDataError("No data between %s - %s in %s" %
-                              (begin_date, end_date, table_name))
+                              (begin_date, end_date, table))
 
         device_filter_ojbs = get_filter_objs_by_device_types(
             device_type, begin_date, end_date, table)
@@ -241,147 +241,118 @@ def show_fluency_avgcount(request, dev=""):
 
 '''
 
-
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
-def prepare_fbuffer_pnvalue_hour_data(fbuffer_objs):
-    sucratio_by_hour = {}
-    for i in VIEW_TYPES:
-        filter_objs = fbuffer_objs.filter(ViewType=i)
+def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
+    data_by_hour = {}
+    for (i, second) in view_types:
+        filter_objs = objs.filter(ViewType=i)
         display_data = {}
-        for pn_idx in PNVALUES_LIST:
+        for (pn_idx, pn_des) in pnvalue_types:
             display_data[pn_idx] = []
 
         display_if_has_data = False
         for hour in range(24):
             try:
                 obj = filter_objs.get(Hour=hour)
-                display_data[PNVALUES_LIST[0]].append("%s" % (obj.P25))
-                display_data[PNVALUES_LIST[1]].append("%s" % (obj.P50))
-                display_data[PNVALUES_LIST[2]].append("%s" % (obj.P75))
-                display_data[PNVALUES_LIST[3]].append("%s" % (obj.P90))
-                display_data[PNVALUES_LIST[4]].append("%s" % (obj.P95))
-                display_data[PNVALUES_LIST[5]].append("%s" % (obj.AverageTime))
+                display_data[pnvalue_types[0][0]].append("%s" % (obj.P25))
+                display_data[pnvalue_types[1][0]].append("%s" % (obj.P50))
+                display_data[pnvalue_types[2][0]].append("%s" % (obj.P75))
+                display_data[pnvalue_types[3][0]].append("%s" % (obj.P90))
+                display_data[pnvalue_types[4][0]].append("%s" % (obj.P95))
+                display_data[pnvalue_types[5][0]].append("%s" % (obj.AverageTime))
                 display_if_has_data = True
             except Exception, e:
-                display_data[PNVALUES_LIST[0]].append("%s" % (0))
-                display_data[PNVALUES_LIST[1]].append("%s" % (0))
-                display_data[PNVALUES_LIST[2]].append("%s" % (0))
-                display_data[PNVALUES_LIST[3]].append("%s" % (0))
-                display_data[PNVALUES_LIST[4]].append("%s" % (0))
-                display_data[PNVALUES_LIST[5]].append("%s" % (0))
+                display_data[pnvalue_types[0][0]].append("%s" % (0))
+                display_data[pnvalue_types[1][0]].append("%s" % (0))
+                display_data[pnvalue_types[2][0]].append("%s" % (0))
+                display_data[pnvalue_types[3][0]].append("%s" % (0))
+                display_data[pnvalue_types[4][0]].append("%s" % (0))
+                display_data[pnvalue_types[5][0]].append("%s" % (0))
 
         if display_if_has_data:
-            sucratio_by_hour[i] = display_data
+            data_by_hour[i] = display_data
 
-    if len(sucratio_by_hour) == 0:
+    if len(data_by_hour) == 0:
         return None
-    return sucratio_by_hour
+    return data_by_hour
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
-
-
-def prepare_fbuffer_pnvalue_daily_data(fbuffer_objs, days_duration):
-    sucratio_by_day = {}
-    for i in VIEW_TYPES:
-        filter_objs = fbuffer_objs.filter(ViewType=i)
+def prepare_pnvalue_daily_data(objs, days_duration, view_types, pnvalue_types):
+    data_by_day = {}
+    for (i, second) in view_types:
+        filter_objs = objs.filter(ViewType=i)
         display_data = {}
-        for pn_idx in PNVALUES_LIST:
+        for (pn_idx, pn_des) in pnvalue_types:
             display_data[pn_idx] = []
 
         display_if_has_data = False
         for date_idx in days_duration:
             try:
                 obj = filter_objs.get(Date=date_idx, Hour=24)
-                display_data[PNVALUES_LIST[0]].append("%s" % (obj.P25))
-                display_data[PNVALUES_LIST[1]].append("%s" % (obj.P50))
-                display_data[PNVALUES_LIST[2]].append("%s" % (obj.P75))
-                display_data[PNVALUES_LIST[3]].append("%s" % (obj.P90))
-                display_data[PNVALUES_LIST[4]].append("%s" % (obj.P95))
-                display_data[PNVALUES_LIST[5]].append("%s" % (obj.AverageTime))
+                display_data[pnvalue_types[0][0]].append("%s" % (obj.P25))
+                display_data[pnvalue_types[1][0]].append("%s" % (obj.P50))
+                display_data[pnvalue_types[2][0]].append("%s" % (obj.P75))
+                display_data[pnvalue_types[3][0]].append("%s" % (obj.P90))
+                display_data[pnvalue_types[4][0]].append("%s" % (obj.P95))
+                display_data[pnvalue_types[5][0]].append("%s" % (obj.AverageTime))
                 display_if_has_data = True
             except Exception, e:
-                display_data[PNVALUES_LIST[0]].append("%s" % (0))
-                display_data[PNVALUES_LIST[1]].append("%s" % (0))
-                display_data[PNVALUES_LIST[2]].append("%s" % (0))
-                display_data[PNVALUES_LIST[3]].append("%s" % (0))
-                display_data[PNVALUES_LIST[4]].append("%s" % (0))
-                display_data[PNVALUES_LIST[5]].append("%s" % (0))
+                display_data[pnvalue_types[0][0]].append("%s" % (0))
+                display_data[pnvalue_types[1][0]].append("%s" % (0))
+                display_data[pnvalue_types[2][0]].append("%s" % (0))
+                display_data[pnvalue_types[3][0]].append("%s" % (0))
+                display_data[pnvalue_types[4][0]].append("%s" % (0))
+                display_data[pnvalue_types[5][0]].append("%s" % (0))
 
         if display_if_has_data:
-            sucratio_by_day[i] = display_data
+            data_by_day[i] = display_data
 
-    if len(sucratio_by_day) == 0:
+    if len(data_by_day) == 0:
         return None
-    return sucratio_by_day
-
-# key-values: key: P25, values:[...]
+    return data_by_day
 
 
-def make_fbuffer_pnvalue_item(key_values, item_idx, xAlis, title, subtitle, ytitle):
-    item = {}
-    item["index"] = item_idx
-    item["title"] = title  # u"缓冲时长"
-    item["subtitle"] = subtitle  # u"点播"
-    item["y_title"] = ytitle  # u"成功率"
-    item["xAxis"] = xAlis
-    item["t_interval"] = 1
-
-    series = []
-    for i in PNVALUES_LIST:
-        serie_item = '''{
-            name: '%s',
-            yAxis: 0,
-            type: 'spline',
-            data: [%s]
-        }''' % (i, ",".join(key_values[i]))
-        series.append(serie_item)
-    item["series"] = ",".join(series)
-    return item
-
-
-def show_fbuffer_time(request, dev=""):
+def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnvalue_types):
     begin_time = current_time()
     items = []
 
     try:
         # init params
         service_type, device_type, device_types, begin_date, end_date = get_filter_param_values(
-            request, "fbuffer")
+            request, table)
         if device_type == "":
             raise NoDataError("No data between %s - %s" %
                               (begin_date, end_date))
 
-        device_filter_ojbs = BestvFbuffer.objects.filter(DeviceType=device_type,
-                                                         Date__gte=begin_date, Date__lte=end_date)
+        device_filter_ojbs = get_filter_objs_by_device_types(
+            device_type, begin_date, end_date, table)
 
         # process data from databases;
         if begin_date == end_date:
-            data_by_hour = prepare_fbuffer_pnvalue_hour_data(
-                device_filter_ojbs)
+            data_by_hour = prepare_pnvalue_hour_data(device_filter_ojbs, view_types, pnvalue_types)
             if data_by_hour is None:
                 raise NoDataError(
                     "No hour data between %s - %s" % (begin_date, end_date))
 
             item_idx = 0
-            for view_type_idx in VIEW_TYPES:
-                item = make_plot_item(data_by_hour[view_type_idx], PNVALUES_LIST, PNVALUES_LIST_DES,
+            for (view_type_idx, view_des) in view_types:
+                item = make_plot_item(data_by_hour[view_type_idx], pnvalue_types,
                                       item_idx, hour_xalis,
-                                      u"缓冲成PN值", u"全天24小时%s" % (VIEW_TYPES_DES[view_type_idx]), u"秒")
+                                      u"缓冲成PN值", u"全天24小时%s" % (view_des), u"秒")
                 items.append(item)
                 item_idx += 1
         else:
             days_region = get_days_region(begin_date, end_date)
-            data_by_day = prepare_fbuffer_pnvalue_daily_data(
-                device_filter_ojbs, days_region)
+            data_by_day = prepare_pnvalue_daily_data(device_filter_ojbs, days_region, view_types, pnvalue_types)
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
 
             item_idx = 0
-            for view_type_idx in VIEW_TYPES:
-                item = make_plot_item(data_by_day[view_type_idx], PNVALUES_LIST, PNVALUES_LIST_DES,
+            for (view_type_idx, view_des) in view_types:
+                item = make_plot_item(data_by_day[view_type_idx], pnvalue_types, 
                                       item_idx, days_region,
-                                      u"缓冲成PN值", u"全天24小时%s" % (VIEW_TYPES_DES[view_type_idx]), u"秒")
+                                      u"缓冲成PN值", u"全天24小时%s" % (view_des), u"秒")
                 items.append(item)
                 item_idx += 1
 
@@ -399,8 +370,18 @@ def show_fbuffer_time(request, dev=""):
     if len(items) > 0:
         context['has_data'] = True
 
-    do_mobile_support(request, dev, context)
-
     logger.info("query fbuffer time, cost: %s" % (current_time() - begin_time))
 
+    return context
+
+def show_fbuffer_time(request, dev=""):
+    context = process_multi_plot(request, BestvFbuffer, u"缓冲PN值", u"", u"秒", VIEW_TYPES[1:], PNVALUES_LIST)
+    do_mobile_support(request, dev, context)    
+
     return render_to_response('show_fbuffer_time.html', context)
+
+def show_play_time(request, dev=""):
+    context = process_multi_plot(request, BestvFbuffer, u"播放时长PN值", u"", u"秒", VIEW_TYPES[1:], PNVALUES_LIST)
+    do_mobile_support(request, dev, context)    
+
+    return render_to_response('show_play_time.html', context)
