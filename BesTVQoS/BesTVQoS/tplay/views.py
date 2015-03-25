@@ -59,14 +59,14 @@ class PlayInfo:
         self.end_date = time.strftime(
             '%Y-%m-%d', time.localtime(time.time()))
         self.begin_date = self.end_date
-        self.device_type = u""
+        self.device_type = ""
         self.device_types = []
         self.min_rec = 0
 
-        self.common_filter = u""
-        self.service_type_filter = u""
-        self.device_type_filter = u""
-        self.date_filter = u""
+        self.common_filter = ""
+        self.service_type_filter = ""
+        self.device_type_filter = ""
+        self.date_filter = ""
 
         self.cu = connection.cursor()
 
@@ -132,7 +132,7 @@ class PlayInfo:
             for i in range((tmp_end_date - tmp_begin_date).days + 1):
                 day = tmp_begin_date + datetime.timedelta(days=i)
                 day_str = day.strftime('%Y-%m-%d')
-                x_axis.append("'%s'" % day_str)
+                x_axis.append("%s" % day_str)
 
         for vt in VIEW_TYPES:
             y_axise = []
@@ -152,7 +152,7 @@ class PlayInfo:
                                u'', u'观看量', x_axis)
 
     def get_daily_sql_command(self, date, view_type):
-        sql_command = "select Records from playinfo where Date = %s " % (
+        sql_command = "select sum(Records) from playinfo where Date = '%s'" % (
             date)
         sql_command += self.service_type_filter
         sql_command += self.device_type_filter
@@ -165,7 +165,7 @@ class PlayInfo:
         return sql_command
 
     def get_hourly_sql_command(self, hour, view_type):
-        sql_command = "select Records from playinfo where %s" % (
+        sql_command = "select sum(Records) from playinfo where %s" % (
             self.date_filter)
         sql_command += self.service_type_filter
         sql_command += self.device_type_filter
