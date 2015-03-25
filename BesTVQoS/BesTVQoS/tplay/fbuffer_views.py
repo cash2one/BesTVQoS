@@ -229,6 +229,7 @@ def make_fbuffer_pnvalue_item(key_values, item_idx, xAlis, title, subtitle, ytit
 
 
 def show_fbuffer_time(request, dev=""):
+    logger.info("query fbuffer time")
     items=[]
 
     try:
