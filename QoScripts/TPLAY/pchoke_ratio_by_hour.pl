@@ -87,7 +87,7 @@ $idx_95 = $suc_total * 0.95;
 		
 @pn = split / /, $pnum{$k};
 $sum += $_ for @pn;
-$avg = ($total==0)?0:$sum/$total;
+$avg = ($fail{$k}==0)?0:$sum/$fail{$k};
 		
 $tw += $_ for @ptime;
 $avgw = ($total==0)?0:$tw/$total;
