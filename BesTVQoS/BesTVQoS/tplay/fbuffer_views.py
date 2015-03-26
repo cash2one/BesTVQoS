@@ -171,7 +171,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
             device_type, begin_date, end_date, table)
 
         # process data from databases;
-        if begin_date == end_date and hasattr(device_filter_ojbs, "Hour"):
+        if begin_date == end_date:
             data_by_hour = prepare_hour_data_of_single_Qos(
                 device_filter_ojbs, view_types, Qos_name, base_radix)
             if data_by_hour is None:
