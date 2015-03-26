@@ -98,3 +98,28 @@ class BestvFluency(models.Model):
         unique_together = (
             'ServiceType', 'DeviceType', 'ISP',
             'Area', 'ViewType', 'Date', 'Hour')
+
+class Bestv3SRatio(models.Model):
+    ServiceType = models.CharField(max_length=30)
+    DeviceType = models.CharField(max_length=255)
+    ISP = models.CharField(max_length=255)
+    Area = models.CharField(max_length=255)
+    Date = models.DateField()
+    Ratio = models.FloatField()
+
+    class Meta:
+        db_table = "Bestv3SRatio"
+        unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
+
+class BestvAvgPchoke(models.Model):
+    ServiceType = models.CharField(max_length=30)
+    DeviceType = models.CharField(max_length=255)
+    ISP = models.CharField(max_length=255)
+    Area = models.CharField(max_length=255)
+    Date = models.DateField()
+    AvgCount = models.IntegerField()
+    AvgTime = models.IntegerField()
+
+    class Meta:
+        db_table = "BestvAvgPchoke"
+        unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')

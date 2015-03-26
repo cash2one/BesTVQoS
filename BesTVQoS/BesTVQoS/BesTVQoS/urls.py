@@ -41,6 +41,13 @@ urlpatterns = patterns(
     url(r'^((?P<dev>m)/)?show_fluency_avgcount$',
         'tplay.fbuffer_views.show_fluency_avgcount'),
 
+    url(r'^((?P<dev>m)/)?show_3sratio$',
+        'tplay.fbuffer_views.show_3sratio'),
+    url(r'^((?P<dev>m)/)?show_avg_pcount$',
+        'tplay.fbuffer_views.show_avg_pcount'),
+    url(r'^((?P<dev>m)/)?show_avg_ptime$',
+        'tplay.fbuffer_views.show_avg_ptime'),
+
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),
@@ -48,6 +55,8 @@ urlpatterns = patterns(
     url(r'^update/playtime$', 'tplay.update_views.playtime'),
     url(r'^update/fbuffer$', 'tplay.update_views.fbuffer'),
     url(r'^update/fluency$', 'tplay.update_views.fluency'),
+    url(r'^update/bestv3Sratio$', 'tplay.update_views.bestv3Sratio'),
+    url(r'^update/bestvavgpchoke$', 'tplay.update_views.bestvavgpchoke'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
