@@ -81,10 +81,13 @@ class PlayInfo:
 
     def read_filter_group_form(self, request):
         if(request.method == 'GET'):
-            filters_map=get_default_values_from_cookie(request)
-            self.service_type = request.GET.get("service_type", filters_map["st"])
-            self.device_type = request.GET.get("device_type", filters_map["dt"])
-            self.begin_date = request.GET.get("begin_date", filters_map["begin"])
+            filters_map = get_default_values_from_cookie(request)
+            self.service_type = request.GET.get(
+                "service_type", filters_map["st"])
+            self.device_type = request.GET.get(
+                "device_type", filters_map["dt"])
+            self.begin_date = request.GET.get(
+                "begin_date", filters_map["begin"])
             self.end_date = request.GET.get("end_date", filters_map["end"])
 
         self.device_types = get_device_types1(
