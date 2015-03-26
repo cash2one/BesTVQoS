@@ -2,12 +2,13 @@
 
 import logging
 import time
-import datetime
+from datetime import datetime
+from datetime import timedelta
 
 from django.shortcuts import render_to_response
 from django.db import connection
 from common.mobile import do_mobile_support
-from common.views import get_device_types1
+from common.views import *
 from tplay.models import *
 
 logger = logging.getLogger("django.request")
@@ -56,8 +57,7 @@ class PlayInfo:
 
     def __init__(self, request):
         self.service_type = "All"
-        self.end_date = time.strftime(
-            '%Y-%m-%d', time.localtime(time.time()))
+        self.end_date = str(today())
         self.begin_date = self.end_date
         self.device_type = ""
         self.device_types = []
@@ -81,10 +81,11 @@ class PlayInfo:
 
     def read_filter_group_form(self, request):
         if(request.method == 'GET'):
-            self.service_type = request.GET.get('service_type', 'All')
-            self.device_type = request.GET.get('device_type', '')
-            self.begin_date = request.GET.get('begin_date', self.begin_date)
-            self.end_date = request.GET.get('end_date', self.end_date)
+            filters_map=get_default_values_from_cookie(request)
+            self.service_type = request.GET.get("service_type", filters_map["st"])
+            self.device_type = request.GET.get("device_type", filters_map["dt"])
+            self.begin_date = request.GET.get("begin_date", filters_map["begin"])
+            self.end_date = request.GET.get("end_date", filters_map["end"])
 
         self.device_types = get_device_types1(
             "playinfo", self.service_type, self.begin_date,
@@ -128,12 +129,12 @@ class PlayInfo:
         else:
             '''multidays view'''
             fn_get_sql_cmd = self.get_daily_sql_command
-            tmp_end_date = datetime.datetime.strptime(
+            tmp_end_date = datetime.strptime(
                 self.end_date, '%Y-%m-%d')
-            tmp_begin_date = datetime.datetime.strptime(
+            tmp_begin_date = datetime.strptime(
                 self.begin_date, '%Y-%m-%d')
             for i in range((tmp_end_date - tmp_begin_date).days + 1):
-                day = tmp_begin_date + datetime.timedelta(days=i)
+                day = tmp_begin_date + timedelta(days=i)
                 day_str = day.strftime('%Y-%m-%d')
                 x_axis.append("%s" % day_str)
 
@@ -187,8 +188,7 @@ def get_play_info_today(context, playinfo):
     table.mheader = ["服务类型", "设备类型", "播放数", '播放百分比%']
     table.msub = []
     subs = []
-    today = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-    if playinfo.end_date != today:
+    if playinfo.end_date != str(today()):
         return table
 
     filters = "from playinfo where %s" % (playinfo.common_filter)
@@ -276,8 +276,7 @@ def show_playing_daily(request, dev=""):
     play_profile = PlayInfo(request)
     play_profile.read_filter_profile_form(request)
 
-    today = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-    if play_profile.end_date == today:
+    if play_profile.end_date == str(today()):
         table = get_play_info_today(context, play_profile)
     else:
         table = get_play_profile_history(context, play_profile)
@@ -310,4 +309,8 @@ def show_playing_trend(request, dev=""):
 
     do_mobile_support(request, dev, context)
 
-    return render_to_response('show_playing_trend.html', context)
+    response = render_to_response('show_playing_trend.html', context)
+
+    set_default_values_to_cookie(response, context)
+
+    return response

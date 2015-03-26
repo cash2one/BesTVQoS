@@ -1,5 +1,4 @@
 ﻿# -*- coding: utf-8 -*-
-import json
 import logging
 
 from django.http import HttpResponse
@@ -43,17 +42,23 @@ class NoDataError(Exception):
 
 
 def get_filter_param_values(request, table):
-    service_type = request.GET.get("service_type", "All")
-    device_type = request.GET.get("device_type")
-    last_date = str(today())
-    begin_date = request.GET.get("begin_date", last_date)
-    end_date = request.GET.get("end_date", last_date)
+    #default_service_type, default_device_type, default_begin_time, default_end_time = get_default_values_from_cookie(request)
+    filters_map=get_default_values_from_cookie(request)
+    service_type = request.GET.get("service_type", filters_map["st"])
+    device_type = request.GET.get("device_type", filters_map["dt"])
+    begin_date = request.GET.get("begin_date", filters_map["begin"])
+    end_date = request.GET.get("end_date", filters_map["end"])
 
     logger.info("get_filter_values: %s - %s" % (service_type, device_type))
 
     device_types = get_device_types(
         table, service_type, begin_date, end_date)
-    if device_type is None or device_type == "":  # init device type first time
+
+    if len(device_types) == 0:
+        device_types = [""]
+        device_type = ""
+    
+    if device_type not in device_types:
         device_type = device_types[0]
 
     return service_type, device_type, device_types, begin_date, end_date
@@ -206,36 +211,49 @@ def show_fbuffer_sucratio(request, dev=""):
     context = process_single_Qos(
         request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"全类型", u"成功率(%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
-    return render_to_response('show_fbuffer_sucratio.html', context)
+    response = render_to_response('show_fbuffer_sucratio.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
+    #return render_to_response('show_fbuffer_sucratio.html', context)
 
 
 def show_fluency(request, dev=""):
     context = process_single_Qos(
         request, BestvFluency, "Fluency", u"一次不卡比例", u"全类型", u"百分比(%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
-    return render_to_response('show_fluency.html', context)
+    response = render_to_response('show_fluency.html', context)
+    set_default_values_to_cookie(response, context)
+
+    return response
 
 
 def show_fluency_pratio(request, dev=""):
     context = process_single_Qos(
         request, BestvFluency, "PRatio", u"卡用户卡时间比", u"全类型", u"百分比(%)", VIEW_TYPES[1:],100)
     do_mobile_support(request, dev, context)
-    return render_to_response('show_fluency_pratio.html', context)
-
+    response = render_to_response('show_fluency_pratio.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
 
 def show_fluency_allpratio(request, dev=""):
     context = process_single_Qos(
         request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"全类型", u"百分比(%)", VIEW_TYPES[1:], 100)
     do_mobile_support(request, dev, context)
-    return render_to_response('show_fluency_allpratio.html', context)
-
+    response = render_to_response('show_fluency_allpratio.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
 
 def show_fluency_avgcount(request, dev=""):
     context = process_single_Qos(
         request, BestvFluency, "AvgCount", u"卡用户平均卡次数", u"全类型", u"次数", VIEW_TYPES[1:])
     do_mobile_support(request, dev, context)
-    return render_to_response('show_fluency_avgcount.html', context)
-
+    response = render_to_response('show_fluency_avgcount.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
 
 '''
  For multi Qos, such as pnvalue, display: multi plots of single viewtype
@@ -339,10 +357,12 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                     "No hour data between %s - %s" % (begin_date, end_date))
 
             item_idx = 0
-            for key in data_by_hour:
-                item = make_plot_item(data_by_hour[key], pnvalue_types,
+            for (view_type_idx, view_des) in view_types:
+                if view_type_idx not in data_by_hour:
+                    continue
+                item = make_plot_item(data_by_hour[view_type_idx], pnvalue_types,
                                       item_idx, hour_xalis,
-                                      title, u"%s %s" % (subtitle, view_types[key]), ytitle)
+                                      title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
         else:
@@ -353,10 +373,12 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                     "No daily data between %s - %s" % (begin_date, end_date))
 
             item_idx = 0
-            for key in data_by_day:
-                item = make_plot_item(data_by_day[key], pnvalue_types, 
+            for (view_type_idx, view_des) in view_types:
+                if view_type_idx not in data_by_day:
+                    continue
+                item = make_plot_item(data_by_day[view_type_idx], pnvalue_types, 
                                       item_idx, days_region,
-                                      title, u"%s %s" % (subtitle, view_types[key]), ytitle)
+                                      title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
 
@@ -382,10 +404,15 @@ def show_fbuffer_time(request, dev=""):
     context = process_multi_plot(request, BestvFbuffer, u"缓冲PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
     do_mobile_support(request, dev, context)    
 
-    return render_to_response('show_fbuffer_time.html', context)
+    response = render_to_response('show_fbuffer_time.html', context)
+    set_default_values_to_cookie(response, context)
+
+    return response
 
 def show_play_time(request, dev=""):
     context = process_multi_plot(request, BestvPlaytime, u"播放时长PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
     do_mobile_support(request, dev, context)    
+    response = render_to_response('show_play_time.html', context)
+    set_default_values_to_cookie(response, context)
 
-    return render_to_response('show_play_time.html', context)
+    return response
