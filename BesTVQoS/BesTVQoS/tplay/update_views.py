@@ -255,3 +255,83 @@ def fluency(request):
     respStr = json.dumps({"result": result})
     logger.debug("update fluency: %s" % (respStr))
     return HttpResponse(respStr, content_type="application/json")
+
+def bestv3Sratio(request):
+    result = "ok"
+    if request.method == "POST":
+        try:
+            contents = json.loads(request.body)
+            for item in contents:
+                create_date = '%s-%s-%s' % (
+                    item['date'][0:4], item['date'][4:6], item['date'][6:8])
+                bestv3Sratio_obj = Bestv3SRatio(
+                    ServiceType=item['servicetype'],
+                    DeviceType=item['dev'],
+                    ISP=item['isp'],
+                    Area=item['area'],
+                    Date=create_date,
+                    Ratio=item['ratio'])
+                try:
+                    bestv3Sratio_obj.save()
+                except IntegrityError, e:
+                    logger.info("playprofile record already exists : %s" % (e))
+                    obj=Bestv3SRatio.objects.get(
+                        ServiceType=item['servicetype'],
+                        DeviceType=item['dev'],
+                        ISP=item['isp'],
+                        Area=item['area'],
+                        Date=create_date)
+                    obj.Ratio=item['ratio']
+                    obj.save()
+
+        except ValueError, e:
+            result = "error: %s" % e
+        except Exception, e:
+            result = "error: %s" % e
+    else:
+        result = "error"
+
+    respStr = json.dumps({"result": result})
+    logger.debug("update bestv3Sratio: %s" % (respStr))
+    return HttpResponse(respStr, content_type="application/json")
+
+def bestvavgpchoke(request):
+    result = "ok"
+    if request.method == "POST":
+        try:
+            contents = json.loads(request.body)
+            for item in contents:
+                create_date = '%s-%s-%s' % (
+                    item['date'][0:4], item['date'][4:6], item['date'][6:8])
+                bestvavgpchoke_obj = BestvAvgPchoke(
+                    ServiceType=item['servicetype'],
+                    DeviceType=item['dev'],
+                    ISP=item['isp'],
+                    Area=item['area'],
+                    Date=create_date,
+                    AvgCount=item['avgc'],
+                    AvgTime=item['avgt'])
+                try:
+                    bestvavgpchoke_obj.save()
+                except IntegrityError, e:
+                    logger.info("playprofile record already exists : %s" % (e))
+                    obj=BestvAvgPchoke.objects.get(
+                        ServiceType=item['servicetype'],
+                        DeviceType=item['dev'],
+                        ISP=item['isp'],
+                        Area=item['area'],
+                        Date=create_date)
+                    obj.AvgCount=item['avgc']
+                    obj.AvgTime=item['avgt']
+                    obj.save()
+
+        except ValueError, e:
+            result = "error: %s" % e
+        except Exception, e:
+            result = "error: %s" % e
+    else:
+        result = "error"
+
+    respStr = json.dumps({"result": result})
+    logger.debug("update bestvavgpchoke: %s" % (respStr))
+    return HttpResponse(respStr, content_type="application/json")

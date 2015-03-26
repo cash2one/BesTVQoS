@@ -48,6 +48,8 @@ urlpatterns = patterns(
     url(r'^update/playtime$', 'tplay.update_views.playtime'),
     url(r'^update/fbuffer$', 'tplay.update_views.fbuffer'),
     url(r'^update/fluency$', 'tplay.update_views.fluency'),
+    url(r'^update/bestv3Sratio$', 'tplay.update_views.bestvavgpchoke'),
+    url(r'^update/bestvavgpchoke$', 'tplay.update_views.bestvavgpchoke'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
