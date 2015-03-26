@@ -23,9 +23,11 @@ foreach $filename (@ARGV) {
 			print SUBFILE1 $_."\n";
 			close SUBFILE1;
 			
-			open SUBFILE2, ">>tmp/${date}/$element[$idx]";
-			print SUBFILE2 $_."\n";
-			close SUBFILE2;
+			if ($hour != 24) {
+				open SUBFILE2, ">>tmp/${date}/$element[$idx]";
+				print SUBFILE2 $_."\n";
+				close SUBFILE2;
+			}
 		}
 	}
 
