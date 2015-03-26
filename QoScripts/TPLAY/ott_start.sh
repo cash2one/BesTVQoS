@@ -2,7 +2,7 @@
 
 export PYTHONPATH=/usr/bin/python:/usr/bin/python2.6:/usr/lib/python2.6/site-packages
 
-date=$(date +"%Y%m%d")
+date=$(date -d -1hour +"%Y%m%d")
 #date=$1 
 
 hour=$(date -d -1hour +%H)
