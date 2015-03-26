@@ -122,7 +122,7 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
     return data_by_hour
 
 
-def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, base_radix):
+def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, hour_flag, base_radix):
     data_by_day = {}
     display_if_has_data = False
     for i in view_types:
@@ -135,7 +135,7 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, ba
 
         for date_idx in days_region:
             try:
-                if hasattr(filter_objs, "Hour"):
+                if hour_flag == True:  # such as 3sratio
                     obj = filter_objs.filter(
                         Date=date_idx, Hour=24).aggregate(sum=Sum(Qos_name))
                 else:
@@ -154,8 +154,8 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, ba
         return None
     return data_by_day
 
-
-def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_types, base_radix=1):
+# hour_flag: if have hour data, True
+def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_types, hour_flag, base_radix=1):
     begin_time = current_time()
     items = []
 
@@ -171,7 +171,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
             device_type, begin_date, end_date, table)
 
         # process data from databases;
-        if begin_date == end_date:
+        if begin_date == end_date and hour_flag == True:
             data_by_hour = prepare_hour_data_of_single_Qos(
                 device_filter_ojbs, view_types, Qos_name, base_radix)
             if data_by_hour is None:
@@ -183,7 +183,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
         else:
             days_region = get_days_region(begin_date, end_date)
             data_by_day = prepare_daily_data_of_single_Qos(
-                device_filter_ojbs, days_region, view_types, Qos_name, base_radix)
+                device_filter_ojbs, days_region, view_types, Qos_name, hour_flag, base_radix)
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
@@ -213,7 +213,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
 
 def show_fbuffer_sucratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"加载成功的播放次数/播放总次数", u"成功率(%)", VIEW_TYPES[1:], 100)
+        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"加载成功的播放次数/播放总次数", u"成功率(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fbuffer_sucratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -224,7 +224,7 @@ def show_fbuffer_sucratio(request, dev=""):
 
 def show_fluency(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "Fluency", u"一次不卡比例", u"无卡顿播放次数/加载成功的播放次数", u"百分比(%)", VIEW_TYPES[1:], 100)
+        request, BestvFluency, "Fluency", u"一次不卡比例", u"无卡顿播放次数/加载成功的播放次数", u"百分比(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency.html', context)
     set_default_values_to_cookie(response, context)
@@ -234,7 +234,7 @@ def show_fluency(request, dev=""):
 
 def show_fluency_pratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"卡顿总时长/卡顿用户播放总时长", u"百分比(%)", VIEW_TYPES[1:],100)
+        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"卡顿总时长/卡顿用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_pratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -243,7 +243,7 @@ def show_fluency_pratio(request, dev=""):
 
 def show_fluency_allpratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"卡顿总时长/所有用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], 100)
+        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"卡顿总时长/所有用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_allpratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -252,7 +252,7 @@ def show_fluency_allpratio(request, dev=""):
 
 def show_fluency_avgcount(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AvgCount", u"卡顿播放平均卡次数", u"卡顿总次数/卡顿播放数", u"次数", VIEW_TYPES[1:])
+        request, BestvFluency, "AvgCount", u"卡顿播放平均卡次数", u"卡顿总次数/卡顿播放数", u"次数", VIEW_TYPES[1:], True)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_avgcount.html', context)
     set_default_values_to_cookie(response, context)
@@ -261,7 +261,7 @@ def show_fluency_avgcount(request, dev=""):
 
 def show_3sratio(request, dev=""):
     context = process_single_Qos(
-        request, Bestv3SRatio, "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"百分比(%）", VIEW_TYPES[0:1], 100)
+        request, Bestv3SRatio, "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"百分比(%）", VIEW_TYPES[0:1], False, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_3sratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -270,7 +270,7 @@ def show_3sratio(request, dev=""):
 
 def show_avg_pcount(request, dev=""):
     context = process_single_Qos(
-        request, BestvAvgPchoke, "AvgCount", u"每小时播放卡顿平均次数", u"卡顿次数/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1])
+        request, BestvAvgPchoke, "AvgCount", u"每小时播放卡顿平均次数", u"卡顿次数/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1], False)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_avg_pcount.html', context)
     set_default_values_to_cookie(response, context)
@@ -279,7 +279,7 @@ def show_avg_pcount(request, dev=""):
 
 def show_avg_ptime(request, dev=""):
     context = process_single_Qos(
-        request, BestvAvgPchoke, "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"秒", VIEW_TYPES[0:1])
+        request, BestvAvgPchoke, "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"秒", VIEW_TYPES[0:1], False)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_avg_ptime.html', context)
     set_default_values_to_cookie(response, context)
