@@ -107,11 +107,11 @@ def get_device_type(request, dev=""):
     return HttpResponse(respStr, content_type="text/json")
 
 def get_default_values_from_cookie(request):
-    if "filters" not in request.COOKIES:
+    if "bestvFilters" not in request.COOKIES:
         return json.loads('{"st":"All","dt":"","begin":"%s","end":"%s"}'%(str(today()), today()))
     else:
-        return json.loads(request.COOKIES["filters"])
+        return json.loads(request.COOKIES["bestvFilters"])
         
 def set_default_values_to_cookie(response, context):
-    response.set_cookie("filters", json.dumps({"st": context["default_service_type"], "dt": context["default_device_type"],
+    response.set_cookie("bestvFilters", json.dumps({"st": context["default_service_type"], "dt": context["default_device_type"],
                                     "begin": context['default_begin_date'], "end":context['default_end_date']}), max_age=30000)
