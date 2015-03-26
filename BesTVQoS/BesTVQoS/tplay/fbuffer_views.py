@@ -261,7 +261,7 @@ def show_fluency_avgcount(request, dev=""):
 
 def show_3sratio(request, dev=""):
     context = process_single_Qos(
-        request, Bestv3SRatio, "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"次数", VIEW_TYPES[0:1])
+        request, Bestv3SRatio, "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"百分比(%）", VIEW_TYPES[0:1], 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_3sratio.html', context)
     set_default_values_to_cookie(response, context)
