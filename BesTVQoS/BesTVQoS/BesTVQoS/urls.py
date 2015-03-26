@@ -48,7 +48,7 @@ urlpatterns = patterns(
     url(r'^update/playtime$', 'tplay.update_views.playtime'),
     url(r'^update/fbuffer$', 'tplay.update_views.fbuffer'),
     url(r'^update/fluency$', 'tplay.update_views.fluency'),
-    url(r'^update/bestv3Sratio$', 'tplay.update_views.bestvavgpchoke'),
+    url(r'^update/bestv3Sratio$', 'tplay.update_views.bestv3Sratio'),
     url(r'^update/bestvavgpchoke$', 'tplay.update_views.bestvavgpchoke'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
