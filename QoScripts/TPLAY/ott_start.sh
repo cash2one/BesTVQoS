@@ -2,11 +2,11 @@
 
 export PYTHONPATH=/usr/bin/python:/usr/bin/python2.6:/usr/lib/python2.6/site-packages
 
-date=$(date +"%Y%m%d")
-#date=$1 
+#date=$(date +"%Y%m%d")
+date=$1 
 
-hour=$(date -d -1hour +%H)
-#hour=$2 
+#hour=$(date -d -1hour +%H)
+hour=$2 
 
 bash prepare_for_qos.sh ${date} ${hour}
 
