@@ -135,8 +135,12 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, ba
 
         for date_idx in days_region:
             try:
-                obj = filter_objs.filter(
-                    Date=date_idx, Hour=24).aggregate(sum=Sum(Qos_name))
+                if hasattr(filter_objs, "Hour"):
+                    obj = filter_objs.filter(
+                        Date=date_idx, Hour=24).aggregate(sum=Sum(Qos_name))
+                else:
+                    obj = filter_objs.filter(
+                        Date=date_idx).aggregate(sum=Sum(Qos_name))
                 tmp = obj["sum"]
                 if tmp is None:
                     tmp = 0
@@ -251,6 +255,33 @@ def show_fluency_avgcount(request, dev=""):
         request, BestvFluency, "AvgCount", u"卡用户平均卡次数", u"全类型", u"次数", VIEW_TYPES[1:])
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_avgcount.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
+
+def show_3sratio(request, dev=""):
+    context = process_single_Qos(
+        request, Bestv3SRatio, "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"次数", VIEW_TYPES[0:1])
+    do_mobile_support(request, dev, context)
+    response = render_to_response('show_3sratio.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
+
+def show_avg_pcount(request, dev=""):
+    context = process_single_Qos(
+        request, BestvAvgPchoke, "AvgCount", u"每小时播放卡顿平均次数", u"卡顿次数/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1])
+    do_mobile_support(request, dev, context)
+    response = render_to_response('show_avg_pcount.html', context)
+    set_default_values_to_cookie(response, context)
+    
+    return response
+
+def show_avg_ptime(request, dev=""):
+    context = process_single_Qos(
+        request, BestvAvgPchoke, "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1])
+    do_mobile_support(request, dev, context)
+    response = render_to_response('show_avg_ptime.html', context)
     set_default_values_to_cookie(response, context)
     
     return response
