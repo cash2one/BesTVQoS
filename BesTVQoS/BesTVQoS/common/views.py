@@ -43,6 +43,7 @@ def navi(request, target_url=""):
     else:
         return m_home(request)
 
+
 def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
@@ -64,19 +65,24 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
 
     return device_types
 
+
 def get_device_types(table, service_type, begin_date, end_date, cu=None):
-    if service_type=="All":
-        q = table.objects.filter(Date__gte=begin_date, Date__lte=end_date).values('DeviceType').distinct()
+    if service_type == "All":
+        q = table.objects.filter(Date__gte=begin_date, Date__lte=end_date).values(
+            'DeviceType').distinct()
     else:
-        q = table.objects.filter(ServiceType=service_type,Date__gte=begin_date, Date__lte=end_date).values('DeviceType').distinct()
-    
-    if len(q)>0:
-        device_types=[]
+        q = table.objects.filter(
+            ServiceType=service_type, Date__gte=begin_date, Date__lte=end_date).values(
+            'DeviceType').distinct()
+
+    if len(q) > 0:
+        device_types = []
         for i in q:
             device_types.append(i["DeviceType"])
     else:
-        device_types=[]
+        device_types = []
     return device_types
+
 
 def get_device_type(request, dev=""):
     respStr = json.dumps({"device_types": []})
@@ -106,12 +112,25 @@ def get_device_type(request, dev=""):
 
     return HttpResponse(respStr, content_type="text/json")
 
+
 def get_default_values_from_cookie(request):
-    if "bestvFilters" not in request.COOKIES:
-        return json.loads('{"st":"All","dt":"","begin":"%s","end":"%s"}'%(str(today()), today()))
-    else:
-        return json.loads(request.COOKIES["bestvFilters"])
-        
+    filter_map = json.loads('{"st":"All","dt":"","begin":"%s","end":"%s"}' % (
+        today(), today()))
+    try:
+        filter_map = json.loads(request.COOKIES["bestvFilters"])
+        if("st" not in filter_map or "dt" not in filter_map or
+                "begin" not in filter_map or "end" not in filter_map):
+            raise Exception()
+    except:
+        logger.info("Loads Cookie['bestvFilters'] failed! ")
+
+    return filter_map
+
+
 def set_default_values_to_cookie(response, context):
-    response.set_cookie("bestvFilters", json.dumps({"st": context["default_service_type"], "dt": context["default_device_type"],
-                                    "begin": context['default_begin_date'], "end":context['default_end_date']}), max_age=30000)
+    response.set_cookie("bestvFilters",
+                        json.dumps({"st": context["default_service_type"],
+                                    "dt": context["default_device_type"],
+                                    "begin": context['default_begin_date'],
+                                    "end": context['default_end_date']}),
+                        max_age=30000)
