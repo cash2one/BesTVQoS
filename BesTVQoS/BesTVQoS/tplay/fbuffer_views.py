@@ -279,7 +279,7 @@ def show_avg_pcount(request, dev=""):
 
 def show_avg_ptime(request, dev=""):
     context = process_single_Qos(
-        request, BestvAvgPchoke, "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1])
+        request, BestvAvgPchoke, "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"秒", VIEW_TYPES[0:1])
     do_mobile_support(request, dev, context)
     response = render_to_response('show_avg_ptime.html', context)
     set_default_values_to_cookie(response, context)
