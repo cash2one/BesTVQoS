@@ -55,7 +55,10 @@ foreach $filename (@ARGV) {
 	
 	# for write results
 	foreach $k (%play_time) {
-		$watch .= $play_time{$k}." ";		
+		if (defined($k) && defined($play_time{$k})) {
+			$watch .= $play_time{$k}." ";
+			#print $k."|".$play_time{$k}."|\n";
+		}
 	}
 	
 	@ptime = split / /, $watch;
