@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import time
 from datetime import datetime
 from datetime import timedelta
 
@@ -253,6 +252,7 @@ def get_play_profile_history(context, play_profile):
         filters = filters + play_profile.min_rec_filter
         sql_command = "select ServiceType, DeviceType, Records, Users, \
             AverageTime, (Records/Users) %s" % (filters)
+        sql_command += " order by Records desc"
         logger.debug("SQL %s" % sql_command)
         play_profile.cu.execute(sql_command)
 
