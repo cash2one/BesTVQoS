@@ -27,7 +27,13 @@ do
 
 	bash ott_qos_by_dev.sh ${type} ${date} ${hour} ${type}/${date}/distribution_data_dev_${hour} 
 
+	# just for zhudi
+	perl key_distribution_calc_zhudi.pl ${type} ${date} ${hour} zhudi 1 log/${type}/*
+
+        bash ott_qos_by_dev.sh ${type} ${date} ${hour} ${type}/${date}/distribution_data_zhudi_${hour}
+
+	# clean the tmp data
 	rm log/${type}/*
 done
 
-rm -rf tmp/${date}
+#rm -rf tmp/${date}
