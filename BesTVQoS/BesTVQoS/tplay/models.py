@@ -17,6 +17,9 @@ class BestvPlayprofile(models.Model):
         db_table = "playprofile"
         unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
 
+    def __str__(self):
+        return "BestvPlayprofile"
+
 
 class BestvPlayinfo(models.Model):
     ServiceType = models.CharField(max_length=30)
@@ -33,6 +36,9 @@ class BestvPlayinfo(models.Model):
         unique_together = (
             'ServiceType', 'DeviceType', 'ISP',
             'Area', 'ViewType', 'Date', 'Hour')
+
+    def __str__(self):
+        return "BestvPlayinfo"
 
 
 class BestvPlaytime(models.Model):
@@ -55,6 +61,9 @@ class BestvPlaytime(models.Model):
         unique_together = (
             'ServiceType', 'DeviceType', 'ISP',
             'Area', 'ViewType', 'Date', 'Hour')
+
+    def __str__(self):
+        return "BestvPlaytime"
 
 
 class BestvFbuffer(models.Model):
@@ -79,6 +88,9 @@ class BestvFbuffer(models.Model):
             'ServiceType', 'DeviceType', 'ISP',
             'Area', 'ViewType', 'Date', 'Hour')
 
+    def __str__(self):
+        return "BestvFbuffer"
+
 
 class BestvFluency(models.Model):
     ServiceType = models.CharField(max_length=30)
@@ -99,6 +111,9 @@ class BestvFluency(models.Model):
             'ServiceType', 'DeviceType', 'ISP',
             'Area', 'ViewType', 'Date', 'Hour')
 
+    def __str__(self):
+        return "BestvFluency"
+
 class Bestv3SRatio(models.Model):
     ServiceType = models.CharField(max_length=30)
     DeviceType = models.CharField(max_length=255)
@@ -110,6 +125,9 @@ class Bestv3SRatio(models.Model):
     class Meta:
         db_table = "Bestv3SRatio"
         unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
+
+    def __str__(self):
+        return "Bestv3SRatio"
 
 class BestvAvgPchoke(models.Model):
     ServiceType = models.CharField(max_length=30)
@@ -123,3 +141,6 @@ class BestvAvgPchoke(models.Model):
     class Meta:
         db_table = "BestvAvgPchoke"
         unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
+
+    def __str__(self):
+        return "BestvAvgPchoke"

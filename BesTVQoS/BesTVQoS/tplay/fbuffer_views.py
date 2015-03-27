@@ -192,7 +192,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
             items.append(item)
 
     except Exception, e:
-        logger.info("query %s %s error: %s" % ("xxx", Qos_name, e))
+        logger.info("query %s %s error: %s" % (str(table), Qos_name, e))
 
     context = {}
     context['default_service_type'] = service_type
@@ -205,8 +205,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
     if len(items) > 0:
         context['has_data'] = True
 
-    logger.info("query fbuffer sucratio, cost: %s" %
-                (current_time() - begin_time))
+    logger.info("query %s %s, cost: %s" %(str(table), Qos_name, (current_time() - begin_time)))
 
     return context
 
@@ -414,7 +413,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                 item_idx += 1
 
     except Exception, e:
-        logger.info("query fbuffer time error: %s" % (e))
+        logger.info("query %s multiQos error: %s" % (str(table), e))
 
     context = {}
     context['default_service_type'] = service_type
@@ -427,7 +426,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
     if len(items) > 0:
         context['has_data'] = True
 
-    logger.info("query fbuffer time, cost: %s" % (current_time() - begin_time))
+    logger.info("query %s multiQos, cost: %s" % (str(table), (current_time() - begin_time)))
 
     return context
 
