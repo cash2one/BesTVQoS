@@ -19,7 +19,7 @@ do
 	mkdir -p ${type}/${date}
 
 	# column 6 is devType, 1 is to write subfile
-	perl key_distribution_calc.pl ${type} ${date} ${hour} zhudi 1 log/${type}/TPLAY_${date}*
+	perl key_distribution_calc_zhudi.pl ${type} ${date} ${hour} zhudi 1 log/${type}/TPLAY_${date}*
 
 	bash ott_qos_by_dev.sh ${type} ${date} ${hour} ${type}/${date}/distribution_data_zhudi_${hour} 
 
