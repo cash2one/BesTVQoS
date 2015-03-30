@@ -197,7 +197,7 @@ def get_play_info_today(context, playinfo):
 
     filters = "from playinfo where %s" % (playinfo.common_filter)
     sql_command = "select sum(Records) %s" % (filters)
-    sql_command += play_profile.profile_exclude
+    sql_command += playinfo.profile_exclude
     logger.debug("show_playing_today() SQL %s" % sql_command)
     playinfo.cu.execute(sql_command)
 
@@ -212,7 +212,7 @@ def get_play_info_today(context, playinfo):
         filters = filters + playinfo.min_rec_filter
         sql_command = "select ServiceType, DeviceType, sum(Records) %s" % (
             filters)
-        sql_command += play_profile.profile_exclude
+        sql_command += playinfo.profile_exclude
         sql_command += " group by DeviceType order by sum(Records) desc"
         logger.debug("show_playing_today() SQL %s" % sql_command)
         playinfo.cu.execute(sql_command)
