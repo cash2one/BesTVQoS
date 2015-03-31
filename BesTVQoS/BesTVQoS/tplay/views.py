@@ -55,6 +55,8 @@ class HtmlTable:
 class PlayInfo:
 
     def __init__(self, request):
+        self.profile_exclude = " and DeviceType != 'Bestv_Lite_JSDX'" + \
+            " and DeviceType != 'AiShangVOD'"
         self.service_type = "All"
         self.end_date = str(today())
         self.begin_date = self.end_date
@@ -195,6 +197,7 @@ def get_play_info_today(context, playinfo):
 
     filters = "from playinfo where %s" % (playinfo.common_filter)
     sql_command = "select sum(Records) %s" % (filters)
+    sql_command += playinfo.profile_exclude
     logger.debug("show_playing_today() SQL %s" % sql_command)
     playinfo.cu.execute(sql_command)
 
@@ -209,6 +212,7 @@ def get_play_info_today(context, playinfo):
         filters = filters + playinfo.min_rec_filter
         sql_command = "select ServiceType, DeviceType, sum(Records) %s" % (
             filters)
+        sql_command += playinfo.profile_exclude
         sql_command += " group by DeviceType order by sum(Records) desc"
         logger.debug("show_playing_today() SQL %s" % sql_command)
         playinfo.cu.execute(sql_command)
@@ -229,6 +233,7 @@ def get_play_profile_history(context, play_profile):
     table = HtmlTable()
     filters = "from playprofile where %s" % (play_profile.common_filter)
     sql_command = "select sum(Records), sum(Users) %s" % (filters)
+    sql_command += play_profile.profile_exclude
     logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)
 
@@ -252,6 +257,7 @@ def get_play_profile_history(context, play_profile):
         filters = filters + play_profile.min_rec_filter
         sql_command = "select ServiceType, DeviceType, Records, Users, \
             AverageTime, (Records/Users) %s" % (filters)
+        sql_command += play_profile.profile_exclude
         sql_command += " order by Records desc"
         logger.debug("SQL %s" % sql_command)
         play_profile.cu.execute(sql_command)
