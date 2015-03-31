@@ -28,7 +28,7 @@ foreach $filename (@ARGV) {
 		#print $element[11]."_".$element[12]."\n";
 		
 		$year = substr($element[11], 0, 4);
-		$month = substr($element[11], 4, 2);
+		$month = substr($element[11], 4, 2)-1;
 		$day = substr($element[11], 6, 2);
 		$hour = substr($element[11], 8, 2);
 		$min = substr($element[11], 10, 2);
@@ -36,7 +36,7 @@ foreach $filename (@ARGV) {
 		$beginTime = timelocal($sec, $min, $hour, $day, $month, $year);
 		
 		$year = substr($element[12], 0, 4);
-		$month = substr($element[12], 4, 2);
+		$month = substr($element[12], 4, 2)-1;
 		$day = substr($element[12], 6, 2);
 		$hour = substr($element[12], 8, 2);
 		$min = substr($element[12], 10, 2);
