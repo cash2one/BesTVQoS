@@ -51,6 +51,9 @@ def baseinfo(request):
                 r.append(latest_dev, ' sucratio%d:%s' % (view_type, sucratio))
                 r.append(latest_dev, ' fluency%d:%s' % (view_type, fluency))
                 r.append(latest_dev, ' records%d:%s' % (view_type, records))
+                logger.debug('realtime data: (%s,%s,%s,%d,%s,%s,%d)' % (
+                    current_time, service_type, dev,
+                    view_type, sucratio, fluency, records))
                 try:
                     baseinfo_obj = RealtimeBaseInfo(
                         Time=current_time,
@@ -62,7 +65,7 @@ def baseinfo(request):
                         Records=records)
                     baseinfo_obj.save()
                 except Exception, e:
-                    logger.debug('MySQL: (%s,%s,%s,%d,%s,%s,%d)' % (
+                    logger.debug('MySQL error: (%s,%s,%s,%d,%s,%s,%d)' % (
                         current_time, service_type, dev,
                         view_type, sucratio, fluency, records))
 
