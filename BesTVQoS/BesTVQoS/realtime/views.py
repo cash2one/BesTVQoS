@@ -30,6 +30,7 @@ def baseinfo(request):
     if request.method == "POST":
         try:
             contents = json.loads(request.body)
+            logger.debug("realtime contents: %s" % contents)
             r = redis.StrictRedis(redis_host)
             latest_tag = ''
             latest_dev = ''
