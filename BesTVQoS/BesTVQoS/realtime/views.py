@@ -66,7 +66,7 @@ def baseinfo(request):
                         Records=records)
                     baseinfo_obj.save()
                 except Exception, e:
-                    logger.debug('MySQL error: (%s,%s,%s,%d,%s,%s,%d)' % (
+                    logger.debug('MySQL error: (%s,%s,%s,%s,%s,%s,%s)' % (
                         current_time, service_type, dev,
                         view_type, sucratio, fluency, records))
 
@@ -77,6 +77,6 @@ def baseinfo(request):
         result = "error"
 
     respStr = json.dumps({"result": result})
-    logger.debug("update playinfo: %s" % (respStr))
+    logger.debug("update realtime baseinfo: %s" % (respStr))
 
     return HttpResponse(respStr, content_type="application/json")
