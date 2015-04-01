@@ -19,12 +19,12 @@ def baseinfo(request):
     interface:
         [
             {'time':'201503311630', 'servietype':'B2B', 'dev':'BesTV_OS_Lite',
-             'viewtype':1, 'secrate':0.89, 'fluency':0.80, 'records':10000},
+             'viewtype':1, 'sucratio':0.89, 'fluency':0.80, 'records':10000},
             {...}
         ]
     store the result in Redis:
         string: AiShangVOD
-        format '201503311430 secratio1:0.8 secratio2:0.7 secratio3:0.78 ...'
+        format '201503311430 sucratio1:0.8 sucratio2:0.7 sucratio3:0.78 ...'
     '''
     result = "ok"
     if request.method == "POST":
@@ -38,7 +38,7 @@ def baseinfo(request):
                 service_type = item['servicetype']
                 dev = item['dev']
                 view_type = item['viewtype']
-                secrate = item['secrate']
+                sucratio = item['sucratio']
                 fluency = item['fluency']
                 records = item['records']
                 tag = dev + current_time
@@ -48,7 +48,7 @@ def baseinfo(request):
                     latest_tag = tag
                     latest_dev = dev
                     r.set(latest_dev, current_time)
-                r.append(latest_dev, ' secrate%d:%s' % (view_type, secrate))
+                r.append(latest_dev, ' sucratio%d:%s' % (view_type, sucratio))
                 r.append(latest_dev, ' fluency%d:%s' % (view_type, fluency))
                 r.append(latest_dev, ' records%d:%s' % (view_type, records))
                 try:
@@ -57,14 +57,14 @@ def baseinfo(request):
                         ServiceType=service_type,
                         DeviceType=dev,
                         ViewType=view_type,
-                        SucRate=secrate,
+                        SucRate=sucratio,
                         Fluency=fluency,
                         Records=records)
                     baseinfo_obj.save()
                 except Exception, e:
                     logger.debug('MySQL: (%s,%s,%s,%d,%s,%s,%d)' % (
                         current_time, service_type, dev,
-                        view_type, secrate, fluency, records))
+                        view_type, sucratio, fluency, records))
 
             # r.expire(latest_dev, expire_time)
         except Exception, e:
