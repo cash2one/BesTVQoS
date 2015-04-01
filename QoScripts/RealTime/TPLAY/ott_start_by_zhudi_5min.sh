@@ -2,11 +2,11 @@
 
 export PYTHONPATH=/usr/bin/python:/usr/bin/python2.6:/usr/lib/python2.6/site-packages
 
-date=$(date -d -1hour +"%Y%m%d")
-#date=$1 
+#date=$(date -d -1hour +"%Y%m%d")
+date=$1 
 
-hour=$(date -d -5min +%H%M)
-#hour=$2
+#hour=$(date -d -5min +%H%M)
+hour=$2
 
 bash prepare_for_qos.sh ${date} ${hour}
 
@@ -19,11 +19,11 @@ do
 	mkdir -p ${type}/${date}
 
 	# column 6 is devType, 1 is to write subfile
-	perl key_distribution_calc_zhudi.pl ${type} ${date} ${hour} zhudi 1 log/${type}/TPLAY_${date}*
+	perl key_distribution_calc_zhudi.pl ${type} ${date} ${hour} zhudi 0 log/${type}/TPLAY_${date}*
 
 	bash ott_qos_by_dev.sh ${type} ${date} ${hour} ${type}/${date}/distribution_data_zhudi_${hour} 
 
 	rm ${type}/${date}/distribution_data_zhudi_${hour}
-	rm log/${type}/TPLAY_${date}*
+	#rm log/${type}/TPLAY_${date}*
 	
 done
