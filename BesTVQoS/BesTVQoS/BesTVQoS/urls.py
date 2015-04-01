@@ -58,6 +58,9 @@ urlpatterns = patterns(
     url(r'^update/bestv3Sratio$', 'tplay.update_views.bestv3Sratio'),
     url(r'^update/bestvavgpchoke$', 'tplay.update_views.bestvavgpchoke'),
 
+    # realtime data interface
+    url(r'^update/realtime/base$', 'realtime.views.baseinfo'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
