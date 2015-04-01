@@ -38,8 +38,9 @@ def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
                 data: [%s]
             }''' % (VIEW_TYPES_DES[i], ",".join(key_values[i]))
             series.append(serie_item)
-    except Exception, e:
-        raise e
+    except:
+        logger.error("make_chart_item() failed with args: %s" %
+                    (",".join(key_values[i])))
 
     item["series"] = ",".join(series)
 
@@ -168,8 +169,6 @@ class PlayInfo:
         if view_type != 0:
             sql_command += " and ViewType = '%s'" % (view_type)
 
-        logger.debug("PlayInfo Daily SQL %s" % sql_command)
-
         return sql_command
 
     def get_hourly_sql_command(self, hour, view_type):
@@ -180,8 +179,6 @@ class PlayInfo:
         sql_command += " and Hour = %s" % (hour)
         if view_type != 0:
             sql_command += " and ViewType = '%s'" % (view_type)
-
-        logger.debug("PlayInfo Hourly SQL %s" % sql_command)
 
         return sql_command
 
@@ -198,7 +195,6 @@ def get_play_info_today(context, playinfo):
     filters = "from playinfo where %s" % (playinfo.common_filter)
     sql_command = "select sum(Records) %s" % (filters)
     sql_command += playinfo.profile_exclude
-    logger.debug("show_playing_today() SQL %s" % sql_command)
     playinfo.cu.execute(sql_command)
 
     records_total = 0
@@ -214,7 +210,6 @@ def get_play_info_today(context, playinfo):
             filters)
         sql_command += playinfo.profile_exclude
         sql_command += " group by DeviceType order by sum(Records) desc"
-        logger.debug("show_playing_today() SQL %s" % sql_command)
         playinfo.cu.execute(sql_command)
 
         for item in playinfo.cu.fetchall():
@@ -234,7 +229,6 @@ def get_play_profile_history(context, play_profile):
     filters = "from playprofile where %s" % (play_profile.common_filter)
     sql_command = "select sum(Records), sum(Users) %s" % (filters)
     sql_command += play_profile.profile_exclude
-    logger.debug("SQL %s" % sql_command)
     play_profile.cu.execute(sql_command)
 
     table.mtitle = "%s 用户播放统计信息" % play_profile.end_date.encode('utf-8')
@@ -259,7 +253,6 @@ def get_play_profile_history(context, play_profile):
             AverageTime, (Records/Users) %s" % (filters)
         sql_command += play_profile.profile_exclude
         sql_command += " order by Records desc"
-        logger.debug("SQL %s" % sql_command)
         play_profile.cu.execute(sql_command)
 
         for item in play_profile.cu.fetchall():
