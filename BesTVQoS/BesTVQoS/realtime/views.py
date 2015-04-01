@@ -41,6 +41,10 @@ def baseinfo(request):
                 sucratio = item['sucratio']
                 fluency = item['fluency']
                 records = item['records']
+                logger.debug('realtime data: (%s,%s,%s,%s,%s,%s,%s)' % (
+                    current_time, service_type, dev,
+                    view_type, sucratio, fluency, records))
+
                 tag = dev + current_time
                 if latest_tag != tag:
                     if latest_dev != '':
@@ -48,12 +52,9 @@ def baseinfo(request):
                     latest_tag = tag
                     latest_dev = dev
                     r.set(latest_dev, current_time)
-                r.append(latest_dev, ' sucratio%d:%s' % (view_type, sucratio))
-                r.append(latest_dev, ' fluency%d:%s' % (view_type, fluency))
-                r.append(latest_dev, ' records%d:%s' % (view_type, records))
-                logger.debug('realtime data: (%s,%s,%s,%s,%s,%s,%s)' % (
-                    current_time, service_type, dev,
-                    view_type, sucratio, fluency, records))
+                r.append(latest_dev, ' sucratio%s:%s' % (view_type, sucratio))
+                r.append(latest_dev, ' fluency%s:%s' % (view_type, fluency))
+                r.append(latest_dev, ' records%s:%s' % (view_type, records))
                 try:
                     baseinfo_obj = RealtimeBaseInfo(
                         Time=current_time,
