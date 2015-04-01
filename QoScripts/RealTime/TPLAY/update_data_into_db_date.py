@@ -15,7 +15,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-def update_baseinfo(time, svrtype, dev, viewtype, sucrate, fluency, records):
+def update_baseinfo(time, svrtype, dev, viewtype, sucratio, fluency, records):
 
    url = "http://127.0.0.1:80/update/realtime/base"
 
@@ -24,8 +24,8 @@ def update_baseinfo(time, svrtype, dev, viewtype, sucrate, fluency, records):
    request['servicetype'] = svrtype
    request['dev'] = dev
    request['viewtype'] = viewtype
-   request['sucrate'] = sucrate
-   request['fluency'] = fluency
+   request['sucratio'] = sucratio*1.0
+   request['fluency'] = fluency*1.0
    request['records'] = '%s'%(records)
    
    items = []
@@ -43,7 +43,7 @@ def update_baseinfo(time, svrtype, dev, viewtype, sucrate, fluency, records):
 
 def save_baseinfo_to_DB(filename1, filename2, svrtype, dev, date, hour, viewtype):
     data1 = np.genfromtxt(filename1, delimiter="|", names="hour,fluency", usecols=(1,4), dtype="S8,f8")
-    data2 = np.genfromtxt(filename2, delimiter="|", names="hour,sucrate,records", usecols=(1,2,9), dtype="S8,f8,i8")
+    data2 = np.genfromtxt(filename2, delimiter="|", names="hour,sucratio,records", usecols=(1,2,9), dtype="S8,f8,i8")
     i = -1
     k = -1
     try:
@@ -55,14 +55,14 @@ def save_baseinfo_to_DB(filename1, filename2, svrtype, dev, date, hour, viewtype
     
     
     if i == 0:
-        update_baseinfo("%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucrate'], data1['fluency'], data2['records'])
-        print "%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucrate'], data1['fluency'], data2['records']
+        update_baseinfo("%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucratio'], data1['fluency'], data2['records'])
+        print "%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucratio'], data1['fluency'], data2['records']
         
     
     if i > 0:
         #print data1['date'][i]
-        update_baseinfo("%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucrate'][k], data1['fluency'][i], data2['records'][i])
-        print "%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucrate'][k], data1['fluency'][i], data2['records'][i]
+        update_baseinfo("%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucratio'][k], data1['fluency'][i], data2['records'][i])
+        print "%s%s"%(date,hour), svrtype, dev, viewtype, data2['sucratio'][k], data1['fluency'][i], data2['records'][i]
         
 
 def main(svrtype, dev, date, hour, viewtype, filename1, filename2):
