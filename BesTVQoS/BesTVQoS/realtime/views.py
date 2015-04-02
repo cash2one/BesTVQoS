@@ -56,7 +56,7 @@ def baseinfo(request):
                 latest_dev = dev
                 if view_type == u'1':
                     r.set(latest_dev, current_time)
-                elif view_type in [u'2', u'3', u'4']:
+                if view_type in [u'1', u'2', u'3', u'4']:
                     r.append(latest_dev, ' sucratio%s:%s' %
                              (view_type, sucratio))
                     r.append(latest_dev, ' fluency%s:%s' %
