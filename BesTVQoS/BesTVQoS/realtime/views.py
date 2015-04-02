@@ -56,9 +56,13 @@ def baseinfo(request):
                 latest_dev = dev
                 if view_type == u'1':
                     r.set(latest_dev, current_time)
-                r.append(latest_dev, ' sucratio%s:%s' % (view_type, sucratio))
-                r.append(latest_dev, ' fluency%s:%s' % (view_type, fluency))
-                r.append(latest_dev, ' records%s:%s' % (view_type, records))
+                elif view_type in [u'2', u'3', u'4']:
+                    r.append(latest_dev, ' sucratio%s:%s' %
+                             (view_type, sucratio))
+                    r.append(latest_dev, ' fluency%s:%s' %
+                             (view_type, fluency))
+                    r.append(latest_dev, ' records%s:%s' %
+                             (view_type, records))
                 try:
                     baseinfo_obj = RealtimeBaseInfo(
                         Time=current_time,
