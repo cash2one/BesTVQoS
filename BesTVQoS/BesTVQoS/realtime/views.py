@@ -53,8 +53,8 @@ def baseinfo(request):
                 #     latest_tag = tag
                 #     latest_dev = dev
                 #     r.set(latest_dev, current_time)
+                latest_dev = dev
                 if view_type == u'1':
-                    latest_dev = dev
                     r.set(latest_dev, current_time)
                 r.append(latest_dev, ' sucratio%s:%s' % (view_type, sucratio))
                 r.append(latest_dev, ' fluency%s:%s' % (view_type, fluency))
