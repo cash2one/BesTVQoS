@@ -107,10 +107,12 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
             filter_objs = objs.filter(ViewType=view_idx)
         for hour in range(24):
             try:
-                obj = filter_objs.filter(
-                    Hour=hour).aggregate(sum=Sum(Qos_name))
-                logger.info("aggregate %s %s, cost: %s" %(str(table), Qos_name, (current_time() - begin_time)))
-                tmp = obj["sum"]
+                #obj = filter_objs.filter(
+                #    Hour=hour).aggregate(sum=Sum(Qos_name))
+                #tmp = obj["sum"]
+                obj = filter_objs.get(Hour=hour)
+                tmp = getattr(obj, Qos_name)
+                logger.info("aggregate %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
                 if tmp is None:
                     tmp = 0
                 data_by_hour[view_idx].append("%s" % (tmp*base_radix))
@@ -118,7 +120,7 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
                     display_if_has_data = True
             except Exception, e:
                 data_by_hour[view_idx].append("0")
-        logger.info("prepare %s %s, cost: %s" %(str(table), Qos_name, (current_time() - begin_time)))
+        logger.info("prepare %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
 
     if display_if_has_data == False:
         return None
