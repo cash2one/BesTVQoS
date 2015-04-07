@@ -40,7 +40,7 @@ def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
             series.append(serie_item)
     except:
         logger.error("make_chart_item() failed with args: %s" %
-                    (",".join(key_values[i])))
+                     (",".join(key_values[i])))
 
     item["series"] = ",".join(series)
 
@@ -264,7 +264,10 @@ def get_play_profile_history(context, play_profile):
             sub.append(item[3])
             sub.append(round(100.0 * float(item[3]) / users_total, 2))
             sub.append(item[4])
-            sub.append(int(float(item[5])))
+            if item[5] is None:
+                sub.append(0)
+            else:
+                sub.append(int(float(item[5])))
             subs.append(sub)
             table.msub.append(sub)
 
