@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.shortcuts import render_to_response
 from django.db import connection
+from common.date_time_tool import *
 from common.mobile import do_mobile_support
 from common.views import *
 from tplay.models import *
@@ -298,10 +299,19 @@ def show_playing_daily(request, dev=""):
 
 
 def show_playing_trend(request, dev=""):
+    begin_time = current_time()
+    temp_time_begin = begin_time
+    logger.debug("enter show_playing_trend() at %s" % (temp_time_begin))
+
     play_trend = PlayInfo(request)
     play_trend.read_filter_group_form(request)
 
+    temp_time_begin = current_time()
+    logger.debug("before get_playinfo_item() at %s" % (temp_time_begin))
     chart_item = play_trend.get_playinfo_item(0)
+    logger.debug("after get_playinfo_item() at %s" % (current_time()))
+    time_cost = current_time() - temp_time_begin
+    logger.debug("get_playinfo_item() cost %s" % (time_cost))
 
     context = {}
     context['contents'] = [chart_item]
@@ -317,5 +327,8 @@ def show_playing_trend(request, dev=""):
     response = render_to_response('show_playing_trend.html', context)
 
     set_default_values_to_cookie(response, context)
+
+    time_cost = current_time() - begin_time
+    logger.debug("show_playing_trend() cost %s" % (time_cost))
 
     return response
