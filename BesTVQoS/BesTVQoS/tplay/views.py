@@ -9,15 +9,18 @@ from django.db import connection
 from common.date_time_tool import *
 from common.mobile import do_mobile_support
 from common.views import *
+from fbuffer_views import process_single_Qos
 from tplay.models import *
 
 logger = logging.getLogger("django.request")
 
 SERVICE_TYPES = ["All", "B2B", "B2C"]
 
-VIEW_TYPES = [0, 1, 2, 3, 4, 5]
-VIEW_TYPES_DES = {
-    0: u"总计", 1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"未知"}
+# VIEW_TYPES = [0, 1, 2, 3, 4, 5]
+# VIEW_TYPES_DES = {
+#     0: u"总计", 1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"未知"}
+VIEW_TYPES = [
+    (0, u"总体"), (1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")]
 
 
 def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
@@ -32,13 +35,13 @@ def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
 
     try:
         series = []
-        for i in VIEW_TYPES:
+        for (i, desc) in VIEW_TYPES:
             serie_item = '''{
                 name: '%s',
                 yAxis: 0,
                 type: 'spline',
                 data: [%s]
-            }''' % (VIEW_TYPES_DES[i], ",".join(key_values[i]))
+            }''' % (desc, ",".join(key_values[i]))
             series.append(serie_item)
     except:
         logger.error("make_chart_item() failed with args: %s" %
@@ -148,24 +151,17 @@ class PlayInfo:
                 day_str = day.strftime('%Y-%m-%d')
                 x_axis.append("%s" % day_str)
 
-        for vt in VIEW_TYPES:
+        for (vt, desc) in VIEW_TYPES:
             y_axise = []
             for x in x_axis:
                 sql_command = fn_get_sql_cmd(x, vt)
-                # logger.debug("SQL: %s" % (sql_command))
-                # temp_time_begin = current_time()
                 self.cu.execute(sql_command)
-                # time_cost = current_time() - temp_time_begin
-                # logger.debug("execute() time cost: %s" % (time_cost))
-                # temp_time_begin = current_time()
 
                 records = '0'
                 for item in self.cu.fetchall():
                     if item[0]:
                         records = '%d' % (item[0])
                 y_axise.append(records)
-                # time_cost = current_time() - temp_time_begin
-                # logger.debug("fetchall() time cost: %s" % (time_cost))
 
             y_axises[vt] = y_axise
 
@@ -314,28 +310,31 @@ def show_playing_daily(request, dev=""):
 
 
 def show_playing_trend(request, dev=""):
-    begin_time = current_time()
-    temp_time_begin = begin_time
-    logger.debug("enter show_playing_trend() at %s" % (temp_time_begin))
+    context = process_single_Qos(
+        request, BestvPlayinfo, "Records", u"用户观看量", u"", u"观看量", VIEW_TYPES[1:], True, 1)
 
-    play_trend = PlayInfo(request)
-    play_trend.read_filter_group_form(request)
+    # begin_time = current_time()
+    # temp_time_begin = begin_time
+    # logger.debug("enter show_playing_trend() at %s" % (temp_time_begin))
 
-    temp_time_begin = current_time()
-    logger.debug("before get_playinfo_item() at %s" % (temp_time_begin))
-    chart_item = play_trend.get_playinfo_item(0)
-    logger.debug("after get_playinfo_item() at %s" % (current_time()))
-    time_cost = current_time() - temp_time_begin
-    logger.debug("get_playinfo_item() cost %s" % (time_cost))
+    # play_trend = PlayInfo(request)
+    # play_trend.read_filter_group_form(request)
 
-    context = {}
-    context['contents'] = [chart_item]
-    context['default_service_type'] = play_trend.service_type
-    context['service_types'] = SERVICE_TYPES
-    context['default_device_type'] = play_trend.device_type
-    context['device_types'] = play_trend.device_types
-    context['default_begin_date'] = play_trend.begin_date
-    context['default_end_date'] = play_trend.end_date
+    # temp_time_begin = current_time()
+    # logger.debug("before get_playinfo_item() at %s" % (temp_time_begin))
+    # chart_item = play_trend.get_playinfo_item(0)
+    # logger.debug("after get_playinfo_item() at %s" % (current_time()))
+    # time_cost = current_time() - temp_time_begin
+    # logger.debug("get_playinfo_item() cost %s" % (time_cost))
+
+    # context = {}
+    # context['contents'] = [chart_item]
+    # context['default_service_type'] = play_trend.service_type
+    # context['service_types'] = SERVICE_TYPES
+    # context['default_device_type'] = play_trend.device_type
+    # context['device_types'] = play_trend.device_types
+    # context['default_begin_date'] = play_trend.begin_date
+    # context['default_end_date'] = play_trend.end_date
 
     do_mobile_support(request, dev, context)
 
@@ -343,7 +342,7 @@ def show_playing_trend(request, dev=""):
 
     set_default_values_to_cookie(response, context)
 
-    time_cost = current_time() - begin_time
-    logger.debug("show_playing_trend() cost %s" % (time_cost))
+    # time_cost = current_time() - begin_time
+    # logger.debug("show_playing_trend() cost %s" % (time_cost))
 
     return response
