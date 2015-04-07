@@ -152,22 +152,26 @@ class PlayInfo:
             y_axise = []
             for x in x_axis:
                 sql_command = fn_get_sql_cmd(x, vt)
-                logger.debug("SQL: %s" % (sql_command))
-                temp_time_begin = current_time()
+                # logger.debug("SQL: %s" % (sql_command))
+                # temp_time_begin = current_time()
                 self.cu.execute(sql_command)
-                time_cost = current_time() - temp_time_begin
-                logger.debug("execute() time cost: %s" % (time_cost))
-                temp_time_begin = current_time()
+                # time_cost = current_time() - temp_time_begin
+                # logger.debug("execute() time cost: %s" % (time_cost))
+                # temp_time_begin = current_time()
 
                 records = '0'
                 for item in self.cu.fetchall():
                     if item[0]:
                         records = '%d' % (item[0])
                 y_axise.append(records)
-                time_cost = current_time() - temp_time_begin
-                logger.debug("fetchall() time cost: %s" % (time_cost))
+                # time_cost = current_time() - temp_time_begin
+                # logger.debug("fetchall() time cost: %s" % (time_cost))
 
             y_axises[vt] = y_axise
+
+        time_cost = current_time() - begin_time
+        logger.debug(
+            "get_playinfo_item() exlude make_chart_item cost: %s" % (time_cost))
 
         return make_chart_item(y_axises, item_index, u'用户观看量',
                                u'', u'观看量', x_axis)
