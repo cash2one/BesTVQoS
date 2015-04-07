@@ -106,32 +106,14 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
         else:
             filter_objs = objs.filter(ViewType=view_idx)
 
-        tmp_list=[]
-        for i in range(24):
-            tmp_list.append("0")
-
+        tmp_list=["0" for k in range(24)]        
         for obj in filter_objs:
             if obj.Hour != 24:
-                tmp_list[obj.Hour]="%s"%(getattr(obj, Qos_name))
-                display_if_has_data = True
+                tmp=getattr(obj, Qos_name)
+                tmp_list[obj.Hour]="%s"%(float(tmp_list[obj.Hour])+tmp)
+                if tmp != 0:
+                    display_if_has_data = True
         data_by_hour[view_idx]=tmp_list
-        logger.info("prepare %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
-        #for hour in range(24):
-        #    try:
-        #        #obj = filter_objs.filter(
-        #        #    Hour=hour).aggregate(sum=Sum(Qos_name))
-        #        #tmp = obj["sum"]
-        #        obj = filter_objs.get(Hour=hour)
-        #        tmp = getattr(obj, Qos_name)
-        #        logger.info("aggregate %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
-        #        if tmp is None:
-        #            tmp = 0
-        #        data_by_hour[view_idx].append("%s" % (tmp*base_radix))
-        #        if tmp != 0:
-        #            display_if_has_data = True
-        #    except Exception, e:
-        #        data_by_hour[view_idx].append("0")
-        #logger.info("prepare %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
 
     if display_if_has_data == False:
         return None
@@ -146,26 +128,21 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, ho
         data_by_day[view_idx] = []
         if view_idx == 0:
             filter_objs = objs
+        elif hour_flag:
+            filter_objs = objs.filter(ViewType=view_idx, Hour=24)
         else:
             filter_objs = objs.filter(ViewType=view_idx)
 
-        for date_idx in days_region:
-            try:
-                if hour_flag == True:  # such as 3sratio
-                    obj = filter_objs.filter(
-                        Date=date_idx, Hour=24).aggregate(sum=Sum(Qos_name))
-                else:
-                    obj = filter_objs.filter(
-                        Date=date_idx).aggregate(sum=Sum(Qos_name))
-                tmp = obj["sum"]
-                if tmp is None:
-                    tmp = 0
-                data_by_day[view_idx].append("%s" % (tmp*base_radix))
-                if tmp != 0:
-                    display_if_has_data = True
-            except Exception, e:
-                data_by_day[view_idx].append("%s" % (0))
+        tmp_list=["0" for k in days_region]
+        for obj in filter_objs:
+            tmp=getattr(obj, Qos_name)
+            tmp_idx=get_days_offset(days_region[0], str(obj.Date))
+            tmp_list[tmp_idx]="%s"%(float(tmp_list[tmp_idx])+tmp)
+            if tmp != 0:
+                display_if_has_data = True
 
+        data_by_day[view_idx]=tmp_list
+        
     if display_if_has_data == False:
         return None
     return data_by_day
@@ -315,27 +292,20 @@ def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
         filter_objs = objs.filter(ViewType=i)
         display_data = {}
         for (pn_idx, pn_des) in pnvalue_types:
-            display_data[pn_idx] = []
+            display_data[pn_idx] = ["0" for k in range(24)]
 
         display_if_has_data = False
-        for hour in range(24):
-            try:
-                obj = filter_objs.get(Hour=hour)
-                display_data[pnvalue_types[0][0]].append("%s" % (obj.P25))
-                display_data[pnvalue_types[1][0]].append("%s" % (obj.P50))
-                display_data[pnvalue_types[2][0]].append("%s" % (obj.P75))
-                display_data[pnvalue_types[3][0]].append("%s" % (obj.P90))
-                display_data[pnvalue_types[4][0]].append("%s" % (obj.P95))
-                display_data[pnvalue_types[5][0]].append("%s" % (obj.AverageTime))
+        for obj in filter_objs:
+            hour=obj.Hour
+            if hour != 24:
+                display_data[pnvalue_types[0][0]][hour]="%s"%(obj.P25)
+                display_data[pnvalue_types[1][0]][hour]="%s"%(obj.P50)
+                display_data[pnvalue_types[2][0]][hour]="%s"%(obj.P75)
+                display_data[pnvalue_types[3][0]][hour]="%s"%(obj.P90)
+                display_data[pnvalue_types[4][0]][hour]="%s"%(obj.P95)
+                display_data[pnvalue_types[5][0]][hour]="%s"%(obj.AverageTime)
                 if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
                     display_if_has_data = True
-            except Exception, e:
-                display_data[pnvalue_types[0][0]].append("%s" % (0))
-                display_data[pnvalue_types[1][0]].append("%s" % (0))
-                display_data[pnvalue_types[2][0]].append("%s" % (0))
-                display_data[pnvalue_types[3][0]].append("%s" % (0))
-                display_data[pnvalue_types[4][0]].append("%s" % (0))
-                display_data[pnvalue_types[5][0]].append("%s" % (0))
 
         if display_if_has_data:
             data_by_hour[i] = display_data
@@ -345,33 +315,25 @@ def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
     return data_by_hour
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
-def prepare_pnvalue_daily_data(objs, days_duration, view_types, pnvalue_types):
+def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types):
     data_by_day = {}
     for (i, second) in view_types:
-        filter_objs = objs.filter(ViewType=i)
+        filter_objs = objs.filter(ViewType=i, Hour=24)
         display_data = {}
         for (pn_idx, pn_des) in pnvalue_types:
-            display_data[pn_idx] = []
+            display_data[pn_idx] = ["0" for k in days_region]
 
         display_if_has_data = False
-        for date_idx in days_duration:
-            try:
-                obj = filter_objs.get(Date=date_idx, Hour=24)
-                display_data[pnvalue_types[0][0]].append("%s" % (obj.P25))
-                display_data[pnvalue_types[1][0]].append("%s" % (obj.P50))
-                display_data[pnvalue_types[2][0]].append("%s" % (obj.P75))
-                display_data[pnvalue_types[3][0]].append("%s" % (obj.P90))
-                display_data[pnvalue_types[4][0]].append("%s" % (obj.P95))
-                display_data[pnvalue_types[5][0]].append("%s" % (obj.AverageTime))
-                if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
-                    display_if_has_data = True
-            except Exception, e:
-                display_data[pnvalue_types[0][0]].append("%s" % (0))
-                display_data[pnvalue_types[1][0]].append("%s" % (0))
-                display_data[pnvalue_types[2][0]].append("%s" % (0))
-                display_data[pnvalue_types[3][0]].append("%s" % (0))
-                display_data[pnvalue_types[4][0]].append("%s" % (0))
-                display_data[pnvalue_types[5][0]].append("%s" % (0))
+        for obj in filter_objs:
+            tmp_idx=get_days_offset(days_region[0], str(obj.Date))
+            display_data[pnvalue_types[0][0]][tmp_idx]="%s"%(obj.P25)
+            display_data[pnvalue_types[1][0]][tmp_idx]="%s"%(obj.P50)
+            display_data[pnvalue_types[2][0]][tmp_idx]="%s"%(obj.P75)
+            display_data[pnvalue_types[3][0]][tmp_idx]="%s"%(obj.P90)
+            display_data[pnvalue_types[4][0]][tmp_idx]="%s"%(obj.P95)
+            display_data[pnvalue_types[5][0]][tmp_idx]="%s"%(obj.AverageTime)
+            if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
+                display_if_has_data = True
 
         if display_if_has_data:
             data_by_day[i] = display_data

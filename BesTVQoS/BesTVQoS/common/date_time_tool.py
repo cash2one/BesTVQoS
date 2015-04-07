@@ -63,6 +63,11 @@ def get_days_region(begin_date, end_date):
 
     return days_str_list
 
+def get_days_offset(begin_date, end_date):
+    tmp_begin_date=datetime.strptime(begin_date, '%Y-%m-%d')
+    tmp_end_date=datetime.strptime(end_date, '%Y-%m-%d')
+    return (tmp_end_date - tmp_begin_date).days
+
 def get_days_of_month(year,mon): 
     ''''' 
     get days of month 
