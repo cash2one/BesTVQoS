@@ -47,7 +47,10 @@ while(<FILE>) {
 		}
 
 		$watch_time = $endTime - $beginTime;
-		
+	    if($watch_time<0) {
+			next;
+		}
+	
 		if ($element[17] == 0) {
 			$suc{$key} += 1;
 		}
