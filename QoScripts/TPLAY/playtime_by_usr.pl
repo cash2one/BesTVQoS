@@ -49,6 +49,9 @@ foreach $filename (@ARGV) {
 		}
 
 		$watch_time = $endTime - $beginTime;
+		if($watch_time<0){
+            next;
+        }
 		
 		$play_time{$key} += $watch_time;
 		
