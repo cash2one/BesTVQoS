@@ -105,22 +105,33 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
             filter_objs = objs
         else:
             filter_objs = objs.filter(ViewType=view_idx)
-        for hour in range(24):
-            try:
-                #obj = filter_objs.filter(
-                #    Hour=hour).aggregate(sum=Sum(Qos_name))
-                #tmp = obj["sum"]
-                obj = filter_objs.get(Hour=hour)
-                tmp = getattr(obj, Qos_name)
-                logger.info("aggregate %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
-                if tmp is None:
-                    tmp = 0
-                data_by_hour[view_idx].append("%s" % (tmp*base_radix))
-                if tmp != 0:
-                    display_if_has_data = True
-            except Exception, e:
-                data_by_hour[view_idx].append("0")
+
+        tmp_list=[]
+        for i in range(24):
+            tmp_list.append("0")
+
+        for obj in filter_objs:
+            if obj.Hour != 24:
+                tmp_list[obj.Hour]="%s"%(getattr(obj, Qos_name))
+                display_if_has_data = True
+        data_by_hour[view_idx]=tmp_list
         logger.info("prepare %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
+        #for hour in range(24):
+        #    try:
+        #        #obj = filter_objs.filter(
+        #        #    Hour=hour).aggregate(sum=Sum(Qos_name))
+        #        #tmp = obj["sum"]
+        #        obj = filter_objs.get(Hour=hour)
+        #        tmp = getattr(obj, Qos_name)
+        #        logger.info("aggregate %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
+        #        if tmp is None:
+        #            tmp = 0
+        #        data_by_hour[view_idx].append("%s" % (tmp*base_radix))
+        #        if tmp != 0:
+        #            display_if_has_data = True
+        #    except Exception, e:
+        #        data_by_hour[view_idx].append("0")
+        #logger.info("prepare %s, cost: %s" %(Qos_name, (current_time() - begin_time)))
 
     if display_if_has_data == False:
         return None
