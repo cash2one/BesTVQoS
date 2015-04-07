@@ -11,6 +11,10 @@ open FILE, "<$filename";
 while(<FILE>) {
 	chomp;
 	@element = split /\|/;
+
+	if($element[15]<0 || $element[15]>600) {
+        next;
+    }
 	
 	if ($element[34] == $playtype) {
 		if ($element[31] == 1) {
