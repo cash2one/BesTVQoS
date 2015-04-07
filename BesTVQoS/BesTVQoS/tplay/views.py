@@ -21,6 +21,7 @@ VIEW_TYPES_DES = {
 
 
 def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
+    begin_time = current_time()
     item = {}
     item["index"] = item_idx
     item["title"] = title
@@ -44,6 +45,7 @@ def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
                      (",".join(key_values[i])))
 
     item["series"] = ",".join(series)
+    logger.debug("make_chart_item() cost %s" % (current_time() - begin_time))
 
     return item
 
@@ -124,6 +126,8 @@ class PlayInfo:
         self.common_filter = self.date_filter + self.service_type_filter
 
     def get_playinfo_item(self, item_index):
+        begin_time = current_time()
+
         x_axis = []
         y_axises = {}
 
@@ -148,13 +152,20 @@ class PlayInfo:
             y_axise = []
             for x in x_axis:
                 sql_command = fn_get_sql_cmd(x, vt)
+                logger.debug("SQL: %s" % (sql_command))
+                temp_time_begin = current_time()
                 self.cu.execute(sql_command)
+                time_cost = current_time() - temp_time_begin
+                logger.debug("execute() time cost: %s" % (time_cost))
+                temp_time_begin = current_time()
 
                 records = '0'
                 for item in self.cu.fetchall():
                     if item[0]:
                         records = '%d' % (item[0])
                 y_axise.append(records)
+                time_cost = current_time() - temp_time_begin
+                logger.debug("fetchall() time cost: %s" % (time_cost))
 
             y_axises[vt] = y_axise
 
