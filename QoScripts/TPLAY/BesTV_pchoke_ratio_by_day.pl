@@ -21,7 +21,7 @@ while(<FILE>) {
 		$sec = substr($element[11], 12, 2);
 		eval{
 			$beginTime = timelocal($sec, $min, $hour, $day, $month, $year);
-		}
+		};
 		if($@){
 			next;
 		}
@@ -34,7 +34,7 @@ while(<FILE>) {
 		$sec = substr($element[12], 12, 2);
 		eval{
 			$endTime = timelocal($sec, $min, $hour, $day, $month, $year);
-		}
+		};
 		if($@){
 			next;
 		}
