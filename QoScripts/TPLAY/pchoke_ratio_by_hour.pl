@@ -49,7 +49,7 @@ while(<FILE>) {
 		}
 
 		$watch_time = $endTime - $beginTime;
-		if($watch_time<0) {
+		if($watch_time<0  || $watch_time>36000) {
 			next;
 		}	
 	
