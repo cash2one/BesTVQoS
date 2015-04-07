@@ -13,26 +13,32 @@ while(<FILE>) {
 	
 	if ($element[31] == 1) {
 		
-		if ( ($element[12] !~ /^$date/) ) {
-			next;
-		}
-		
 		$year = substr($element[11], 0, 4);
 		$month = substr($element[11], 4, 2);
 		$day = substr($element[11], 6, 2);
 		$hour = substr($element[11], 8, 2);
 		$min = substr($element[11], 10, 2);
 		$sec = substr($element[11], 12, 2);
-		$beginTime = timelocal($sec, $min, $hour, $day, $month, $year);
-		
+		eval{
+			$beginTime = timelocal($sec, $min, $hour, $day, $month, $year);
+		}
+		if($@){
+			next;
+		}
+
 		$year = substr($element[12], 0, 4);
 		$month = substr($element[12], 4, 2);
 		$day = substr($element[12], 6, 2);
 		$hour = substr($element[12], 8, 2);
 		$min = substr($element[12], 10, 2);
 		$sec = substr($element[12], 12, 2);
-		$endTime = timelocal($sec, $min, $hour, $day, $month, $year);
-		
+		eval{
+			$endTime = timelocal($sec, $min, $hour, $day, $month, $year);
+		}
+		if($@){
+			next;
+		}
+
 		$watch_time = $endTime - $beginTime;
 		
 		if ($element[17] > 0) {		
