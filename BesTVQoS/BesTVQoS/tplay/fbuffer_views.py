@@ -169,6 +169,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
 
         device_filter_ojbs = get_filter_objs_by_device_types(
             device_type, begin_date, end_date, table)
+        logger.info("filter %s %s, cost: %s" %(str(table), Qos_name, (current_time() - begin_time)))
 
         # process data from databases;
         if begin_date == end_date and hour_flag == True:
@@ -378,6 +379,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
 
         device_filter_ojbs = get_filter_objs_by_device_types(
             device_type, begin_date, end_date, table)
+        logger.info("filter %s multiQos, cost: %s" % (str(table), (current_time() - begin_time)))
 
         # process data from databases;
         if begin_date == end_date:
