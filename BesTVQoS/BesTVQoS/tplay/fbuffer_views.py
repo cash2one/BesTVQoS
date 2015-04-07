@@ -106,9 +106,11 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
             filter_objs = objs.filter(ViewType=view_idx)
         for hour in range(24):
             try:
-                obj = filter_objs.filter(
-                    Hour=hour).aggregate(sum=Sum(Qos_name))
-                tmp = obj["sum"]
+                #obj = filter_objs.filter(
+                #    Hour=hour).aggregate(sum=Sum(Qos_name))
+                #tmp = obj["sum"]
+                obj = filter_objs.get(Hour=hour)
+                tmp = getattr(obj, Qos_name)
                 if tmp is None:
                     tmp = 0
                 data_by_hour[view_idx].append("%s" % (tmp*base_radix))
