@@ -102,6 +102,10 @@ def get_device_type(request, dev=""):
                 table_name = "playtime"
             elif url.find("fluency") != -1:
                 table_name = "fluency"
+            elif url.find("3sratio") != -1:
+                table_name = "Bestv3SRatio"
+            elif url.find("avg_pcount") != -1 or url.find("avg_ptime") != -1:
+                table_name = "BestvAvgPchoke"
 
             device_types = get_device_types1(
                 table_name, service_type, begin_date, end_date)
