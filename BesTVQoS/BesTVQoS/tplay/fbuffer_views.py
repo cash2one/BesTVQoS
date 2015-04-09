@@ -110,7 +110,7 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
         for obj in filter_objs:
             if obj.Hour != 24:
                 tmp=getattr(obj, Qos_name)
-                tmp_list[obj.Hour]="%s"%(float(tmp_list[obj.Hour])+tmp)
+                tmp_list[obj.Hour]="%s"%((float(tmp_list[obj.Hour])+tmp)*base_radix)
                 if tmp != 0:
                     display_if_has_data = True
         data_by_hour[view_idx]=tmp_list
@@ -137,7 +137,7 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, ho
         for obj in filter_objs:
             tmp=getattr(obj, Qos_name)
             tmp_idx=get_days_offset(days_region[0], str(obj.Date))
-            tmp_list[tmp_idx]="%s"%(float(tmp_list[tmp_idx])+tmp)
+            tmp_list[tmp_idx]="%s"%((float(tmp_list[tmp_idx])+tmp)*base_radix)
             if tmp != 0:
                 display_if_has_data = True
 
