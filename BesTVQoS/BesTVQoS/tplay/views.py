@@ -62,8 +62,7 @@ class HtmlTable:
 class PlayInfo:
 
     def __init__(self, request):
-        self.profile_exclude = " and DeviceType != 'Bestv_Lite_JSDX'" + \
-            " and DeviceType != 'AiShangVOD'"
+        self.profile_exclude = " and DeviceType like '%.%'"
         self.service_type = "All"
         self.end_date = str(today())
         self.begin_date = self.end_date
@@ -311,38 +310,13 @@ def show_playing_daily(request, dev=""):
 
 def show_playing_trend(request, dev=""):
     context = process_single_Qos(
-        request, BestvPlayinfo, "Records", u"用户观看量", u"", u"观看量", VIEW_TYPES, True, 1)
-
-    # begin_time = current_time()
-    # temp_time_begin = begin_time
-    # logger.debug("enter show_playing_trend() at %s" % (temp_time_begin))
-
-    # play_trend = PlayInfo(request)
-    # play_trend.read_filter_group_form(request)
-
-    # temp_time_begin = current_time()
-    # logger.debug("before get_playinfo_item() at %s" % (temp_time_begin))
-    # chart_item = play_trend.get_playinfo_item(0)
-    # logger.debug("after get_playinfo_item() at %s" % (current_time()))
-    # time_cost = current_time() - temp_time_begin
-    # logger.debug("get_playinfo_item() cost %s" % (time_cost))
-
-    # context = {}
-    # context['contents'] = [chart_item]
-    # context['default_service_type'] = play_trend.service_type
-    # context['service_types'] = SERVICE_TYPES
-    # context['default_device_type'] = play_trend.device_type
-    # context['device_types'] = play_trend.device_types
-    # context['default_begin_date'] = play_trend.begin_date
-    # context['default_end_date'] = play_trend.end_date
+        request, BestvPlayinfo, "Records", u"用户观看量",
+        u"", u"观看量", VIEW_TYPES, True, 1)
 
     do_mobile_support(request, dev, context)
 
     response = render_to_response('show_playing_trend.html', context)
 
     set_default_values_to_cookie(response, context)
-
-    # time_cost = current_time() - begin_time
-    # logger.debug("show_playing_trend() cost %s" % (time_cost))
 
     return response
