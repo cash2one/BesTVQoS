@@ -73,8 +73,7 @@ def playinfo(request):
                     Records=item['records'])
                 try:
                     playinfo_obj.save()
-                except IntegrityError, e:
-                    logger.info("playinfo record already exists : %s" % (e))
+                except IntegrityError, e:                    
                     obj = BestvPlayinfo.objects.get(
                         ServiceType=item['servicetype'],
                         DeviceType=item['dev'],
@@ -83,6 +82,7 @@ def playinfo(request):
                         ViewType=item['viewtype'],
                         Date=create_date,
                         Hour=item['hour'])
+                    logger.info("playinfo record already exists : %s, %s, %s" % (e, obj.Records, item['records']))
                     obj.Records = item['records']
                     obj.save()
 
