@@ -20,6 +20,11 @@ foreach $filename (@ARGV) {
 		
 		#if ($element[31] == 1) {
 		
+		#if ( ($element[12] !~ /^$date/) ) {
+		#	#print ERR "@element\n";
+		#	next;
+		#}
+		
 		#print $element[11]."_".$element[12]."\n";
 		
 		$year = substr($element[11], 0, 4);
@@ -34,7 +39,7 @@ foreach $filename (@ARGV) {
 		if($@){
 			next;
 		}
-
+		
 		$year = substr($element[12], 0, 4);
 		$month = substr($element[12], 4, 2)-1;
 		$day = substr($element[12], 6, 2);
@@ -49,10 +54,10 @@ foreach $filename (@ARGV) {
 		}
 
 		$watch_time = $endTime - $beginTime;
-		if($watch_time<0  || $watch_time>36000){
-            next;
-        }
-		
+		if($watch_time<0 || $watch_time>36000){
+			next;
+		}
+	
 		$play_time{$key} += $watch_time;
 		
 		$records += 1;	
