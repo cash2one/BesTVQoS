@@ -17,7 +17,7 @@ sys.setdefaultencoding("utf-8")
 
 def update_baseinfo(time, svrtype, dev, viewtype, sucratio, fluency, records):
 
-   url = "http://127.0.0.1:80/update/realtime/base"
+   url = "http://127.0.0.1:6699/update/realtime/base"
 
    request = {}
    request['time'] = time

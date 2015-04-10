@@ -17,7 +17,7 @@ sys.setdefaultencoding("utf-8")
 
 def update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, records):
 
-   url = "http://127.0.0.1:80/update/playinfo"
+   url = "http://127.0.0.1:6699/update/playinfo"
 
    request = {}
    request['servicetype'] = svrtype
@@ -44,7 +44,7 @@ def update_playinfo(svrtype, dev, isp, date, area, hour, viewtype, records):
 
 def update_playtime(svrtype, dev, isp, date, area, hour, viewtype, p25, p50, p75, p90, p95, avg):
 
-   url = "http://127.0.0.1:80/update/playtime"
+   url = "http://127.0.0.1:6699/update/playtime"
 
    request = {}
    request['servicetype'] = svrtype
@@ -75,7 +75,7 @@ def update_playtime(svrtype, dev, isp, date, area, hour, viewtype, p25, p50, p75
 
 def update_fbuffer(svrtype, dev, isp, date, area, hour, viewtype, sucratio, p25, p50, p75, p90, p95, avg):
 
-   url = "http://127.0.0.1:80/update/fbuffer"
+   url = "http://127.0.0.1:6699/update/fbuffer"
 
    request = {}
    request['servicetype'] = svrtype
@@ -107,7 +107,7 @@ def update_fbuffer(svrtype, dev, isp, date, area, hour, viewtype, sucratio, p25,
    
 def update_fluency(svrtype, dev, isp, date, area, hour, viewtype, pratio, apratio, fluency, pavg):
 
-   url = "http://127.0.0.1:80/update/fluency"
+   url = "http://127.0.0.1:6699/update/fluency"
 
    request = {}
    request['servicetype'] = svrtype
