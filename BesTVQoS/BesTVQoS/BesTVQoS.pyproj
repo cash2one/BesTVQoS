@@ -10,7 +10,7 @@
     <InterpreterArguments />
     <DjangoSettingsModule />
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
+    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
     <InterpreterVersion>2.7</InterpreterVersion>
     <WebBrowserPort>80</WebBrowserPort>
   </PropertyGroup>
@@ -73,7 +73,6 @@
     <Content Include="common\templates\filter_device_type.html" />
     <Content Include="common\templates\filter_group.html" />
     <Content Include="common\templates\filter_service_type.html" />
-    <Content Include="common\templates\filter_versions.html" />
     <Content Include="common\templates\highcharts_plot.html" />
     <Content Include="common\templates\home.html" />
     <Content Include="common\templates\m_home.html" />
@@ -89,6 +88,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\2.7" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
