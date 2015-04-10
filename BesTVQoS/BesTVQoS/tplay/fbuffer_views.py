@@ -289,7 +289,7 @@ def show_avg_ptime(request, dev=""):
 '''
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
-def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
+def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types, base_radix):
     data_by_hour = {}
     for (i, second) in view_types:
         filter_objs = objs.filter(ViewType=i)
@@ -301,12 +301,12 @@ def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
         for obj in filter_objs:
             hour=obj.Hour
             if hour != 24:
-                display_data[pnvalue_types[0][0]][hour]="%s"%(obj.P25)
-                display_data[pnvalue_types[1][0]][hour]="%s"%(obj.P50)
-                display_data[pnvalue_types[2][0]][hour]="%s"%(obj.P75)
-                display_data[pnvalue_types[3][0]][hour]="%s"%(obj.P90)
-                display_data[pnvalue_types[4][0]][hour]="%s"%(obj.P95)
-                display_data[pnvalue_types[5][0]][hour]="%s"%(obj.AverageTime)
+                display_data[pnvalue_types[0][0]][hour]="%s"%(obj.P25/base_radix)
+                display_data[pnvalue_types[1][0]][hour]="%s"%(obj.P50/base_radix)
+                display_data[pnvalue_types[2][0]][hour]="%s"%(obj.P75/base_radix)
+                display_data[pnvalue_types[3][0]][hour]="%s"%(obj.P90/base_radix)
+                display_data[pnvalue_types[4][0]][hour]="%s"%(obj.P95/base_radix)
+                display_data[pnvalue_types[5][0]][hour]="%s"%(obj.AverageTime/base_radix)
                 if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
                     display_if_has_data = True
 
@@ -318,7 +318,7 @@ def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types):
     return data_by_hour
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
-def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types):
+def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types, base_radix):
     data_by_day = {}
     for (i, second) in view_types:
         filter_objs = objs.filter(ViewType=i, Hour=24)
@@ -329,12 +329,12 @@ def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types):
         display_if_has_data = False
         for obj in filter_objs:
             tmp_idx=get_days_offset(days_region[0], str(obj.Date))
-            display_data[pnvalue_types[0][0]][tmp_idx]="%s"%(obj.P25)
-            display_data[pnvalue_types[1][0]][tmp_idx]="%s"%(obj.P50)
-            display_data[pnvalue_types[2][0]][tmp_idx]="%s"%(obj.P75)
-            display_data[pnvalue_types[3][0]][tmp_idx]="%s"%(obj.P90)
-            display_data[pnvalue_types[4][0]][tmp_idx]="%s"%(obj.P95)
-            display_data[pnvalue_types[5][0]][tmp_idx]="%s"%(obj.AverageTime)
+            display_data[pnvalue_types[0][0]][tmp_idx]="%s"%(obj.P25/base_radix)
+            display_data[pnvalue_types[1][0]][tmp_idx]="%s"%(obj.P50/base_radix)
+            display_data[pnvalue_types[2][0]][tmp_idx]="%s"%(obj.P75/base_radix)
+            display_data[pnvalue_types[3][0]][tmp_idx]="%s"%(obj.P90/base_radix)
+            display_data[pnvalue_types[4][0]][tmp_idx]="%s"%(obj.P95/base_radix)
+            display_data[pnvalue_types[5][0]][tmp_idx]="%s"%(obj.AverageTime/base_radix)
             if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
                 display_if_has_data = True
 
@@ -346,7 +346,7 @@ def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types):
     return data_by_day
 
 
-def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnvalue_types):
+def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnvalue_types, base_radix=1):
     begin_time = current_time()
     items = []
 
@@ -364,7 +364,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
 
         # process data from databases;
         if begin_date == end_date:
-            data_by_hour = prepare_pnvalue_hour_data(device_filter_ojbs, view_types, pnvalue_types)
+            data_by_hour = prepare_pnvalue_hour_data(device_filter_ojbs, view_types, pnvalue_types, base_radix)
             if data_by_hour is None:
                 raise NoDataError(
                     "No hour data between %s - %s" % (begin_date, end_date))
@@ -380,7 +380,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                 item_idx += 1
         else:
             days_region = get_days_region(begin_date, end_date)
-            data_by_day = prepare_pnvalue_daily_data(device_filter_ojbs, days_region, view_types, pnvalue_types)
+            data_by_day = prepare_pnvalue_daily_data(device_filter_ojbs, days_region, view_types, pnvalue_types, base_radix)
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
@@ -423,7 +423,7 @@ def show_fbuffer_time(request, dev=""):
     return response
 
 def show_play_time(request, dev=""):
-    context = process_multi_plot(request, BestvPlaytime, u"播放时长PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
+    context = process_multi_plot(request, BestvPlaytime, u"播放时长PN值", u"", u"单位：分钟", VIEW_TYPES[1:], PNVALUES_LIST, 60)
     do_mobile_support(request, dev, context)    
     response = render_to_response('show_play_time.html', context)
     set_default_values_to_cookie(response, context)
