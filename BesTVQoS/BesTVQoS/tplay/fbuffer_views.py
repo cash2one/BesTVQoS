@@ -121,17 +121,20 @@ def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
 
 
 def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, hour_flag, base_radix):
+    if hour_flag:
+        daily_objs=objs.filter(Hour=24)
+    else:
+        daily_objs=objs
+
     data_by_day = {}
     display_if_has_data = False
     for i in view_types:
         view_idx = i[0]
         data_by_day[view_idx] = []
         if view_idx == 0:
-            filter_objs = objs
-        elif hour_flag:
-            filter_objs = objs.filter(ViewType=view_idx, Hour=24)
+            filter_objs = daily_objs
         else:
-            filter_objs = objs.filter(ViewType=view_idx)
+            filter_objs = daily_objs.filter(ViewType=view_idx)
 
         tmp_list=["0" for k in days_region]
         for obj in filter_objs:
