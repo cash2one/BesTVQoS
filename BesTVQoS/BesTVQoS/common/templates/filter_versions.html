@@ -1,0 +1,14 @@
+{% if versions %}
+<div class="ctrlitem"> 
+    <label>版本号</label>
+    <select name="version" id="version">
+        {% for item in versions %}   
+            {% ifequal item default_version %}
+                <option value="{{ item }}" selected>{{ item }}</option>
+            {% else %}
+                <option value="{{ item }}" >{{ item }}</option>
+            {% endifequal %}
+        {% endfor %}
+    </select>
+</div>
+{% endif %}
