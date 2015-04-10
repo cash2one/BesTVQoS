@@ -9,8 +9,8 @@ from realtime.models import RealtimeBaseInfo
 
 logger = logging.getLogger("django.request")
 
-# redis_host = '192.168.182.129'
-redis_host = 'localhost'
+redis_host = '192.168.182.129'
+# redis_host = 'localhost'
 expire_time = 360
 
 
@@ -32,6 +32,7 @@ def baseinfo(request):
             contents = json.loads(request.body)
             logger.debug("realtime contents: %s" % contents)
             r = redis.StrictRedis(redis_host)
+            # latest_tag = ''
             latest_dev = ''
             for item in contents:
                 current_time = item['time']
@@ -45,6 +46,13 @@ def baseinfo(request):
                     current_time, service_type, dev,
                     view_type, sucratio, fluency, records))
 
+                # tag = dev + current_time
+                # if latest_tag != tag:
+                #     if latest_dev != '':
+                #         r.expire(latest_dev, expire_time)
+                #     latest_tag = tag
+                #     latest_dev = dev
+                #     r.set(latest_dev, current_time)
                 latest_dev = dev
                 if view_type == u'1':
                     r.set(latest_dev, current_time)

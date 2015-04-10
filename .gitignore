@@ -4,3 +4,10 @@
 /BesTVQoS/*.suo
 /TestScripts
 /BesTVQoS/BesTVQoS/bin
+/BesTVQoS/BesTVQoS/web.config
+/BesTVQoS/BesTVQoS/web.debug.config
+/BesTVQoS/BesTVQoSStore/web.config
+/BesTVQoS/BesTVQoSStore/web.debug.config
+/BesTVQoS/BesTVQoSStore/bin
+/BesTVQoS/BesTVQoSStore/obj
+/BesTVQoS/BesTVQoSStore/dbstore.log

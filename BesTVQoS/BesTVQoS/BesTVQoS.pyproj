@@ -4,6 +4,15 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <Name>YueMeQos</Name>
     <RootNamespace>YueMeQos</RootNamespace>
+    <CommandLineArguments>
+    </CommandLineArguments>
+    <InterpreterPath />
+    <InterpreterArguments />
+    <DjangoSettingsModule />
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
+    <InterpreterVersion>2.7</InterpreterVersion>
+    <WebBrowserPort>80</WebBrowserPort>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -38,25 +47,49 @@
     <Compile Include="common\views.py" />
     <Compile Include="common\__init__.py" />
     <Compile Include="manage.py" />
+    <Compile Include="realtime\models.py" />
+    <Compile Include="realtime\tests.py" />
+    <Compile Include="realtime\views.py" />
+    <Compile Include="realtime\__init__.py" />
+    <Compile Include="tplay\fbuffer_views.py" />
     <Compile Include="tplay\models.py" />
     <Compile Include="tplay\tests.py" />
+    <Compile Include="tplay\update_views.py" />
     <Compile Include="tplay\views.py" />
     <Compile Include="tplay\__init__.py" />
     <Compile Include="BesTVQoS\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="common\" />
+    <Folder Include="common\templates\" />
+    <Folder Include="realtime\" />
+    <Folder Include="realtime\Templates\" />
     <Folder Include="tplay\" />
     <Folder Include="tplay\templates\" />
     <Folder Include="BesTVQoS\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="common\templates\basic_table.html" />
+    <Content Include="common\templates\filter_device_type.html" />
+    <Content Include="common\templates\filter_group.html" />
+    <Content Include="common\templates\filter_service_type.html" />
+    <Content Include="common\templates\filter_versions.html" />
+    <Content Include="common\templates\highcharts_plot.html" />
+    <Content Include="common\templates\home.html" />
+    <Content Include="common\templates\m_home.html" />
+    <Content Include="common\templates\m_navi_menu.html" />
+    <Content Include="common\templates\m_topbar.html" />
+    <Content Include="common\templates\navi_menu.html" />
+    <Content Include="common\templates\no_data.html" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.mht">
       <SubType>WebBrowser</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\2.7" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
   <!-- Specify pre- and post-build commands in the BeforeBuild and 

@@ -21,7 +21,7 @@ urlpatterns = patterns('',
     url(r'^update/bestvavgpchoke$', 'store.views.bestvavgpchoke'),
 
     # realtime data interface
-    url(r'^update/realtime/base$', 'store.views.baseinfo'),
+    url(r'^update/realtime/base$', 'realtime.views.baseinfo'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

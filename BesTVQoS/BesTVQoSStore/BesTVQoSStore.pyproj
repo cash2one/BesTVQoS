@@ -28,6 +28,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="realtime\models.py" />
+    <Compile Include="realtime\tests.py" />
+    <Compile Include="realtime\views.py" />
+    <Compile Include="realtime\__init__.py" />
     <Compile Include="store\forms.py" />
     <Compile Include="store\models.py" />
     <Compile Include="store\tests.py" />
@@ -40,12 +44,15 @@
     <Compile Include="BesTVQoSStore\wsgi.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="realtime\" />
     <Folder Include="store\" />
     <Folder Include="BesTVQoSStore\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="realtime\models.pyc" />
+    <Content Include="realtime\views.pyc" />
+    <Content Include="realtime\__init__.pyc" />
     <Content Include="requirements.txt" />
-    <Content Include="db.sqlite3" />
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.mht">
