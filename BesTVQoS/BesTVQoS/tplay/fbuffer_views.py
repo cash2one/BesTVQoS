@@ -80,6 +80,8 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
     item["y_title"] = ytitle  # u"成功率"
     item["xAxis"] = xAlis
     item["t_interval"] = 1
+    if len(xAlis)>30:
+        item["t_interval"] = len(xAlis)/30
 
     series = []
     for (i, desc) in keys:
@@ -184,8 +186,10 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
+
+            format_days_region=["%s%s"%(i[5:7], i[8:10]) for i in days_region]
             item = make_plot_item(
-                data_by_day, view_types, 0, days_region, title, subtitle, ytitle)
+                data_by_day, view_types, 0, format_days_region, title, subtitle, ytitle)
             items.append(item)
 
     except Exception, e:
@@ -385,12 +389,13 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
 
+            format_days_region=["%s%s"%(i[5:7], i[8:10]) for i in days_region]
             item_idx = 0
             for (view_type_idx, view_des) in view_types:
                 if view_type_idx not in data_by_day:
                     continue
                 item = make_plot_item(data_by_day[view_type_idx], pnvalue_types, 
-                                      item_idx, days_region,
+                                      item_idx, format_days_region,
                                       title, u"%s %s" % (subtitle, view_des), ytitle)
                 items.append(item)
                 item_idx += 1
