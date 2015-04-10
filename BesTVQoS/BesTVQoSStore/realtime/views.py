@@ -9,8 +9,8 @@ from realtime.models import RealtimeBaseInfo
 
 logger = logging.getLogger("django.request")
 
-redis_host = '192.168.182.129'
-# redis_host = 'localhost'
+# redis_host = '192.168.182.129'
+redis_host = 'localhost'
 expire_time = 360
 
 
