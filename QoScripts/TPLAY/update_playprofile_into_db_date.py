@@ -17,7 +17,7 @@ sys.setdefaultencoding("utf-8")
 
 def update_playprofile(svrtype, dev, isp, date, area, avg, users, records):
 
-   url = "http://10.100.12.5:80/update/playprofile"
+   url = "http://10.100.12.5:6699/update/playprofile"
 
    request = {}
    request['servicetype'] = svrtype

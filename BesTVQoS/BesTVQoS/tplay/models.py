@@ -123,7 +123,7 @@ class Bestv3SRatio(models.Model):
     Ratio = models.FloatField()
 
     class Meta:
-        db_table = "Bestv3SRatio"
+        db_table = "bestv3sratio"  #Bestv3SRatio
         unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
 
     def __str__(self):
@@ -139,7 +139,7 @@ class BestvAvgPchoke(models.Model):
     AvgTime = models.IntegerField()
 
     class Meta:
-        db_table = "BestvAvgPchoke"
+        db_table = "bestvavgpchoke"  #BestvAvgPchoke
         unique_together = ('ServiceType', 'DeviceType', 'ISP', 'Area', 'Date')
 
     def __str__(self):
