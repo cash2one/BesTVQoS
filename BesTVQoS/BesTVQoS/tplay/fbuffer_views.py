@@ -169,6 +169,13 @@ def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, ho
 def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_types, hour_flag, base_radix=1):
     begin_time = current_time()
     items = []
+    service_type = "All"
+    device_type = ""
+    device_types = [""]
+    version = ""
+    versions = [""]
+    begin_date = today()
+    end_date = today()
 
     try:
         (service_type, device_type, device_types, 
@@ -381,6 +388,13 @@ def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types, bas
 def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnvalue_types, base_radix=1):
     begin_time = current_time()
     items = []
+    service_type = "All"
+    device_type = ""
+    device_types = [""]
+    version = ""
+    versions = [""]
+    begin_date = today()
+    end_date = today()
 
     try:
         # init params
