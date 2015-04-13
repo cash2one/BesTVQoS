@@ -14,6 +14,7 @@ urlpatterns = patterns(
     '',
     # Examples:
     url(r'^$', 'common.views.home'),
+    url(r'^p/$', 'common.views.p_home'),
     url(r'^m/$', 'common.views.m_home'),
     url(r'^navi/(?P<target_url>\w*)', 'common.views.navi'),
     url(r'^((?P<dev>m)/)?get_device_type$',

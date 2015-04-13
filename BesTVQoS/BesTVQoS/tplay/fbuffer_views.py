@@ -388,8 +388,13 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
             raise NoDataError("No data between %s - %s" %
                               (begin_date, end_date))
 
+        if version == "All":
+            device_type_full = device_type
+        else:
+            device_type_full = '%s_%s' % (device_type, version) 
+
         device_filter_ojbs = get_filter_objs_by_device_types(
-            device_type, begin_date, end_date, table)
+            device_type_full, begin_date, end_date, table)
         logger.info("filter %s multiQos, cost: %s" %
                     (str(table), (current_time() - begin_time)))
 
@@ -438,6 +443,8 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
     context['service_types'] = SERVICE_TYPES
     context['default_device_type'] = device_type
     context['device_types'] = device_types
+    context['default_version'] = version
+    context['versions'] = versions
     context['default_begin_date'] = str(begin_date)
     context['default_end_date'] = str(end_date)
     context['contents'] = items

@@ -80,7 +80,21 @@
     <Content Include="common\templates\m_topbar.html" />
     <Content Include="common\templates\navi_menu.html" />
     <Content Include="common\templates\no_data.html" />
+    <Content Include="common\templates\index.html" />
     <Content Include="requirements.txt" />
+    <Content Include="tplay\templates\show_3sratio.html" />
+    <Content Include="tplay\templates\show_avg_pcount.html" />
+    <Content Include="tplay\templates\show_avg_ptime.html" />
+    <Content Include="tplay\templates\show_fbuffer_sucratio.html" />
+    <Content Include="tplay\templates\show_fbuffer_time.html" />
+    <Content Include="tplay\templates\show_fluency.html" />
+    <Content Include="tplay\templates\show_fluency_allpratio.html" />
+    <Content Include="tplay\templates\show_fluency_avgcount.html" />
+    <Content Include="tplay\templates\show_fluency_pratio.html" />
+    <Content Include="tplay\templates\show_playing_daily.html" />
+    <Content Include="tplay\templates\show_playing_trend.html" />
+    <Content Include="tplay\templates\show_play_time.html" />
+    <Content Include="tplay\templates\top.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.mht">

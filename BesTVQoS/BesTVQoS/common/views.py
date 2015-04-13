@@ -1,3 +1,5 @@
+﻿# -*- coding: utf-8 -*-
+
 """
 Definition of views.
 """
@@ -17,14 +19,16 @@ logger = logging.getLogger("django.request")
 
 def home(request):
     logger.debug("Qos request")
-    return render_to_response('home.html', Context())
+    return render_to_response('index.html', Context())
 
+def p_home(request):
+    return render_to_response('home.html', Context())
 
 def m_home(reuest):
     context = {}
     context["is_mobile"] = True
     context["top_title"] = "BesTV QoS Monitor"
-    context["navi"] = Navi().get_sub_items()
+    #context["navi"] = Navi().get_sub_items()
 
     return render_to_response('m_navi_menu.html', context)
 

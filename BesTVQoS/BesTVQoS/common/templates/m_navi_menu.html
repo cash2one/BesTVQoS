@@ -1,12 +1,112 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+<link rel="apple-touch-startup-image" href="images/apple-touch-startup-image-320x460.png" />
+<link type="text/css" rel="stylesheet" href="/static/js/phone/css/style.css"/>
+<link type="text/css" rel="stylesheet" href="/static/js/phone/colors/metro/metro.css"/>
+<link type="text/css" rel="stylesheet" href="/static/js/phone/css/idangerous.swiper.css"/>
+<link type="text/css" rel="stylesheet" href="/static/js/phone/css/swipebox.css" />
 
-{% include 'home.html' %}
-
+</head>
 <body>
-    <div id="content1">
-        <ul class="pageitem">
-            {% for item in navi %}
-                <li class="menu"><a href="{{item.url}}"><span class="name">{{item.name}}</span><span class="arrow"></span></a></li>
-            {% endfor %}
-        </ul>
+  <div id="header">
+      <div class="gohome radius20">
+         <a href="#"><img src="/static/js/phone/images/icons/home.png" alt="" title="" style="width:90px;height:90px;"/></a>
+      </div>
+  </div>
+  <div class="swiper-container swiper-parent">
+    <div class="swiper-wrapper">
+    
+<!--Menu page-->
+      <div class="swiper-slide sliderbg_menu">
+          <div class="swiper-container swiper-nested">
+                   <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                                  <div class="slide-inner">
+                                        <div class="logo"><a href="#"><img src="/static/js/phone/images/logo.jpg" alt="" title="" border="0" /></a></div>
+                                        <div class="menu">
+                                        <ul>
+                                        <li><a href="#" onclick="swiperParent.swipeTo(1);"><img src="/static/js/phone/images/icons/black_icon.png" alt="" title="" /><span>观看数</span></a></li>
+                                        <li><a href="#" onclick="swiperParent.swipeTo(2);"><img src="/static/js/phone/images/icons/casepipei.png" alt="" title="" /><span>播放时长</span></a></li>
+                                        <li><a href="#" onclick="swiperParent.swipeTo(3);"><img src="/static/js/phone/images/icons/current_icon.png" alt="" title="" /><span>首次缓冲</span></a></li>
+                                        <li><a href="#" onclick="swiperParent.swipeTo(4);"><img src="/static/js/phone/images/icons/device_icon.png" alt="" title="" /><span>流畅度</span></a></li>
+                                        <li><a href="#" onclick="swiperParent.swipeTo(5);"><img src="/static/js/phone/images/icons/diacrisisIcon.png" alt="" title="" /><span>Bestv现有指标</span></a></li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                        </div>
+                                 </div>
+                         </div>
+                   </div>
+                  <div class="swiper-scrollbar"></div>
+          </div> 
+      </div>
+      
+<!--Page 1 content-->
+     <div class="swiper-slide sliderbg">
+        <a href="/show_playing_daily" class="button_12 green green_borderbottom radius4">单日统计</a>  
+        <a href="/show_playing_trend" class="button_12 blue blue_borderbottom radius4">趋势</a>
+     </div>
+      
+<!--Page 2 content-->
+      <div class="swiper-slide sliderbg">
+      	<a href="/show_play_time" class="button_12 green green_borderbottom radius4">播放时长</a>  
+     </div>
+     
+<!--Page 3 content-->
+      <div class="swiper-slide sliderbg">
+      	<a href="/show_fbuffer_sucratio" class="button_12 green green_borderbottom radius4">首次缓冲成功率</a>  
+        <a href="/show_fbuffer_time" class="button_12 blue blue_borderbottom radius4">首次缓冲时长</a>
+      </div>
+<!--Page 4 content-->
+      <div class="swiper-slide sliderbg">
+      	<a href="/show_fluency" class="button_12 green green_borderbottom radius4">一次不卡比例</a>  
+        <a href="/show_fluency_pratio" class="button_12 blue blue_borderbottom radius4">卡用户卡时间占比</a>
+        <a href="/show_fluency_allpratio" class="button_12 red red_borderbottom radius4">所有用户卡时间占比</a>  
+        <a href="/show_fluency_avgcount" class="button_12 orange orange_borderbottom radius4">卡顿播放平均卡次数</a>      	
+     </div>
+     
+<!--Page 5 content-->
+     <div class="swiper-slide sliderbg">
+        <a href="/show_3sratio" class="button_12 green green_borderbottom radius4">流量统计</a>
+        <a href="/show_avg_pcount" class="button_12 blue blue_borderbottom radius4">每小时播放卡顿平均次数</a>
+        <a href="/show_avg_ptime" class="button_12 red red_borderbottom radius4">每小时播放卡顿平均时长</a>  
+     </div>
+     <!--End of pages--> 
+
     </div>
+    <div class="pagination"></div>
+  </div>
+<script type="text/javascript" src="/static/js/phone/js/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/jquery.swipebox.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/idangerous.swiper-2.1.min.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/idangerous.swiper.scrollbar-2.1.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/jquery.tabify.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/jquery.fitvids.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/code.js"></script>
+<script type="text/javascript" src="/static/js/phone/js/load.js"></script>
+
+<!--Twitter Feed-->
+<script type="text/javascript" src="/static-src/js/phone/js/twitter/jquery.tweet.js" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+var $ = jQuery.noConflict();  
+jQuery(function($){
+	$(".tweet").tweet({
+	  modpath: 'js/twitter/',
+	  join_text: "auto",
+	  username: "famousthemes",
+	  count: 5,
+	  auto_join_text_default: "we said,",
+	  auto_join_text_ed: "we",
+	  auto_join_text_ing: "we were",
+	  auto_join_text_reply: "we replied",
+	  auto_join_text_url: "we were checking out",
+	  loading_text: "&nbsp;&nbsp;微博内容..."
+	});
+});
+</script>
 </body>
+</html>
