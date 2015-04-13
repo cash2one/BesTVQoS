@@ -59,11 +59,13 @@ def get_filter_param_values(request, table):
     if device_type not in device_types:
         device_type = device_types[0]
 
+    versions = []
     try:        
         versions = get_versions(
             table, service_type, device_type, begin_date, end_date)
     except Exception, e:
-        raise e
+        logger.info("get_versions(%s, %s, %s, %s, %s) failed." % (
+            table, service_type, device_type, begin_date, end_date))
 
     if version not in versions:
         version = versions[0]
