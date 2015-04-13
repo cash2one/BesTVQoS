@@ -9,6 +9,7 @@ from django.db import connection
 from common.date_time_tool import *
 from common.mobile import do_mobile_support
 from common.views import *
+from common.date_time_tool import *
 from fbuffer_views import process_single_Qos
 from tplay.models import *
 
@@ -16,9 +17,6 @@ logger = logging.getLogger("django.request")
 
 SERVICE_TYPES = ["All", "B2B", "B2C"]
 
-# VIEW_TYPES = [0, 1, 2, 3, 4, 5]
-# VIEW_TYPES_DES = {
-#     0: u"总计", 1: u"点播", 2: u"回看", 3: u"直播", 4: u"连看", 5: u"未知"}
 VIEW_TYPES = [
     (0, u"总体"), (1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")]
 
@@ -91,10 +89,13 @@ class PlayInfo:
     def read_filter_group_form(self, request):
         if(request.method == 'GET'):
             filters_map = get_default_values_from_cookie(request)
-            self.service_type = request.GET.get("service_type", filters_map["st"])
-            self.device_type = request.GET.get("device_type", filters_map["dt"])
+            self.service_type = request.GET.get(
+                "service_type", filters_map["st"])
+            self.device_type = request.GET.get(
+                "device_type", filters_map["dt"])
             self.version = request.GET.get("version", filters_map["vt"])
-            self.begin_date = request.GET.get("begin_date", filters_map["begin"])
+            self.begin_date = request.GET.get(
+                "begin_date", filters_map["begin"])
             self.end_date = request.GET.get("end_date", filters_map["end"])
 
         self.device_types = get_device_types1(
@@ -206,12 +207,18 @@ def get_play_info_today(context, playinfo):
     filters = "from playinfo where %s" % (playinfo.common_filter)
     sql_command = "select sum(Records) %s" % (filters)
     sql_command += playinfo.profile_exclude
+    logger.debug("get records_total SQL: %s" % sql_command)
+    begin_time = current_time()
     playinfo.cu.execute(sql_command)
 
     records_total = 0
     for item in playinfo.cu.fetchall():
         if item[0]:
             records_total = int(item[0])
+
+    end_time = current_time()
+    logger.debug("get records_total from MySql cost %ss" %
+                 (end_time - begin_time))
 
     if records_total == 0:
         logger.error("Unexpected Value: records_total: %d" % (records_total))
@@ -221,6 +228,9 @@ def get_play_info_today(context, playinfo):
             filters)
         sql_command += playinfo.profile_exclude
         sql_command += " group by DeviceType order by sum(Records) desc"
+        logger.debug("SQL: %s" % sql_command)
+
+        begin_time = current_time()
         playinfo.cu.execute(sql_command)
 
         for item in playinfo.cu.fetchall():
@@ -231,6 +241,9 @@ def get_play_info_today(context, playinfo):
             sub.append(round(100.0 * float(item[2]) / records_total, 2))
             subs.append(sub)
             table.msub.append(sub)
+
+        end_time = current_time()
+        logger.debug("get datas from MySql cost %ss" % (end_time - begin_time))
 
     return table
 
