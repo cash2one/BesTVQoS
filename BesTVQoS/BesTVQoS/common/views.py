@@ -49,6 +49,7 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     if service_type != "All":
         fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
     sql_command = "select distinct DeviceType from %s %s" % (table, fitlers)
+    sql_command += " and DeviceType not like '%.%'"
 
     if cu is None:
         cu = connection.cursor()
@@ -66,22 +67,63 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     return device_types
 
 
-def get_device_types(table, service_type, begin_date, end_date, cu=None):
+def get_device_types(table, service_type, begin_date, end_date):
+    device_types = []
+
     if service_type == "All":
-        q = table.objects.filter(Date__gte=begin_date, Date__lte=end_date).values(
-            'DeviceType').distinct()
+        q = table.objects.filter(Date__gte=begin_date, Date__lte=end_date).exclude(
+            DeviceType__contains='.').values('DeviceType').distinct()
     else:
         q = table.objects.filter(
-            ServiceType=service_type, Date__gte=begin_date, Date__lte=end_date).values(
-            'DeviceType').distinct()
+            ServiceType=service_type, Date__gte=begin_date, Date__lte=end_date).exclude(
+                DeviceType__contains='.').values('DeviceType').distinct()
 
     if len(q) > 0:
-        device_types = []
-        for i in q:
-            device_types.append(i["DeviceType"])
-    else:
-        device_types = []
+        device_types = [i["DeviceType"] for i in q]
+
     return device_types
+
+
+def get_versions(table, service_type, device_type, begin_date, end_date):
+    versions = ["All"]
+
+    if device_type == "":
+        return versions
+
+    version_patten = '%s_' % (device_type)
+
+    if service_type == "All":
+        q = table.objects.filter(
+            Date__gte=begin_date, Date__lte=end_date, DeviceType__contains=version_patten).values('DeviceType').distinct()
+    else:
+        q = table.objects.filter(
+            ServiceType=service_type, Date__gte=begin_date, Date__lte=end_date, DeviceType__contains=version_patten).values(
+                'DeviceType').distinct()
+
+    if len(q) > 0:
+        version_pos = len(device_type) + 1
+        for i in q:
+            versions.append(i["DeviceType"][version_pos:])
+
+    return versions
+
+
+def get_table_name(url):
+    table_name = ""
+    if url.find("playing_trend") != -1:
+        table_name = "playinfo"
+    elif url.find("fbuffer") != -1:
+        table_name = "fbuffer"
+    elif url.find("play_time") != -1:
+        table_name = "playtime"
+    elif url.find("fluency") != -1:
+        table_name = "fluency"
+    elif url.find("3sratio") != -1:
+        table_name = "Bestv3SRatio"
+    elif url.find("avg_pcount") != -1 or url.find("avg_ptime") != -1:
+        table_name = "BestvAvgPchoke"
+
+    return table_name
 
 
 def get_device_type(request, dev=""):
@@ -93,19 +135,7 @@ def get_device_type(request, dev=""):
             end_date = request.GET.get('end_date')
             url = request.META.get('HTTP_REFERER')
 
-            table_name = ""
-            if url.find("playing_trend") != -1:
-                table_name = "playinfo"
-            elif url.find("fbuffer") != -1:
-                table_name = "fbuffer"
-            elif url.find("play_time") != -1:
-                table_name = "playtime"
-            elif url.find("fluency") != -1:
-                table_name = "fluency"
-            elif url.find("3sratio") != -1:
-                table_name = "Bestv3SRatio"
-            elif url.find("avg_pcount") != -1 or url.find("avg_ptime") != -1:
-                table_name = "BestvAvgPchoke"
+            table_name = get_table_name(url)
 
             device_types = get_device_types1(
                 table_name, service_type, begin_date, end_date)
@@ -117,12 +147,55 @@ def get_device_type(request, dev=""):
     return HttpResponse(respStr, content_type="text/json")
 
 
+def get_versions1(table, service_type, device_type, begin_date, end_date, cu=None):
+    fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
+    if service_type != "All":
+        fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
+    fitlers += " and DeviceType like '%s_%%'" % (device_type)
+    sql_command = "select distinct DeviceType from %s %s" % (table, fitlers)
+
+    if cu is None:
+        cu = connection.cursor()
+
+    logger.debug("SQL %s" % sql_command)
+    cu.execute(sql_command)
+
+    version_pos = len(device_type) + 1
+    device_types = ["All"]
+    for item in cu.fetchall():
+        device_types.append(item[0][version_pos:])
+
+    return device_types
+
+
+def get_version(request, dev=""):
+    respStr = json.dumps({"versions": []})
+    if(request.method == 'GET'):
+        try:
+            service_type = request.GET.get('service_type')
+            device_type = request.GET.get('device_type')
+            begin_date = request.GET.get('begin_date')
+            end_date = request.GET.get('end_date')
+            url = request.META.get('HTTP_REFERER')
+
+            table_name = get_table_name(url)
+
+            versions = get_versions1(
+                table_name, service_type, device_type, begin_date, end_date)
+            respStr = json.dumps({"versions": versions})
+
+        except Exception, e:
+            raise e
+
+    return HttpResponse(respStr, content_type="text/json")
+
+
 def get_default_values_from_cookie(request):
-    filter_map = json.loads('{"st":"All","dt":"","begin":"%s","end":"%s"}' % (
+    filter_map = json.loads('{"st":"All","dt":"","vt":"","begin":"%s","end":"%s"}' % (
         today(), today()))
     try:
         filter_map = json.loads(request.COOKIES["bestvFilters"])
-        if("st" not in filter_map or "dt" not in filter_map or
+        if("st" not in filter_map or "dt" not in filter_map or "vt" not in filter_map or
                 "begin" not in filter_map or "end" not in filter_map):
             raise Exception()
     except:
@@ -135,6 +208,7 @@ def set_default_values_to_cookie(response, context):
     response.set_cookie("bestvFilters",
                         json.dumps({"st": context["default_service_type"],
                                     "dt": context["default_device_type"],
+                                    "vt": context["default_version"],
                                     "begin": context['default_begin_date'],
                                     "end": context['default_end_date']}),
                         max_age=30000)
