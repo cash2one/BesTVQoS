@@ -17,7 +17,7 @@ do
 	mkdir -p tmp/${type}/${date}/${svr}
 		
 	# column 5 is response code, 1 is to write subfile
-	perl key_distribution_calc.pl ${type} ${svr} ${date} ${hour} code 7 1 tmp/${type}/${date}/${svr}_hour
+	perl key_distribution_calc.pl ${type} ${svr} ${date} ${hour} code 7 0 tmp/${type}/${date}/${svr}_hour
 	
 	# colume 4 is request url
 	perl url_distribution_calc.pl ${type} ${svr} ${date} ${hour} url 0 tmp/${type}/${date}/${svr}_hour
