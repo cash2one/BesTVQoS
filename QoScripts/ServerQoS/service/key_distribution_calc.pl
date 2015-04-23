@@ -23,12 +23,6 @@ foreach $filename (@ARGV) {
 			open SUBFILE1, ">>tmp/${svrtype}/${date}/${svrip}/$element[$idx]\_hour";
 			print SUBFILE1 $_."\n";
 			close SUBFILE1;
-			
-			if ($hour != 24) {
-				open SUBFILE2, ">>tmp/${svrtype}/${date}/${svrip}/$element[$idx]";
-				print SUBFILE2 $_."\n";
-				close SUBFILE2;
-			}
 		}
 		
 		$total += 1;
