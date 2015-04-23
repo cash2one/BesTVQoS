@@ -37,5 +37,5 @@ do
 	#rm ${type}/${date}/${svr}/distribution_data_url_${hour}
 	
 	# delete tmp files
-	#rm tmp/${type}/${date}/${svr}_hour
+	rm tmp/${type}/${date}/${svr}_hour
 done
