@@ -1,13 +1,15 @@
 ﻿# -*- coding: utf-8 -*-
 import logging
+import xlwt as xlwt
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.db.models import Count, Min, Sum, Avg
 from tplay.models import *
 from common.mobile import do_mobile_support
 from common.views import *
 from common.date_time_tool import *
-import xlwt as xlwt
+
 ezxf=xlwt.easyxf
 
 logger = logging.getLogger("django.request")
