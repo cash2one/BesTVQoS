@@ -14,13 +14,11 @@ logger = logging.getLogger("django.request")
 
 def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
     for colx, value in enumerate(headings):
-        print '%s %s %s'%(rowx, colx, value)
         sheet.write(rowx, colx, value, heading_xf)
 
     for row in data:
         rowx+=1
         for colx, value in enumerate(row):
-            print '%s %s %s'%(rowx, colx, value)
             sheet.write(rowx, colx, value, data_xf)
 
     return rowx
@@ -68,8 +66,9 @@ def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
 
     return qos_data
 
+    qos_desc=[u'首次缓冲成功率', u'一次不卡比例', u'卡用户卡时间比']
     return [
-        [u'首次缓冲成功率-2.6.4.9', 90, 80, 70, 0],
+        [u'%s-2.6.4.9'%qos_desc[0], 90, 80, 70, 0],
         [u'首次缓冲成功率-2.6.4.2', 90, 80, 70, 0],
         [u'一次不卡比例-2.6.4.9', 90, 80, 70, 0],
         [u'一次不卡比例-2.6.4.2', 90, 80, 70, 0],
@@ -166,7 +165,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
 
 def day_reporter(request, dev=""):
     wb = xlwt.Workbook()
-    generate_report(wb, "2015-04-23", "2015-04-23", "2.6.4.9", "2.6.4.2")
+    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", "BesTV_Lite_A_2.6.4.2")
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=day_report_%s.xls'%('2015-04-22')
