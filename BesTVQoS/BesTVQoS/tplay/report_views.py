@@ -65,6 +65,7 @@ def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
             temp=[]
             temp.append(u"%s-%s"%(qos_desc[index], ver))
             for view in view_type:
+                begin_time = current_time()
                 view_objs=objs.filter(ViewType=view)
                 sum=0
                 count=0
@@ -72,6 +73,8 @@ def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
                     sum += getattr(obj, qos)
                     count+=1
                 temp.append(float("%.3f"%(sum/count)))
+                logger.info("aggregate qos %s, cost: %s" 
+                            %(qos, (current_time() - begin_time)))
                 #begin_time = current_time()
                 #obj=objs.filter(ViewType=view).aggregate(sum=Sum(qos))
                 #logger.info("aggregate qos %s, cost: %s" 
