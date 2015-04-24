@@ -60,8 +60,8 @@ def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
             temp=[]
             temp.append(u"%s-%s"%(qos_desc[index], ver))
             for view in view_type:
-                i=100
-                temp.append(i)
+                obj=objs.filter(ViewType=view).aggregate(sum=Sum(qos))
+                temp.append(obj["sum"])
             qos_data.append(temp)
 
     return qos_data
