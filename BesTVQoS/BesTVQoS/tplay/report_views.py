@@ -61,14 +61,14 @@ def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
             begin_time = current_time()
             objs=get_objs_by_device_date_hour(ver, begin_date, end_date, single_qos[index], 24)
             logger.info("filter qos %s, cost: %s" 
-                            %qos, (current_time() - begin_time))
+                            %(qos, (current_time() - begin_time)))
             temp=[]
             temp.append(u"%s-%s"%(qos_desc[index], ver))
             for view in view_type:
                 begin_time = current_time()
                 obj=objs.filter(ViewType=view).aggregate(sum=Sum(qos))
                 logger.info("aggregate qos %s, cost: %s" 
-                            %qos, (current_time() - begin_time))
+                            %(qos, (current_time() - begin_time)))
                 temp.append(obj["sum"])
             qos_data.append(temp)
 
