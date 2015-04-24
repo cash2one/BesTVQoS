@@ -51,6 +51,11 @@ urlpatterns = patterns(
     url(r'^((?P<dev>m)/)?show_avg_ptime$',
         'tplay.fbuffer_views.show_avg_ptime'),
 
+    url(r'^((?P<dev>m)/)?day_reporter$',
+        'tplay.report_views.day_reporter'),
+    url(r'^((?P<dev>m)/)?week_reporter$',
+        'tplay.report_views.week_reporter'),
+
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),
