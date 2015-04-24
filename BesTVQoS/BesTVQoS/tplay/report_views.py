@@ -58,11 +58,17 @@ def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
     view_type=[1, 2, 3, 4]  #(1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")
     for index, qos in enumerate(qos_name):
         for ver in vers:
+            begin_time = current_time()
             objs=get_objs_by_device_date_hour(ver, begin_date, end_date, single_qos[index], 24)
+            logger.info("filter qos %s, cost: %s" 
+                            %qos, (current_time() - begin_time))
             temp=[]
             temp.append(u"%s-%s"%(qos_desc[index], ver))
             for view in view_type:
+                begin_time = current_time()
                 obj=objs.filter(ViewType=view).aggregate(sum=Sum(qos))
+                logger.info("aggregate qos %s, cost: %s" 
+                            %qos, (current_time() - begin_time))
                 temp.append(obj["sum"])
             qos_data.append(temp)
 
