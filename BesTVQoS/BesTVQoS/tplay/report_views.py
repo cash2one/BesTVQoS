@@ -13,6 +13,9 @@ from common.date_time_tool import *
 
 ezxf=xlwt.easyxf
 
+VIEW_TYPES = [
+    (0, u"总体"), (1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")]
+
 logger = logging.getLogger("django.request")
 
 def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
@@ -70,7 +73,7 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
                     sum += row[0]
                     count+=1
                 avg=0
-                if count>0:
+                if count>1:
                     avg=sum/count
                 temp.append(float("%.3f"%(avg)))
                 logger.info("aggregate22 qos %s, count %d, cost: %s" 
@@ -80,30 +83,51 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
     db.close()
     return qos_data
 
+# p25, 50, 75, 90, 95, avg
+def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master_ver):
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
+
+    qos_data=[]
+    vers=[]
+    if len(beta_ver)>0:
+        vers.append(beta_ver)
+    if len(master_ver)>0:
+        vers.append(master_ver)
+
+    for (view, second) in view_types:
+        for ver in vers:
+            temp=[0 for i in range(7)]
+            temp[0]=u"%s-%s"%(ver, second)
+            sql="SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType='%s'"%(
+                    table, ver, begin_date, end_date, view)
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            count=0
+            for row in results:
+                count+=1
+                for i in range(6):
+                    temp[i+1]+=row[i]
+
+            if count>1:
+                for i in range(6):
+                    temp[i+1]/=count
+
+            qos_data.append(temp)
+    db.close()
+    return qos_data
+
 def get_playtm_data(begin_date, end_date, beta_ver, master_ver):
-    return [
-        [u'2.6.4.9-点播', 5, 10, 20, 30, 50, 25],
-        [u'2.6.4.2-点播', 5, 10, 20, 30, 50, 25],
-        [u'2.6.4.9-回看', 5, 10, 20, 30, 50, 25],
-        [u'2.6.4.2-回看', 5, 10, 20, 30, 50, 25],
-        [u'2.6.4.9-直播', 5, 10, 20, 30, 50, 25],
-        [u'2.6.4.2-直播', 5, 10, 20, 30, 50, 25],
-        ]
+    return get_multi_qos_data("playtime", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver)
 
 def get_fbuffer_data(begin_date, end_date, beta_ver, master_ver):
-    return [
-        [u'2.6.4.9-点播', 1, 1, 2, 3, 4, 2],
-        [u'2.6.4.2-点播', 1, 1, 2, 3, 4, 2],
-        [u'2.6.4.9-回看', 1, 1, 2, 3, 4, 2],
-        [u'2.6.4.2-回看', 1, 1, 2, 3, 4, 2],
-        [u'2.6.4.9-直播', 1, 1, 2, 3, 4, 2],
-        [u'2.6.4.2-直播', 1, 1, 2, 3, 4, 2],
-        ]
+    return get_multi_qos_data("fbuffer", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver)
 
 def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
+    begin_time = current_time()
     book = wb
     sheet = book.add_sheet("version-report")
-    sheet.col(0).width=8000
+    sheet.col(0).width=10000
     
     heading_xf=ezxf('borders: left thin, right thin, top thin, bottom thin; font: bold on; pattern: pattern solid, fore_colour bright_green')
     data_xf=ezxf('borders: left thin, right thin, top thin, bottom thin; font: name Arial')
@@ -132,7 +156,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     records_data=get_records_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, records_headings, records_data, heading_xf, data_xf)
     rowx+=2
-
+    print "step 1: ", current_time() - begin_time
     #
     # step 2: single Qos
     #     
@@ -140,7 +164,8 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     single_qos_data=get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, single_qos_headings, single_qos_data, heading_xf, data_xf)
     rowx+=2
-    
+    print "step 2: ", current_time() - begin_time
+
     #
     # step 3: playtm
     #    
@@ -148,6 +173,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     playtm_data=get_playtm_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, playtm_headings, playtm_data, heading_xf, data_xf)
     rowx+=2
+    print "step 3: ", current_time() - begin_time
     
     #
     # step 4: fbuffer
@@ -156,6 +182,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     fbuffer_data=get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, fbuffer_headings, fbuffer_data, heading_xf, data_xf)
     rowx+=2
+    print "step 4: ", current_time() - begin_time
     
     #
     # step 5: remarks
@@ -164,8 +191,11 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     remarks=[u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长']
     rowx=write_remarks_to_xls(book, sheet, rowx, remarks, remark_xf)
     rowx+=2
+    print "step 4: ", current_time() - begin_time
     
-    print begin_date, end_date, beta_ver
+    logger.info("generate_report:  %s - %s, cost: %s" %
+                (begin_date, end_date, (current_time() - begin_time)))
+    print begin_date, end_date, beta_ver, current_time() - begin_time
 
 def day_reporter(request, dev=""):
     wb = xlwt.Workbook()

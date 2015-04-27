@@ -27,7 +27,6 @@ PNVALUES_LIST_DES = {"P25": "P25", "P50": "P50",
 
 
 class NoDataError(Exception):
-
     def __init__(self, value):
         self.value = value
 
