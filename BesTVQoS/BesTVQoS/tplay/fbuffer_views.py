@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import logging
+import MySQLdb
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -39,6 +40,14 @@ class NoDataError(Exception):
 
 '''
 
+class FilterParams:
+    def __init__(self, table, servicetype, devicetype, begin_date, end_date):
+        self.table=table
+        self.servicetype=servicetype
+        self.devicetype=devicetype
+        self.begin_date=begin_date
+        self.end_date=end_date
+
 
 def get_filter_param_values(request, table):
     filters_map = get_default_values_from_cookie(request)
@@ -51,7 +60,7 @@ def get_filter_param_values(request, table):
     logger.info("get_filter_values: %s - %s - %s" %
                 (service_type, device_type, version))
 
-    device_types = get_device_types(table, service_type, begin_date, end_date)
+    device_types = get_device_types1(table, service_type, begin_date, end_date)
     if len(device_types) == 0:
         device_types = [""]
         device_type = ""
@@ -61,24 +70,19 @@ def get_filter_param_values(request, table):
 
     versions = []
     try:        
-        versions = get_versions(
+        versions = get_versions1(
             table, service_type, device_type, begin_date, end_date)
     except Exception, e:
         logger.info("get_versions(%s, %s, %s, %s, %s) failed." % (
             table, service_type, device_type, begin_date, end_date))
 
+    if len(versions) == 0:
+        versions = [""]
+        version = ""
     if version not in versions:
         version = versions[0]
 
     return service_type, device_type, device_types, version, versions, begin_date, end_date
-
-
-def get_filter_objs_by_device_types(device_type, begin_date, end_date, table):
-    device_filter_ojbs = table.objects.filter(
-        DeviceType=device_type, Date__gte=begin_date, Date__lte=end_date)
-
-    return device_filter_ojbs
-
 
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
 # is viewtype, lists contain each hour's data
@@ -106,59 +110,72 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
     return item
 
 
-def prepare_hour_data_of_single_Qos(objs, view_types, Qos_name, base_radix):
+def prepare_hour_data_of_single_Qos(filterParams, view_types, Qos_name, base_radix):
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
+
     data_by_hour = {}
     display_if_has_data = False
     for i in view_types:
         begin_time = current_time()
         view_idx = i[0]
         data_by_hour[view_idx] = []
-        if view_idx == 0:
-            filter_objs = objs
-        else:
-            filter_objs = objs.filter(ViewType=view_idx)
+        sql="SELECT %s, Hour FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour<24"%(
+                    Qos_name, filterParams.table, filterParams.devicetype, filterParams.begin_date, 
+                    filterParams.end_date)
+        if view_idx >= 0:
+            sql="%s and ViewType=%d"%(sql, view_idx)
 
         tmp_list = [0.0 for k in range(24)]
-        for obj in filter_objs:
-            if obj.Hour != 24:
-                tmp = getattr(obj, Qos_name)
-                tmp_list[obj.Hour] += tmp
-                if tmp > 0:
-                    display_if_has_data = True
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        logger.info("execute sql:  %s, cost: %s" %
+                (sql, (current_time() - begin_time)))
+        for row in results:
+            tmp_list[row[1]] += row[0]
+            if row[0]>0:
+                display_if_has_data = True
                     
         data_by_hour[view_idx] = ['%s' % (k * base_radix) for k in tmp_list]
 
+    db.close()
     if display_if_has_data == False:
         return None
     return data_by_hour
 
 
-def prepare_daily_data_of_single_Qos(objs, days_region, view_types, Qos_name, hour_flag, base_radix):
-    if hour_flag:
-        daily_objs = objs.filter(Hour=24)
-    else:
-        daily_objs = objs
-
+def prepare_daily_data_of_single_Qos(filterParams, days_region, view_types, Qos_name, hour_flag, base_radix):
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
+   
     data_by_day = {}
     display_if_has_data = False
     for i in view_types:
+        begin_time = current_time()
         view_idx = i[0]
         data_by_day[view_idx] = []
-        if view_idx == 0:
-            filter_objs = daily_objs
-        else:
-            filter_objs = daily_objs.filter(ViewType=view_idx)
+        sql="SELECT %s, Date FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s'"%(
+                    Qos_name, filterParams.table, filterParams.devicetype, filterParams.begin_date, 
+                    filterParams.end_date)
+        if hour_flag:
+            sql="%s and Hour=24"%sql
+        if view_idx != 0:
+            sql="%s and ViewType=%d"%(sql, view_idx)
 
         tmp_list = [0.0 for k in days_region]
-        for obj in filter_objs:
-            tmp = getattr(obj, Qos_name)
-            tmp_idx = get_days_offset(days_region[0], str(obj.Date))
-            tmp_list[tmp_idx] += tmp
-            if tmp > 0:
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        logger.info("execute sql:  %s, cost: %s" %
+                (sql, (current_time() - begin_time)))
+        for row in results:
+            tmp_idx = get_days_offset(days_region[0], str(row[1]))
+            tmp_list[tmp_idx] += row[0]
+            if row[0]>0:
                 display_if_has_data = True
 
         data_by_day[view_idx] = ['%s' % (k * base_radix) for k in tmp_list]
 
+    db.close()
     if display_if_has_data == False:
         return None
     return data_by_day
@@ -189,13 +206,12 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
         else:
             device_type_full = '%s_%s' % (device_type, version) 
 
-        device_filter_ojbs = get_filter_objs_by_device_types(device_type_full, begin_date, end_date, table)
-        logger.info("filter %s %s, cost: %s" % (str(table), Qos_name, (current_time() - begin_time)))
+        filterParams=FilterParams(table, service_type, device_type_full, begin_date, end_date)
 
         # process data from databases;
         if begin_date == end_date and hour_flag == True:
             data_by_hour = prepare_hour_data_of_single_Qos(
-                device_filter_ojbs, view_types, Qos_name, base_radix)
+                filterParams, view_types, Qos_name, base_radix)
             if data_by_hour is None:
                 raise NoDataError(
                     "No hour data between %s - %s" % (begin_date, end_date))
@@ -205,7 +221,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
         else:
             days_region = get_days_region(begin_date, end_date)
             data_by_day = prepare_daily_data_of_single_Qos(
-                device_filter_ojbs, days_region, view_types, Qos_name, hour_flag, base_radix)
+                filterParams, days_region, view_types, Qos_name, hour_flag, base_radix)
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
@@ -239,7 +255,7 @@ def process_single_Qos(request, table, Qos_name, title, subtitle, ytitle, view_t
 
 def show_fbuffer_sucratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFbuffer, "SucRatio", u"首次缓冲成功率", u"加载成功的播放次数/播放总次数", u"成功率(%)", VIEW_TYPES[1:], True, 100)
+        request, "fbuffer", "SucRatio", u"首次缓冲成功率", u"加载成功的播放次数/播放总次数", u"成功率(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fbuffer_sucratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -250,7 +266,7 @@ def show_fbuffer_sucratio(request, dev=""):
 
 def show_fluency(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "Fluency", u"一次不卡比例", u"无卡顿播放次数/加载成功的播放次数", u"百分比(%)", VIEW_TYPES[1:], True, 100)
+        request, "fluency", "Fluency", u"一次不卡比例", u"无卡顿播放次数/加载成功的播放次数", u"百分比(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency.html', context)
     set_default_values_to_cookie(response, context)
@@ -260,7 +276,7 @@ def show_fluency(request, dev=""):
 
 def show_fluency_pratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "PRatio", u"卡用户卡时间比", u"卡顿总时长/卡顿用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], True, 100)
+        request, "fluency", "PRatio", u"卡用户卡时间比", u"卡顿总时长/卡顿用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_pratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -270,7 +286,7 @@ def show_fluency_pratio(request, dev=""):
 
 def show_fluency_allpratio(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AllPRatio", u"所有用户卡时间比", u"卡顿总时长/所有用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], True, 100)
+        request, "fluency", "AllPRatio", u"所有用户卡时间比", u"卡顿总时长/所有用户播放总时长", u"百分比(%)", VIEW_TYPES[1:], True, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_allpratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -280,7 +296,7 @@ def show_fluency_allpratio(request, dev=""):
 
 def show_fluency_avgcount(request, dev=""):
     context = process_single_Qos(
-        request, BestvFluency, "AvgCount", u"卡顿播放平均卡次数", u"卡顿总次数/卡顿播放数", u"次数", VIEW_TYPES[1:], True)
+        request, "fluency", "AvgCount", u"卡顿播放平均卡次数", u"卡顿总次数/卡顿播放数", u"次数", VIEW_TYPES[1:], True)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_fluency_avgcount.html', context)
     set_default_values_to_cookie(response, context)
@@ -290,7 +306,7 @@ def show_fluency_avgcount(request, dev=""):
 
 def show_3sratio(request, dev=""):
     context = process_single_Qos(
-        request, Bestv3SRatio, "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"百分比(%）", VIEW_TYPES[0:1], False, 100)
+        request, "bestv3sratio", "Ratio", u"3秒起播占比", u"首次载入时长小于等于3秒的播放次数/播放总次数", u"百分比(%）", VIEW_TYPES[0:1], False, 100)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_3sratio.html', context)
     set_default_values_to_cookie(response, context)
@@ -300,7 +316,7 @@ def show_3sratio(request, dev=""):
 
 def show_avg_pcount(request, dev=""):
     context = process_single_Qos(
-        request, BestvAvgPchoke, "AvgCount", u"每小时播放卡顿平均次数", u"卡顿次数/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1], False)
+        request, "bestvavgpchoke", "AvgCount", u"每小时播放卡顿平均次数", u"卡顿次数/卡顿用户播放总时长（小时）", u"次数", VIEW_TYPES[0:1], False)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_avg_pcount.html', context)
     set_default_values_to_cookie(response, context)
@@ -310,7 +326,7 @@ def show_avg_pcount(request, dev=""):
 
 def show_avg_ptime(request, dev=""):
     context = process_single_Qos(
-        request, BestvAvgPchoke, "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"秒", VIEW_TYPES[0:1], False)
+        request, "bestvavgpchoke", "AvgTime", u"每小时播放卡顿平均时长", u"卡顿总时长（秒）/卡顿用户播放总时长（小时）", u"秒", VIEW_TYPES[0:1], False)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_avg_ptime.html', context)
     set_default_values_to_cookie(response, context)
@@ -324,32 +340,36 @@ def show_avg_ptime(request, dev=""):
 '''
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
+def prepare_pnvalue_hour_data(filterParams, view_types, pnvalue_types, base_radix):
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
 
-
-def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types, base_radix):
     data_by_hour = {}
     for (i, second) in view_types:
-        filter_objs = objs.filter(ViewType=i)
+        sql="SELECT Hour, P25, P50, P75, P90, P95, AverageTime FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour<24 and ViewType=%d"%(
+                    filterParams.table, filterParams.devicetype, filterParams.begin_date, 
+                    filterParams.end_date, i)
         display_data = {}
         for (pn_idx, pn_des) in pnvalue_types:
             display_data[pn_idx] = ["0" for k in range(24)]
 
         display_if_has_data = False
-        for obj in filter_objs:
-            hour = obj.Hour
-            if hour != 24:
-                display_data[pnvalue_types[0][0]][hour] = "%s" % (obj.P25 / base_radix)
-                display_data[pnvalue_types[1][0]][hour] = "%s" % (obj.P50 / base_radix)
-                display_data[pnvalue_types[2][0]][hour] = "%s" % (obj.P75 / base_radix)
-                display_data[pnvalue_types[3][0]][hour] = "%s" % (obj.P90 / base_radix)
-                display_data[pnvalue_types[4][0]][hour] = "%s" % (obj.P95 / base_radix)
-                display_data[pnvalue_types[5][0]][hour] = "%s" % (obj.AverageTime / base_radix)
-                if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
-                    display_if_has_data = True
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        for row in results:
+            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[1] / base_radix)
+            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[2] / base_radix)
+            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[3] / base_radix)
+            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[4] / base_radix)
+            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[5] / base_radix)
+            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[6] / base_radix)
+            if row[1]+row[2]+row[3]+row[4]+row[5]+row[6]>0:
+                display_if_has_data = True
 
         if display_if_has_data:
             data_by_hour[i] = display_data
 
+    db.close()
     if len(data_by_hour) == 0:
         return None
     return data_by_hour
@@ -357,29 +377,37 @@ def prepare_pnvalue_hour_data(objs, view_types, pnvalue_types, base_radix):
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
 
 
-def prepare_pnvalue_daily_data(objs, days_region, view_types, pnvalue_types, base_radix):
+def prepare_pnvalue_daily_data(filterParams, days_region, view_types, pnvalue_types, base_radix):
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
+
     data_by_day = {}
     for (i, second) in view_types:
-        filter_objs = objs.filter(ViewType=i, Hour=24)
+        sql="SELECT Date, P25, P50, P75, P90, P95, AverageTime FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d"%(
+                    filterParams.table, filterParams.devicetype, filterParams.begin_date, 
+                    filterParams.end_date, i)
         display_data = {}
         for (pn_idx, pn_des) in pnvalue_types:
             display_data[pn_idx] = ["0" for k in days_region]
 
         display_if_has_data = False
-        for obj in filter_objs:
-            tmp_idx = get_days_offset(days_region[0], str(obj.Date))
-            display_data[pnvalue_types[0][0]][tmp_idx] = "%s" % (obj.P25 / base_radix)
-            display_data[pnvalue_types[1][0]][tmp_idx] = "%s" % (obj.P50 / base_radix)
-            display_data[pnvalue_types[2][0]][tmp_idx] = "%s" % (obj.P75 / base_radix)
-            display_data[pnvalue_types[3][0]][tmp_idx] = "%s" % (obj.P90 / base_radix)
-            display_data[pnvalue_types[4][0]][tmp_idx] = "%s" % (obj.P95 / base_radix)
-            display_data[pnvalue_types[5][0]][tmp_idx] = "%s" % (obj.AverageTime / base_radix)
-            if (obj.P25 + obj.P50 + obj.P75 + obj.P90 + obj.P95 + obj.AverageTime) > 0:
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        for row in results:
+            tmp_idx = get_days_offset(days_region[0], str(row[0]))
+            display_data[pnvalue_types[0][0]][tmp_idx] = "%s" % (row[1] / base_radix)
+            display_data[pnvalue_types[1][0]][tmp_idx] = "%s" % (row[2] / base_radix)
+            display_data[pnvalue_types[2][0]][tmp_idx] = "%s" % (row[3] / base_radix)
+            display_data[pnvalue_types[3][0]][tmp_idx] = "%s" % (row[4] / base_radix)
+            display_data[pnvalue_types[4][0]][tmp_idx] = "%s" % (row[5] / base_radix)
+            display_data[pnvalue_types[5][0]][tmp_idx] = "%s" % (row[6] / base_radix)
+            if row[1]+row[2]+row[3]+row[4]+row[5]+row[6]>0:
                 display_if_has_data = True
 
         if display_if_has_data:
             data_by_day[i] = display_data
-
+    
+    db.close()
     if len(data_by_day) == 0:
         return None
     return data_by_day
@@ -409,15 +437,12 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
         else:
             device_type_full = '%s_%s' % (device_type, version) 
 
-        device_filter_ojbs = get_filter_objs_by_device_types(
-            device_type_full, begin_date, end_date, table)
-        logger.info("filter %s multiQos, cost: %s" %
-                    (str(table), (current_time() - begin_time)))
+        filterParams=FilterParams(table, service_type, device_type_full, begin_date, end_date)
 
         # process data from databases;
         if begin_date == end_date:
             data_by_hour = prepare_pnvalue_hour_data(
-                device_filter_ojbs, view_types, pnvalue_types, base_radix)
+                filterParams, view_types, pnvalue_types, base_radix)
             if data_by_hour is None:
                 raise NoDataError(
                     "No hour data between %s - %s" % (begin_date, end_date))
@@ -434,7 +459,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
         else:
             days_region = get_days_region(begin_date, end_date)
             data_by_day = prepare_pnvalue_daily_data(
-                device_filter_ojbs, days_region, view_types, pnvalue_types, base_radix)
+                filterParams, days_region, view_types, pnvalue_types, base_radix)
             if data_by_day is None:
                 raise NoDataError(
                     "No daily data between %s - %s" % (begin_date, end_date))
@@ -475,7 +500,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
 
 def show_fbuffer_time(request, dev=""):
     context = process_multi_plot(
-        request, BestvFbuffer, u"缓冲PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
+        request, "fbuffer", u"缓冲PN值", u"", u"单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
     do_mobile_support(request, dev, context)
 
     response = render_to_response('show_fbuffer_time.html', context)
@@ -486,7 +511,7 @@ def show_fbuffer_time(request, dev=""):
 
 def show_play_time(request, dev=""):
     context = process_multi_plot(
-        request, BestvPlaytime, u"播放时长PN值", u"", u"单位：分钟", VIEW_TYPES[1:], PNVALUES_LIST, 60)
+        request, "playtime", u"播放时长PN值", u"", u"单位：分钟", VIEW_TYPES[1:], PNVALUES_LIST, 60)
     do_mobile_support(request, dev, context)
     response = render_to_response('show_play_time.html', context)
     set_default_values_to_cookie(response, context)

@@ -323,7 +323,7 @@ def show_playing_daily(request, dev=""):
 
 def show_playing_trend(request, dev=""):
     context = process_single_Qos(
-        request, BestvPlayinfo, "Records", u"用户观看量",
+        request, "playinfo", "Records", u"用户观看量",
         u"", u"观看量", VIEW_TYPES, True, 1)
 
     do_mobile_support(request, dev, context)

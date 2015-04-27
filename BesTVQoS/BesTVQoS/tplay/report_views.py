@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import logging
 import xlwt as xlwt
+import MySQLdb
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -32,67 +33,52 @@ def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
 
     return rowx
 
-def get_objs_by_device_date_hour(device_type, begin_date, end_date, table, hour):
-    filter_ojbs = table.objects.filter(
-        DeviceType=device_type, Date__gte=begin_date, Date__lte=end_date, Hour=hour)
-
-    return filter_ojbs
-
 def get_records_data(begin_date, end_date, beta_ver, master_ver):
     return [
         ['2.6.4.9', 1000, 1000, 500, 500, 3000],
         ['2.6.4.2', 3000, 3000, 1000, 1000, 8000]
         ]
 
-def get_single_qos_data(begin_date, end_date, beta_ver, master_ver):
+def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
+
+    qos_data=[]
     vers=[]
     if len(beta_ver)>0:
         vers.append(beta_ver)
     if len(master_ver)>0:
         vers.append(master_ver)
-
-    qos_data=[]
-    single_qos=[BestvFbuffer, BestvFluency, BestvFluency]
+    
+    single_qos=['fbuffer', 'fluency', 'fluency']
     qos_name=['SucRatio', 'Fluency', 'PRatio']
     qos_desc=[u'首次缓冲成功率', u'一次不卡比例', u'卡用户卡时间比']
     view_type=[1, 2, 3, 4]  #(1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")
     for index, qos in enumerate(qos_name):
         for ver in vers:
-            begin_time = current_time()
-            objs=get_objs_by_device_date_hour(ver, begin_date, end_date, single_qos[index], 24)
-            logger.info("filter qos %s, cost: %s" 
-                            %(qos, (current_time() - begin_time)))
             temp=[]
             temp.append(u"%s-%s"%(qos_desc[index], ver))
             for view in view_type:
-                begin_time = current_time()
-                view_objs=objs.filter(ViewType=view)
+                begin_time = current_time()                
                 sum=0
                 count=0
-                for obj in view_objs:
-                    sum += getattr(obj, qos)
+                sql="SELECT %s FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType='%s'"%(
+                    qos, single_qos[index], ver, begin_date, end_date, view)
+                cursor.execute(sql)
+                results = cursor.fetchall()
+                for row in results:
+                    sum += row[0]
                     count+=1
-                temp.append(float("%.3f"%(sum/count)))
-                logger.info("aggregate qos %s, cost: %s" 
-                            %(qos, (current_time() - begin_time)))
-                #begin_time = current_time()
-                #obj=objs.filter(ViewType=view).aggregate(sum=Sum(qos))
-                #logger.info("aggregate qos %s, cost: %s" 
-                #            %(qos, (current_time() - begin_time)))
-                #temp.append(obj["sum"])
+                avg=0
+                if count>0:
+                    avg=sum/count
+                temp.append(float("%.3f"%(avg)))
+                logger.info("aggregate22 qos %s, count %d, cost: %s" 
+                            %(qos, count, (current_time() - begin_time)))
             qos_data.append(temp)
 
+    db.close()
     return qos_data
-
-    qos_desc=[u'首次缓冲成功率', u'一次不卡比例', u'卡用户卡时间比']
-    return [
-        [u'%s-2.6.4.9'%qos_desc[0], 90, 80, 70, 0],
-        [u'首次缓冲成功率-2.6.4.2', 90, 80, 70, 0],
-        [u'一次不卡比例-2.6.4.9', 90, 80, 70, 0],
-        [u'一次不卡比例-2.6.4.2', 90, 80, 70, 0],
-        [u'卡用户卡时间比-2.6.4.9', 2, 3, 4, 0],
-        [u'卡用户卡时间比-2.6.4.2', 2, 3, 4, 0]
-        ]
 
 def get_playtm_data(begin_date, end_date, beta_ver, master_ver):
     return [
@@ -151,7 +137,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 2: single Qos
     #     
     single_qos_headings=[u'一次不卡比例/版本', u'点播', u'回看', u'直播', u'连看']
-    single_qos_data=get_single_qos_data(begin_date, end_date, beta_ver, master_ver)
+    single_qos_data=get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, single_qos_headings, single_qos_data, heading_xf, data_xf)
     rowx+=2
     
