@@ -50,6 +50,7 @@ class FilterParams:
 
 
 def get_filter_param_values(request, table):
+    begin_time = current_time()
     filters_map = get_default_values_from_cookie(request)
     service_type = request.GET.get("service_type", filters_map["st"])
     device_type = request.GET.get("device_type", filters_map["dt"])
@@ -67,6 +68,8 @@ def get_filter_param_values(request, table):
 
     if device_type not in device_types:
         device_type = device_types[0]
+    logger.info("get_filter_param_values1 %s %s, cost: %s" %
+                (device_type, version, (current_time() - begin_time)))
 
     versions = []
     try:        
@@ -82,6 +85,8 @@ def get_filter_param_values(request, table):
     if version not in versions:
         version = versions[0]
 
+    logger.info("get_filter_param_values %s %s, cost: %s" %
+                (device_type, version, (current_time() - begin_time)))
     return service_type, device_type, device_types, version, versions, begin_date, end_date
 
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
