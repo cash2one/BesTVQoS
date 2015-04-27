@@ -11,3 +11,4 @@ perl filter_data_by_svrip.pl ${type} ${date} ${hour} svrip 1 tmp/${type}/${date}
 
 bash server_qos_by_svrip.sh ${type} ${date} ${hour} ${type}/${date}/distribution_data_svrip_${hour}
 
+rm -rf tmp/${type}/${date}
