@@ -73,7 +73,7 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
                     sum += row[0]
                     count+=1
                 avg=0
-                if count>1:
+                if count>0:
                     avg=sum/count
                 temp.append(float("%.3f"%(avg)))
                 logger.info("aggregate22 qos %s, count %d, cost: %s" 
