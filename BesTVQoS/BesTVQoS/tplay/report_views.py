@@ -37,10 +37,36 @@ def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
     return rowx
 
 def get_records_data(begin_date, end_date, beta_ver, master_ver):
-    return [
-        ['2.6.4.9', 1000, 1000, 500, 500, 3000],
-        ['2.6.4.2', 3000, 3000, 1000, 1000, 8000]
-        ]
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
+    cursor = db.cursor()
+
+    qos_data=[]
+    vers=[]
+    if len(beta_ver)>0:
+        vers.append(beta_ver)
+    if len(master_ver)>0:
+        vers.append(master_ver)
+
+    view_type=[1, 2, 3, 4] #(1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")
+    for ver in vers:
+        temp=[]
+        temp.append("%s"%(ver))
+        total=0
+        for view in view_type:
+            sql="SELECT Records FROM playinfo WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType='%s'"%(
+                    ver, begin_date, end_date, view)
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            sum=0
+            for row in results:
+                sum += row[0]
+            temp.append(sum)
+            total+=sum
+        temp.append(total)
+        qos_data.append(temp)
+
+    db.close()
+    return qos_data
 
 def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
     db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
@@ -160,7 +186,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 2: single Qos
     #     
-    single_qos_headings=[u'一次不卡比例/版本', u'点播', u'回看', u'直播', u'连看']
+    single_qos_headings=[u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
     single_qos_data=get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, single_qos_headings, single_qos_data, heading_xf, data_xf)
     rowx+=2
