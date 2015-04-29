@@ -27,8 +27,8 @@ def update_code_info(svrtype, svrip, isp, area, date, hour, code, records, ratio
    request['date'] = date
    request['hour'] = hour
    request['code'] = code
-   request['records'] = '%s'%(records)
-   request['ratio'] = '%.2f'%(ratio)
+   request['records'] = records
+   request['ratio'] = ratio
    
    items = []
    items.append(request)
@@ -43,7 +43,7 @@ def update_code_info(svrtype, svrip, isp, area, date, hour, code, records, ratio
    print response.read()
 
 
-def update_time(datatype, svrtype, svrip, isp, area, date, hour, url, p25, p50, p75, p90, p95, avg):
+def update_time(datatype, svrtype, svrip, isp, area, date, hour, code, url, p25, p50, p75, p90, p95, avg):
 
    url = "http://127.0.0.1:6699/update/log/%s"%(datatype)
    
@@ -54,6 +54,7 @@ def update_time(datatype, svrtype, svrip, isp, area, date, hour, url, p25, p50, 
    request['area'] = area
    request['date'] = date
    request['hour'] = hour
+   request['code'] = code
    request['url'] = url
    request['P25'] = p25*1000
    request['P50'] = p50*1000
@@ -74,8 +75,9 @@ def update_time(datatype, svrtype, svrip, isp, area, date, hour, url, p25, p50, 
 
    print response.read()
 
-def save_tm_to_DB(filename, datatype, svrtype, svrip, isp, area, date, hour, url):
-    data = np.genfromtxt(filename, delimiter="|", names="hour,25,50,75,90,95,avg", usecols=(1,3,4,5,6,7,8), dtype="i8,f8,f8,f8,f8,f8,f8")
+def save_tm_to_DB(filename, datatype, svrtype, svrip, isp, area, date, hour, code, url):
+    data = np.genfromtxt(filename, delimiter="|", names="hour,25,50,75,90,95,avg", usecols=(1,3,4,5,6,7,8), dtype="S8,f8,f8,f8,f8,f8,f8")
+    
     i = -1
     try:
         i = data['hour'].tolist().index(hour)
@@ -83,34 +85,34 @@ def save_tm_to_DB(filename, datatype, svrtype, svrip, isp, area, date, hour, url
         print hour, e
     
     if i == 0:
-        update_time(datatype, svrtype, svrip, isp, area, date, hour, url, data['25'], data['50'], data['75'], data['90'], data['95'], data['avg'])
-        print datatype, svrtype, svrip, isp, area, date, hour, url, data['25'], data['50'], data['75'], data['90'], data['95'], data['avg']
+        update_time(datatype, svrtype, svrip, isp, area, date, hour, code, url, data['25'], data['50'], data['75'], data['90'], data['95'], data['avg'])
+        print datatype, svrtype, svrip, isp, area, date, hour, code, url, data['25'], data['50'], data['75'], data['90'], data['95'], data['avg']
     
     if i > 0:
         #print data1['date'][i]
-        update_time(datatype, svrtype, svrip, isp, date, area, hour, url, data['25'][i], data['50'][i], data['75'][i], data['90'][i], data['95'][i], data['avg'][i])
-        print datatype, svrtype, svrip, isp, date, area, hour, url, data['25'][i], data['50'][i], data['75'][i], data['90'][i], data['95'][i], data['avg'][i]
+        update_time(datatype, svrtype, svrip, isp, area, date, hour, code, url, data['25'][i], data['50'][i], data['75'][i], data['90'][i], data['95'][i], data['avg'][i])
+        print datatype, svrtype, svrip, isp, area, date, hour, code, url, data['25'][i], data['50'][i], data['75'][i], data['90'][i], data['95'][i], data['avg'][i]
        
 def save_code_to_DB(filename, svrtype, svrip, isp, area, date, hour):       
     data = np.genfromtxt(filename, delimiter="|", names="code,records,ratio", usecols=(1,2,3), dtype="i8,i8,f8")
         
     i = len(data['code'])
     if i == 1:
-        update_code_info(svrtype, svrip, isp, date, area, hour, data['code'], data['records'], data['ratio'])
-        print svrtype, svrip, isp, date, area, hour, data['code'], data['records'], data['ratio']
+        update_code_info(svrtype, svrip, isp, area, date, hour, data['code'], data['records'], data['ratio'])
+        print svrtype, svrip, isp, area, date, hour, data['code'], data['records'], data['ratio']
         return
     
     for k in range(i):
-        update_code_info(svrtype, svrip, isp, date, area, hour, data['code'][k], data['records'][k], data['ratio'][k])
-        print svrtype, svrip, isp, date, area, hour, data['code'][k], data['records'][k], data['ratio'][k]
+        update_code_info(svrtype, svrip, isp, area, date, hour, data['code'][k], data['records'][k], data['ratio'][k])
+        print svrtype, svrip, isp, area, date, hour, data['code'][k], data['records'][k], data['ratio'][k]
     
 
 def main(svrtype, svrip, date, hour, filename1, filename2, filename3):
     isp = 'OTT'
     area = 'OTT'
     
-    save_tm_to_DB(filename1, 'reqdelay', svrtype, svrip, isp, area, date, hour, 'all')
-    save_tm_to_DB(filename2, 'respdelay', svrtype, svrip, isp, area, date, hour, 'all')
+    save_tm_to_DB(filename1, 'reqdelay', svrtype, svrip, isp, area, date, hour, 200, 'all')
+    save_tm_to_DB(filename2, 'respdelay', svrtype, svrip, isp, area, date, hour, 200, 'all')
     save_code_to_DB(filename3, svrtype, svrip, isp, area, date, hour)
            
 if __name__ == '__main__':
