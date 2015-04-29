@@ -75,7 +75,7 @@ def update_time(datatype, svrtype, svrip, isp, area, date, hour, url, p25, p50, 
    print response.read()
 
 def save_tm_to_DB(filename, datatype, svrtype, svrip, isp, area, date, hour, url):
-    data = np.genfromtxt(filename, delimiter="|", names="hour,25,50,75,90,95,avg", usecols=(1,3,4,5,6,7,8,9), dtype="i8,f8,f8,f8,f8,f8,f8")
+    data = np.genfromtxt(filename, delimiter="|", names="hour,25,50,75,90,95,avg", usecols=(1,3,4,5,6,7,8), dtype="i8,f8,f8,f8,f8,f8,f8")
     i = -1
     try:
         i = data['hour'].tolist().index(hour)
