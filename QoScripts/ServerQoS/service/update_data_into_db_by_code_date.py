@@ -60,12 +60,12 @@ def save_url_to_DB(filename, svrtype, svrip, isp, area, date, hour, code):
         print svrtype, svrip, isp, date, area, hour, code, data['url'][i], data['records'][i], data['ratio'][i]
 
 def main(svrtype, svrip, date, hour, code, filename):
-    isp = 'JS'
-    area = 'YD'
+    isp = 'OTT'
+    area = 'OTT'
     
     save_url_to_DB(filename, svrtype, svrip, isp, area, date, hour, code)         
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
 
    

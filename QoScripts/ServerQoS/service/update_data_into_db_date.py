@@ -108,7 +108,7 @@ def save_code_to_DB(filename, svrtype, svrip, isp, area, date, hour):
         update_code_info(svrtype, svrip, isp, date, area, hour, data['code'][i], data['records'][i], data['ratio'][i])
         print svrtype, svrip, isp, date, area, hour, data['code'][i], data['records'][i], data['ratio'][i]
 
-def main(svrtype, svrip, date, hour, viewtype, filename1, filename2):
+def main(svrtype, svrip, date, hour, filename1, filename2, filename3):
     isp = 'OTT'
     area = 'OTT'
     
