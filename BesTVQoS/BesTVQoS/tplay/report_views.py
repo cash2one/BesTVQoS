@@ -204,7 +204,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 4: fbuffer
     #    
-    fbuffer_headings=[u'首次缓冲时长', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    fbuffer_headings=[u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
     fbuffer_data=get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, fbuffer_headings, fbuffer_data, heading_xf, data_xf)
     rowx+=2
@@ -215,7 +215,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #    
     remark_xf=ezxf('font: name Arial, colour Red')
     remarks=[u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
-        u'多天报表的算均值']
+        u'多天报表的算均值：算均值可能存在差错']
     rowx=write_remarks_to_xls(book, sheet, rowx, remarks, remark_xf)
     rowx+=2
     print "step 4: ", current_time() - begin_time
