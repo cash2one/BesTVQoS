@@ -2,6 +2,9 @@
 import json
 import urllib
 import urllib2
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 if __name__ == '__main__':    
     items=[{'IP':'192.168.16.34', 'ServiceType':'B2C', 'ISP':u'移动', 'Area':u'江苏', \

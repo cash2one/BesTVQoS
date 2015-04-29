@@ -2,6 +2,9 @@
 import json
 import logging
 import MySQLdb
+import sys
+reload(sys)
+sys.setdefaultencoding( "utf-8" )
 
 from django.http import HttpResponse
 from django.db import IntegrityError
