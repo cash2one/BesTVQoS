@@ -21,7 +21,7 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, url, record, ratio):
 
    request = {}
    request['servicetype'] = svrtype
-   request['svrip'] = svrip
+   request['ip'] = svrip
    request['isp'] = isp
    request['area'] = area
    request['date'] = date
