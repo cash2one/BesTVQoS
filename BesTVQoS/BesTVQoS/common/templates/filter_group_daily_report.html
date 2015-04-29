@@ -1,0 +1,128 @@
+<link rel="stylesheet" type="text/css" href="/static/js/multiselectSrc/jquery.multiselect.css" />
+<link rel="stylesheet" type="text/css" href="/static/js/ui/jquery-ui.css" />
+<script type="text/javascript" src="/static/js/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
+
+<script type="text/javascript">     
+$(function(){
+    $("#service_type").multiselect({
+        selectedList:1,
+        height:110,
+        multiple:false,
+        header:false,
+        minWidth:100
+    });
+    $("#device_type").multiselect({
+        selectedList:1,
+        height:110,
+        multiple:false,
+        header:false,
+        minWidth:100
+    });
+    $("#version").multiselect({
+        selectedList:1,
+        height:110,
+        multiple:false,
+        header:false,
+        minWidth:100
+    });
+});
+
+function get_device_type(platform) {
+    var service_type = $("#service_type").val()
+    var begin_date = $("#begin_date").val()
+    var end_date = $("#end_date").val()
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "get_device_type",
+        data: { 
+            'service_type': service_type,
+            'begin_date': begin_date,
+            'end_date': end_date,
+        },
+        success: function (data) {
+            $("#device_type").empty()
+            device_types = data["device_types"];
+
+            for(i=0;i<device_types.length;i++)
+            {
+                $("#device_type").append("<option value='"+device_types[i]+"'>"+device_types[i]+"</option>");
+            }
+            get_version(device_types[0]);
+            $("#device_type").multiselect('refresh'); 
+
+        }
+    });
+}   
+
+function get_version(device_type) {
+    var service_type = $("#service_type").val()
+    var device_type = $("#device_type").val()
+    var begin_date = $("#begin_date").val()
+    var end_date = $("#end_date").val()
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "get_version",
+        data: { 
+            'service_type': service_type,
+            'device_type': device_type,
+            'begin_date': begin_date,
+            'end_date': end_date,
+        },
+        success: function (data) {
+            versions = data["versions"];
+
+            $("#version").empty()  
+            $("#version2").empty()         
+            for(i=0;i<versions.length;i++)
+            {
+                $("#version").append("<option value='"+versions[i]+"'>"+versions[i]+"</option>");
+                $("#version2").append("<option value='"+versions[i]+"'>"+versions[i]+"</option>");
+                
+                
+            }
+            $("#version").multiselect('refresh'); 
+            $("#version2").multiselect('refresh'); 
+            
+            
+
+           
+        }
+    });
+}   
+</script>
+
+
+<form action="generate_report" method="get">
+    <div class="pageitem">
+        <span style="float:left;padding-left:1%;"></span>
+            {% include 'filter_service_type.html'%}
+            {% include 'filter_device_type.html'%}
+            {% include 'filter_versions.html'%}
+            {% include 'filter_versions2.html'%}
+        <div class="ctrlbox">
+            <div class="ctrlitem">  
+                <label>起始日期</label>
+                {% if is_mobile %}
+                    <input name="begin_date" type="date" value="{{default_begin_date}}" id="begin_date">
+                {% else %}
+                    <input class="Wdate" name="begin_date" type="text" value="{{default_begin_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})" id="begin_date">
+                {% endif %}
+            </div>
+            <div class="ctrlitem">  
+                <label>结束日期</label>
+                {% if is_mobile %}
+                    <input name="end_date" type="date" value="{{default_end_date}}" id="end_date">
+                {% else %}
+                    <input class="Wdate" name="end_date" type="text" value="{{default_end_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})" id="end_date">
+                {% endif %}
+            </div>
+            <div class="ctrlitem">
+                <input type="submit" value="生成/下载报表">
+            </div>
+        </div>
+    </div>
+</form>

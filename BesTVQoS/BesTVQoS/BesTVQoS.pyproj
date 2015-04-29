@@ -75,7 +75,10 @@
     <Content Include="common\templates\basic_table.html" />
     <Content Include="common\templates\filter_device_type.html" />
     <Content Include="common\templates\filter_group.html" />
+    <Content Include="common\templates\filter_group_daily_report.html" />
     <Content Include="common\templates\filter_service_type.html" />
+    <Content Include="common\templates\filter_versions.html" />
+    <Content Include="common\templates\filter_versions2.html" />
     <Content Include="common\templates\highcharts_plot.html" />
     <Content Include="common\templates\home.html" />
     <Content Include="common\templates\m_home.html" />
@@ -88,6 +91,7 @@
     <Content Include="tplay\templates\show_3sratio.html" />
     <Content Include="tplay\templates\show_avg_pcount.html" />
     <Content Include="tplay\templates\show_avg_ptime.html" />
+    <Content Include="tplay\templates\show_daily_report.html" />
     <Content Include="tplay\templates\show_fbuffer_sucratio.html" />
     <Content Include="tplay\templates\show_fbuffer_time.html" />
     <Content Include="tplay\templates\show_fluency.html" />

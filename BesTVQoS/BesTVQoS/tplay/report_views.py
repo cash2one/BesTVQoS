@@ -53,7 +53,7 @@ def get_records_data(begin_date, end_date, beta_ver, master_ver):
         temp.append("%s"%(ver))
         total=0
         for view in view_type:
-            sql="SELECT Records FROM playinfo WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType='%s'"%(
+            sql="SELECT Records FROM playinfo WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d"%(
                     ver, begin_date, end_date, view)
             cursor.execute(sql)
             results = cursor.fetchall()
@@ -91,7 +91,7 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
                 begin_time = current_time()                
                 sum=0
                 count=0
-                sql="SELECT %s FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType='%s'"%(
+                sql="SELECT %s FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d"%(
                     qos, single_qos[index], ver, begin_date, end_date, view)
                 cursor.execute(sql)
                 results = cursor.fetchall()
@@ -125,7 +125,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
         for ver in vers:
             temp=[0 for i in range(7)]
             temp[0]=u"%s-%s"%(ver, second)
-            sql="SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType='%s'"%(
+            sql="SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d"%(
                     table, ver, begin_date, end_date, view)
             cursor.execute(sql)
             results = cursor.fetchall()
@@ -165,7 +165,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     spec_xf=ezxf('font: name Arial, colour Red')
     spec_data=[
-        [u'日期: %s'%begin_date],
+        [u'日期: %s - %s'%(begin_date, end_date)],
         [u'%s -- %s'%(beta_ver, u'公测版')]
         ]
     if len(master_ver)>0:
@@ -214,7 +214,8 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 5: remarks
     #    
     remark_xf=ezxf('font: name Arial, colour Red')
-    remarks=[u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长']
+    remarks=[u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
+        u'多天报表的算均值']
     rowx=write_remarks_to_xls(book, sheet, rowx, remarks, remark_xf)
     rowx+=2
     print "step 4: ", current_time() - begin_time
@@ -222,6 +223,23 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     logger.info("generate_report:  %s - %s, cost: %s" %
                 (begin_date, end_date, (current_time() - begin_time)))
     print begin_date, end_date, beta_ver, current_time() - begin_time
+
+def pre_day_reporter(request, dev=""):
+    (service_type, device_type, device_types, 
+            version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
+    context = {}
+    context['default_service_type'] = service_type
+    context['service_types'] = ["All", "B2B", "B2C"]
+    context['default_device_type'] = device_type
+    context['device_types'] = device_types
+    context['default_version'] = version
+    context['versions'] = versions
+    context['default_version2'] = version
+    context['versions2'] = versions2
+    context['default_begin_date'] = str(begin_date)
+    context['default_end_date'] = str(end_date)
+    response = render_to_response('show_daily_report.html', context)
+    return response
 
 def day_reporter(request, dev=""):
     wb = xlwt.Workbook()
@@ -238,5 +256,21 @@ def week_reporter(request, dev=""):
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=week_report_%s.xls'%('2015-04-22')
+    wb.save(response)
+    return response
+
+def bestv_reporter(request, dev=""):
+    (service_type, device_type, device_types, 
+            version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
+
+    version='%s_%s' % (device_type, version) 
+    version2='%s_%s' % (device_type, version2) 
+    if version==version2:
+        version2=""
+    wb = xlwt.Workbook()
+    generate_report(wb, begin_date, end_date, version, version2)
+
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=%s_report_%s.xls'%(version, begin_date)
     wb.save(response)
     return response

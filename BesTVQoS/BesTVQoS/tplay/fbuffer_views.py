@@ -47,47 +47,6 @@ class FilterParams:
         self.begin_date=begin_date
         self.end_date=end_date
 
-
-def get_filter_param_values(request, table):
-    begin_time = current_time()
-    filters_map = get_default_values_from_cookie(request)
-    service_type = request.GET.get("service_type", filters_map["st"])
-    device_type = request.GET.get("device_type", filters_map["dt"])
-    version = request.GET.get("version", filters_map["vt"])
-    begin_date = request.GET.get("begin_date", filters_map["begin"])
-    end_date = request.GET.get("end_date", filters_map["end"])
-
-    logger.info("get_filter_values: %s - %s - %s" %
-                (service_type, device_type, version))
-
-    device_types = get_device_types1(table, service_type, begin_date, end_date)
-    if len(device_types) == 0:
-        device_types = [""]
-        device_type = ""
-
-    if device_type not in device_types:
-        device_type = device_types[0]
-    logger.info("get_filter_param_values1 %s %s, cost: %s" %
-                (device_type, version, (current_time() - begin_time)))
-
-    versions = []
-    try:        
-        versions = get_versions1(
-            table, service_type, device_type, begin_date, end_date)
-    except Exception, e:
-        logger.info("get_versions(%s, %s, %s, %s, %s) failed." % (
-            table, service_type, device_type, begin_date, end_date))
-
-    if len(versions) == 0:
-        versions = [""]
-        version = ""
-    if version not in versions:
-        version = versions[0]
-
-    logger.info("get_filter_param_values %s %s, cost: %s" %
-                (device_type, version, (current_time() - begin_time)))
-    return service_type, device_type, device_types, version, versions, begin_date, end_date
-
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
 # is viewtype, lists contain each hour's data
 def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
