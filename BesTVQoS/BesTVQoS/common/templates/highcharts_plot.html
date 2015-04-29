@@ -28,12 +28,27 @@
                         }
                     },
                     title: {
-                        text: '{{item.y_title}}',
+                        text: '{{item.y_title1}}',
                         style: {
                             color: '#89A54E'
                         }
                     },
                     min: 0
+                }, 
+                { // Secondary yAxis
+                    title: {
+                        text: '{{item.y_title2}}',
+                        style: {
+                            color: '#4572A7'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            color: '#4572A7'
+                        }
+                    },
+                    min: 0,
+                    opposite: true
                 }],
                 tooltip: {
                     valueSuffix: '',

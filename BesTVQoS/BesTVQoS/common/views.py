@@ -7,6 +7,8 @@ Definition of views.
 import logging
 import json
 
+from datetime import timedelta, date, datetime
+
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import Context
@@ -15,6 +17,38 @@ from navi import Navi
 from date_time_tool import today
 
 logger = logging.getLogger("django.request")
+
+
+class HtmlTable:
+    mtitle = "title"
+    mheader = ["header"]
+    msub = [['sub1'], ['sub2']]
+   
+
+# key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
+# is viewtype, lists contain each hour's data
+def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
+    item = {}
+    item["index"] = item_idx
+    item["title"] = title  # u"首次缓冲成功率"
+    item["subtitle"] = subtitle  # u"全天24小时/全类型"
+    item["y_title"] = ytitle  # u"成功率"
+    item["xAxis"] = xAlis
+    item["t_interval"] = 1
+    if len(xAlis) > 30:
+        item["t_interval"] = len(xAlis) / 30
+
+    series = []
+    for (i, desc) in keys:
+        serie_item = '''{
+            name: '%s',
+            yAxis: 0,
+            type: 'spline',
+            data: [%s]
+        }''' % (desc, ",".join(key_values[i]))
+        series.append(serie_item)
+    item["series"] = ",".join(series)
+    return item
 
 
 def home(request):

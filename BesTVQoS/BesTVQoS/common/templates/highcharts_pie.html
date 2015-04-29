@@ -1,0 +1,65 @@
+﻿<script type="text/javascript" src="/static-src/js/highcharts/highcharts.js"></script>
+<script type="text/javascript" src="/static-src/js/highcharts/modules/exporting.js"></script>
+<script>
+    $(function () {
+        {% for item in pie_contents %}
+            $('#tabs_{{item.index}}').highcharts({
+                title: {
+                    text: '{{item.title}}',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: '{{item.subtitle}}',
+                    x: -20
+                },
+                xAxis: {
+                    categories: [{{item.xAxis|safe}}],
+                    tickInterval:{{item.t_interval}},
+                    labels:{
+                        rotation:45,                        
+                        y:30,
+                    }
+                },
+                yAxis: [{
+                    labels: {
+                        style: {
+                            color: '#89A54E'
+                        }
+                    },
+                    title: {
+                        text: '{{item.y_title}}',
+                        style: {
+                            color: '#89A54E'
+                        }
+                    },
+                    min: 0
+                }],
+                tooltip: {
+                    valueSuffix: ''
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'left',
+                    x: 120,
+                    verticalAlign: 'top',
+                    y: 100,
+                    floating: true,
+                    backgroundColor: '#FFFFFF'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            color: '#000000',
+                            connectorColor: '#000000',
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                    }
+                },
+                series: [{{item.series|safe}}]
+            });
+        {% endfor %}
+    });
+</script>

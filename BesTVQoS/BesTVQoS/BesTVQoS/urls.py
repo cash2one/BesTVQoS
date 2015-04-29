@@ -56,6 +56,11 @@ urlpatterns = patterns(
     url(r'^((?P<dev>m)/)?week_reporter$',
         'tplay.report_views.week_reporter'),
 
+    # log analyze
+    url(r'^((?P<dev>m)/)?show_server_list$',
+        'loganalyze.server_views.show_server_list'),
+    url(r'^((?P<dev>m)/)?show_server_detail$',
+        'loganalyze.server_views.show_server_detail'),
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),

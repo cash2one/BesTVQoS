@@ -88,31 +88,6 @@ def get_filter_param_values(request, table):
                 (device_type, version, (current_time() - begin_time)))
     return service_type, device_type, device_types, version, versions, begin_date, end_date
 
-# key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
-# is viewtype, lists contain each hour's data
-def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
-    item = {}
-    item["index"] = item_idx
-    item["title"] = title  # u"首次缓冲成功率"
-    item["subtitle"] = subtitle  # u"全天24小时/全类型"
-    item["y_title"] = ytitle  # u"成功率"
-    item["xAxis"] = xAlis
-    item["t_interval"] = 1
-    if len(xAlis) > 30:
-        item["t_interval"] = len(xAlis) / 30
-
-    series = []
-    for (i, desc) in keys:
-        serie_item = '''{
-            name: '%s',
-            yAxis: 0,
-            type: 'spline',
-            data: [%s]
-        }''' % (desc, ",".join(key_values[i]))
-        series.append(serie_item)
-    item["series"] = ",".join(series)
-    return item
-
 
 def prepare_hour_data_of_single_Qos(filterParams, view_types, Qos_name, base_radix):
     db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
