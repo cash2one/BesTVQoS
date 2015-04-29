@@ -26,9 +26,13 @@ do
 
 	# response time
 	perl calc_response_time_CDF.pl ${date} ${hour} 4 ${savedir} tmp/${type}/${date}/${svr}_hour
+	perl calc_response_time_CDF_by_url.pl ${date} ${hour} 4 ${savedir} tmp/${type}/${date}/${svr}_hour	
 
 	# request time
 	perl calc_response_time_CDF.pl ${date} ${hour} 5 ${savedir} tmp/${type}/${date}/${svr}_hour
+	perl calc_response_time_CDF_by_url.pl ${date} ${hour} 5 ${savedir} tmp/${type}/${date}/${svr}_hour
+
+	python update_data_into_db_date.py ${type} ${svr} ${date} ${hour} ${type}/${date}/${svr}/response_data_CDF_5 ${type}/${date}/${svr}/response_data_CDF_4 ${type}/${date}/${svr}/distribution_data_code_${hour}
 	
 	# calc qos by code	
 	bash server_qos_by_code.sh ${type} ${svr} ${date} ${hour} ${type}/${date}/${svr}/distribution_data_code_${hour}
