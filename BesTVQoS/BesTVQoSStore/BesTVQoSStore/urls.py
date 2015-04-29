@@ -23,6 +23,12 @@ urlpatterns = patterns('',
     # realtime data interface
     url(r'^update/realtime/base$', 'realtime.views.baseinfo'),
 
+    # serverlog
+    url(r'^update/log/respcode$', 'logStore.views.respcode'),
+    url(r'^update/log/urlinfo$', 'logStore.views.urlinfo'),
+    url(r'^update/log/respdelay$', 'logStore.views.respdelay'),
+    url(r'^update/log/reqdelay$', 'logStore.views.reqdelay'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
