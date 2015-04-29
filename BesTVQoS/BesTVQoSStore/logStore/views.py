@@ -175,7 +175,7 @@ def handle_delay(request, table):
         result = "error"
 
     respStr = json.dumps({"result": result})
-    logger.debug("update urlinfo: %s" % (respStr))
+    logger.debug("update %s: %s" % (table, respStr))
     return HttpResponse(respStr, content_type="application/json")
 
 def respdelay(request):
