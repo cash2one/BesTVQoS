@@ -220,5 +220,5 @@ def get_filter_param_values(request, table):
 def get_report_filter_param_values(request, table):
     service_type, device_type, device_types, version, versions, begin_date, end_date = get_filter_param_values(request, table)
     version2 = request.GET.get("version2", "")
-    versions2=['']+versions
+    versions2=versions
     return service_type, device_type, device_types, version, versions, version2, versions2, begin_date, end_date

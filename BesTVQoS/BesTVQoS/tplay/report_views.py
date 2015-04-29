@@ -263,8 +263,14 @@ def bestv_reporter(request, dev=""):
     (service_type, device_type, device_types, 
             version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
 
-    version='%s_%s' % (device_type, version) 
-    version2='%s_%s' % (device_type, version2) 
+    if version!="All":
+        version='%s_%s' % (device_type, version) 
+    else:
+        version=device_type
+    if version2!="All":
+        version2='%s_%s' % (device_type, version2) 
+    else:
+        version2=device_type
     if version==version2:
         version2=""
     wb = xlwt.Workbook()
