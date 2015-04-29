@@ -17,7 +17,7 @@ sys.setdefaultencoding("utf-8")
 
 def update_code_info(svrtype, svrip, isp, area, date, hour, code, records, ratio):
 
-   url = "http://127.0.0.1:6699/update/codeinfo"
+   url = "http://127.0.0.1:6699/update/log/respcode"
 
    request = {}
    request['servicetype'] = svrtype
