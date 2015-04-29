@@ -45,19 +45,16 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, url, record, ratio):
         
 def save_url_to_DB(filename, svrtype, svrip, isp, area, date, hour, code):
     data = np.genfromtxt(filename, delimiter="|", names="url,records,ratio", usecols=(1,2,3), dtype="S32,i8,f8")
-    i = -1
-    try:
-        i = data['hour'].tolist().index(hour)
-    except Exception, e:
-        print hour, e
     
-    if i == 0:
+    i = len(data['url'])
+    if i == 1:
         update_code_info(svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio'])
         print svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio']
+        return
     
-    if i > 0:
-        update_code_info(svrtype, svrip, isp, date, area, hour, code, data['url'][i], data['records'][i], data['ratio'][i])
-        print svrtype, svrip, isp, date, area, hour, code, data['url'][i], data['records'][i], data['ratio'][i]
+    for k in range(i):
+        update_code_info(svrtype, svrip, isp, date, area, hour, code, data['url'][k], data['records'][k], data['ratio'][k])
+        print svrtype, svrip, isp, date, area, hour, code, data['url'][k], data['records'][k], data['ratio'][k]
 
 def main(svrtype, svrip, date, hour, code, filename):
     isp = 'OTT'
