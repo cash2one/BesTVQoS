@@ -95,14 +95,14 @@ def respcode(request):
         try:               
             contents = json.loads(request.body)
             for item in contents:
-                serverID=get_ServerID(db, cursor, item['IP'], item['ServiceType'], item['ISP'], item['Area'])
+                serverID=get_ServerID(db, cursor, item['ip'], item['servicetype'], item['isp'], item['area'])
                 insert_codeinfo_sql = "INSERT INTO codeinfo(ServerID,\
                         Date, Hour, Code, Records, Ratio)\
-                        VALUES (%d, '%s', %d, %d, %d, %f)"%(serverID, item['Date'], item['Hour'], \
-                        item['Code'], item['Records'], item['Ratio'])
+                        VALUES (%d, '%s', %d, %d, %d, %f)"%(serverID, item['date'], item['hour'], \
+                        item['code'], item['records'], item['ratio'])
                 update_codeinfo_sql="UPDATE codeinfo SET Records=%d, Ratio=%f \
-                        WHERE ServerID=%d and Date='%s' and Hour=%d and Code=%d"%(item['Records'], item['Ratio'],\
-                        serverID, item['Date'], item['Hour'], item['Code'])
+                        WHERE ServerID=%d and Date='%s' and Hour=%d and Code=%d"%(item['records'], item['ratio'],\
+                        serverID, item['date'], item['hour'], item['code'])
                 execute_insert(db, cursor, insert_codeinfo_sql, update_codeinfo_sql)
         except ValueError, e:
             result = "valueerror: %s" % e
@@ -126,14 +126,14 @@ def urlinfo(request):
         try:       
             contents = json.loads(request.body)
             for item in contents:
-                codeID=get_CodeID(db, cursor, item['IP'], item['ServiceType'], item['ISP'], item['Area'],\
-                    item['Date'], item['Hour'], item['Code'])
+                codeID=get_CodeID(db, cursor, item['ip'], item['servicetype'], item['isp'], item['area'],\
+                    item['date'], item['hour'], item['code'])
                 insert_urlinfo_sql = "INSERT INTO urlinfo(CodeID,\
                         URL, Records, Ratio)\
-                        VALUES (%d, '%s', %d, %f)"%(codeID, item['URL'], item['Records'], item['Ratio'])
+                        VALUES (%d, '%s', %d, %f)"%(codeID, item['url'], item['records'], item['ratio'])
                 update_urlinfo_sql="UPDATE urlinfo SET Records=%d, Ratio=%f \
-                          WHERE CodeID=%d and URL='%s'"%(item['Records'], item['Ratio'],\
-                          codeID, item['URL'])
+                          WHERE CodeID=%d and URL='%s'"%(item['records'], item['ratio'],\
+                          codeID, item['url'])
                 execute_insert(db, cursor, insert_urlinfo_sql, update_urlinfo_sql)
         except ValueError, e:
             result = "valueerror: %s" % e
@@ -157,16 +157,16 @@ def handle_delay(request, table):
         try:       
             contents = json.loads(request.body)
             for item in contents:
-                urlID=get_URLID(db, cursor, item['IP'], item['ServiceType'], item['ISP'], item['Area'],\
-                    item['Date'], item['Hour'], item['Code'], item['URL'])
+                urlID=get_URLID(db, cursor, item['ip'], item['servicetype'], item['isp'], item['area'],\
+                    item['date'], item['hour'], item['code'], item['url'])
                 insert_delay_sql = "INSERT INTO %s(URLID,\
                         P25, P50, P75, P90, P95, AvgTime)\
                         VALUES (%d, %d, %d, %d, %d, %d, %d)"\
                         %(table, urlID, item['P25'], item['P50'], item['P75'], \
-                        item['P90'], item['P95'], item['AVG'])
+                        item['P90'], item['P95'], item['avg'])
                 update_delay_sql="UPDATE %s SET P25=%d, P50=%d, P75=%d, P90=%d, P95=%d, AvgTime=%d \
                         WHERE URLID=%d"%(table, item['P25'], item['P50'], item['P75'], \
-                        item['P90'], item['P95'], item['AVG'], urlID)
+                        item['P90'], item['P95'], item['avg'], urlID)
                 execute_insert(db, cursor, insert_delay_sql, update_delay_sql)
         except ValueError, e:
             result = "valueerror: %s" % e

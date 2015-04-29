@@ -4,8 +4,8 @@ import urllib
 import urllib2
 
 if __name__ == '__main__':    
-    items=[{'IP':'192.168.16.34', 'ServiceType':'B2C', 'ISP':u'移动', 'Area':u'江苏', \
-            'Date':'2015-03-24', 'Hour':23, 'Code':200, 'URL':'alx', 'Records':333, 'Ratio':0.3}]
+    items=[{'ip':'192.168.16.34', 'servicetype':'B2C', 'isp':u'移动', 'area':u'江苏', \
+            'date':'2015-03-24', 'hour':23, 'Code':200, 'url':'alx', 'records':333, 'ratio':0.3}]
     
     json_str=json.dumps(items)
     print json_str
