@@ -2,6 +2,7 @@
 
 import logging
 import MySQLdb
+import json
 from django.shortcuts import render_to_response
 from django.db import connection
 from common.views import HtmlTable
@@ -12,8 +13,7 @@ from common.date_time_tool import get_days_region
 
 logger = logging.getLogger("django.request")
 
-# key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
-# is viewtype, lists contain each hour's data
+
 def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, ytitle2=""):
     item = {}
     item["index"] = item_idx
@@ -39,6 +39,7 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, 
 
     return item
 
+
 def show_server_list(request, dev=""):
     context = {}
 
@@ -54,6 +55,8 @@ def show_server_list(request, dev=""):
     subs = [["江苏移动", "10.50.131.112", "89.3", "1000"],
             ["江苏移动", "10.50.131.9", "60.5", "500"]]
 
+    # sql = 
+
     table.msub = subs
 
     context['table'] = table
@@ -63,18 +66,20 @@ def show_server_list(request, dev=""):
 
 
 def prepare_hourly_ratio_history(ip, code, datum):
+    data_by_hour = {}
+    if_has_data = False
+
     db = MySQLdb.connect('localhost', 'root', 'funshion', 'test')
     cu = db.cursor()
-    sql  = "select Hour, Ratio, Records from view_codeinfo "
+
+    # for ratio
+    sql  = "select Hour, Ratio from view_codeinfo "
     sql += "where IP='%s' and Date='%s' " % (ip, datum)
     sql += "and Code=%d" % (code)
 
     logger.debug("Daily Ratio SQL - %s" % sql)
 
-    data_by_hour = {}
-    if_has_data = False
     date_ratio = [0.0 for k in range(24)]
-    date_delay = [0.0 for k in range(24)]
 
     begin_time = current_time()
     cu.execute(sql)
@@ -82,12 +87,31 @@ def prepare_hourly_ratio_history(ip, code, datum):
     logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
     for row in results:
         date_ratio[row[0]] = row[1]
-        date_delay[row[0]] = row[2]
-        if (row[0] + row[2]) > 0:
+        if row[0] > 0:
             if_has_data = True
 
     data_by_hour[0] = ['%s' % k for k in date_ratio]
-    data_by_hour[1] = ['%s' % k for k in date_delay]
+
+    # for Record
+    sql  = "select Hour, sum(Records) from view_codeinfo "
+    sql += "where IP='%s' and Date='%s' " % (ip, datum)
+    sql += "group by Hour"
+
+    logger.debug("Daily Records SQL - %s" % sql)
+    
+    date_records = [0.0 for k in range(24)]
+
+    begin_time = current_time()
+    cu.execute(sql)
+    results = cu.fetchall()
+    logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
+    for row in results:
+        date_records[row[0]] = row[1]
+        if row[0] > 0:
+            if_has_data = True
+
+    data_by_hour[1] = ['%s' % k for k in date_records]
+
 
     db.close()
 
@@ -180,6 +204,56 @@ def get_delay_history(ip, code, begin_date, end_date):
     return item
 
 
+def get_code_distribute(server_ip, begin_date, end_date):
+    datas = []
+    if_has_data = False
+
+    sql  = "select Code, sum(Records) from view_codeinfo "
+    sql += "where IP='%s' " % (server_ip)
+    sql += "and Date>='%s' and Date<='%s' " % (begin_date, end_date)
+    sql += "group by Code"
+    
+    logger.debug("Code Distribute SQL - %s" % sql)
+    
+    db = MySQLdb.connect('localhost', 'root', 'funshion', 'test')
+    cu = db.cursor()
+
+    begin_time = current_time()
+    cu.execute(sql)
+    results = cu.fetchall()
+    logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
+    for row in results:
+        data_item = [('%s' % row[0]), int(row[1])]
+        datas.append(data_item)
+        if_has_data = True
+
+    item = {}
+    item["index"] = 0
+    item["title"] = u"服务器响应状态码分布"
+
+    key_values = [datas]
+
+    keys = [(0, u"占比")]
+
+    series = []
+    for (i, desc) in keys:
+        serie_item = '''{
+            type: 'pie',
+            name: '%s',
+            data: %s
+        }''' % (desc, json.dumps(key_values[i]))
+        series.append(serie_item)
+
+    item["series"] = ",".join(series)
+    
+    db.close()    
+
+    if if_has_data == False:
+        return None
+
+    return item
+
+
 def show_server_detail(request, dev=""):
     context = {}
 
@@ -198,6 +272,13 @@ def show_server_detail(request, dev=""):
         context['contents'] = items
         if len(items) > 0:
             context['has_data'] = True
+
+        items_pie = []
+        items_code_pie = get_code_distribute(server_ip, begin_date, end_date)
+        items_pie.append(items_code_pie)
+
+        context['pie_contents'] = items_pie
+
     except Exception, e:
         logger.debug(e)
 

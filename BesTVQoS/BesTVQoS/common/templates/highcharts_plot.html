@@ -5,6 +5,31 @@
     $(function(){
         {% for item in contents %}
             $('#tabs_{{item.index}}').highcharts({
+                credits: {
+                    enabled: true,
+                    text: 'www.bestv.com.cn',
+                    href: 'http://www.bestv.com.cn'
+                },
+                chart: {
+                    zoomType: 'x',
+                    resetZoomButton: {
+                        theme: {
+                            fill: 'white',
+                            stroke: 'silver',
+                            r: 0,
+                            states: {
+                                hover: {
+                                    fill: '#41739D',
+                                    style: {
+                                        color: 'white'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    panning: true,
+                    panKey: 'shift'
+                },
                 title: {
                     text: '{{item.title}}',
                     x: -20 //center

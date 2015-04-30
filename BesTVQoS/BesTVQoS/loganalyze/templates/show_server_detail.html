@@ -32,14 +32,18 @@
     </form>
     
     {% include 'highcharts_plot.html' %}
+    {% include 'highcharts_pie.html' %}
+
     <div class="pageitem">
         {% for item in contents %}
-            <div id="tabs_{{item.index}}"style="min-width:320px;height:250px" ></div>
+            <div id="tabs_{{item.index}}"style="min-width:320px;height:230px" ></div>
         {% endfor %}
     </div>
 
     <div class="pageitem">
-        <div id="code_pie" style="min-width:320px;height:300px" ></div>
+        {% for item in pie_contents %}
+            <div id="pie_{{item.index}}" style="min-width:320px;height:300px" ></div>
+        {% endfor %}
         <div id="url_list" style="min-width:320px;height:300;display:none"></div>
     </div>
     
