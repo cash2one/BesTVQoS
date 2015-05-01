@@ -44,7 +44,7 @@
         {% for item in pie_contents %}
             <div id="pie_{{item.index}}" style="min-width:320px;height:300px" ></div>
         {% endfor %}
-        <div id="url_list" style="min-width:320px;height:300;display:none"></div>
+        <div id="url_list" class="pageitem" style="padding:10px 0px 0px 10px;min-width:320px;display:none"></div>
     </div>
     
 </div>
@@ -71,6 +71,7 @@
                 var url_distribute = data["url_distribute"];
 
                 var tbs = '<div align=center><h4>' + url_distribute["mtitle"] + '</h4></div>';
+                tbs += '<div style="height:300;overflow:scroll;">'
                 tbs += '<table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >'
                 for (var i = 0; i < url_distribute["mheader"].length; i++) {
                     tbs += '<th>' + url_distribute["mheader"][i] + '</th>';
@@ -84,6 +85,7 @@
                     tbs += '</tr>'
                 };
                 tbs += '</table>'; 
+                tbs += '</div>'
 
                 if (has_data) {
                     document.getElementById('url_list').style.display = ""
