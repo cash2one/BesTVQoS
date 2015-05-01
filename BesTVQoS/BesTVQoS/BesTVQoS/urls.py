@@ -63,6 +63,8 @@ urlpatterns = patterns(
         'loganalyze.server_views.show_server_list'),
     url(r'^((?P<dev>m)/)?show_server_detail$',
         'loganalyze.server_views.show_server_detail'),
+    url(r'^((?P<dev>m)/)?get_server_url_distribute$',
+        'loganalyze.server_views.get_server_url_distribute'),
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),

@@ -3,6 +3,7 @@
 import logging
 import MySQLdb
 import json
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.db import connection
 from common.views import HtmlTable
@@ -314,3 +315,63 @@ def show_server_detail(request, dev=""):
     context["default_end_date"] = end_date
 
     return render_to_response('show_server_detail.html', context)
+
+def get_server_url_distribute(request, dev=""):
+    url_distribute = {}
+    try:
+        server_ip = request.GET.get('server_ip')
+        begin_date = request.GET.get('begin_date')
+        end_date = request.GET.get('end_date')
+        code = request.GET.get('code')
+
+        url_distribute["mtitle"] = u"Code：%s 对应的URL访问分布情况" % code
+        url_distribute["mheader"] = ["URL", "Records", "Ratio(%)"]
+        url_distribute["msub"] = []
+
+        # get count of all url records
+        sql  = "select sum(Records) from view_urlinfo "
+        sql += "where IP='%s' and Code=%s " % (server_ip, code)
+        sql += "and Date>='%s' and Date<='%s' " % (begin_date, end_date)
+        sql += "and Hour<24 and URL!='ALL' and Records>0"        
+        logger.debug("Count URL SQL - %s" % sql)
+    
+        cu = connection.cursor()
+
+        begin_time = current_time()
+        cu.execute(sql)
+        results = cu.fetchall()
+        logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
+        total_records = 0
+        for row in results:
+            if not row[0]:
+                log  = "There are no URL records of Code %s on Server %s " % (code, server_ip)
+                log += "between %s and %s" % (begin_date, end_date)
+                raise Exception(log)
+            total_records = int(row[0])
+
+        # get count of all url records
+        sql  = "select URL, sum(Records), 100*sum(Records)/%s " % (total_records)
+        sql += "from view_urlinfo where IP='%s' and Code=%s " % (server_ip, code)
+        sql += "and Date>='%s' and Date<='%s' " % (begin_date, end_date)
+        sql += "and Hour<24 and URL!='ALL' and Records>0 "
+        sql += "group by URL order by Records desc"        
+        logger.debug("URL Distribute SQL - %s" % sql)
+
+        begin_time = current_time()
+        cu.execute(sql)
+        results = cu.fetchall()
+        logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
+
+        for row in results:
+            try:
+                sub = ["%s" % col for col in row]
+                url_distribute["msub"].append(sub)
+            except Exception, e:
+                logger.debug(e)
+
+    except Exception, e:
+        logger.debug(e)
+        url_distribute["mheader"] = []
+
+    respStr = json.dumps({"url_distribute": url_distribute})
+    return HttpResponse(respStr, content_type="text/json")
