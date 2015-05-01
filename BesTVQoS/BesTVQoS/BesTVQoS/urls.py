@@ -52,9 +52,11 @@ urlpatterns = patterns(
         'tplay.fbuffer_views.show_avg_ptime'),
 
     url(r'^((?P<dev>m)/)?day_reporter$',
-        'tplay.report_views.day_reporter'),
+        'tplay.report_views.pre_day_reporter'),
     url(r'^((?P<dev>m)/)?week_reporter$',
-        'tplay.report_views.week_reporter'),
+        'tplay.report_views.pre_day_reporter'),
+    url(r'^((?P<dev>m)/)?generate_report$',
+        'tplay.report_views.bestv_reporter'),
 
     # log analyze
     url(r'^((?P<dev>m)/)?show_server_list$',

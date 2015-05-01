@@ -25,6 +25,14 @@
                     pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
                 },
                 plotOptions: {
+                    series: {
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: on_pie_click
+                            }
+                        }
+                    },
                     pie: {
                         allowPointSelect: true,
                         cursor: 'pointer',

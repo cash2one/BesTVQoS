@@ -14,7 +14,7 @@ from django.shortcuts import render_to_response
 from django.template import Context
 from django.db import connection
 from navi import Navi
-from date_time_tool import today
+from date_time_tool import today, current_time
 
 logger = logging.getLogger("django.request")
 
@@ -118,6 +118,8 @@ def get_table_name(url):
         table_name = "Bestv3SRatio"
     elif url.find("avg_pcount") != -1 or url.find("avg_ptime") != -1:
         table_name = "BestvAvgPchoke"
+    elif url.find("reporter") != -1:
+        table_name = "playinfo"
 
     return table_name
 
@@ -208,3 +210,49 @@ def set_default_values_to_cookie(response, context):
                                     "begin": context['default_begin_date'],
                                     "end": context['default_end_date']}),
                         max_age=30000)
+
+def get_filter_param_values(request, table):
+    begin_time = current_time()
+    filters_map = get_default_values_from_cookie(request)
+    service_type = request.GET.get("service_type", filters_map["st"])
+    device_type = request.GET.get("device_type", filters_map["dt"])
+    version = request.GET.get("version", filters_map["vt"])
+    begin_date = request.GET.get("begin_date", filters_map["begin"])
+    end_date = request.GET.get("end_date", filters_map["end"])
+
+    logger.info("get_filter_values: %s - %s - %s" %
+                (service_type, device_type, version))
+
+    device_types = get_device_types1(table, service_type, begin_date, end_date)
+    if len(device_types) == 0:
+        device_types = [""]
+        device_type = ""
+
+    if device_type not in device_types:
+        device_type = device_types[0]
+    logger.info("get_filter_param_values1 %s %s, cost: %s" %
+                (device_type, version, (current_time() - begin_time)))
+
+    versions = []
+    try:        
+        versions = get_versions1(
+            table, service_type, device_type, begin_date, end_date)
+    except Exception, e:
+        logger.info("get_versions(%s, %s, %s, %s, %s) failed." % (
+            table, service_type, device_type, begin_date, end_date))
+
+    if len(versions) == 0:
+        versions = [""]
+        version = ""
+    if version not in versions:
+        version = versions[0]
+
+    logger.info("get_filter_param_values %s %s, cost: %s" %
+                (device_type, version, (current_time() - begin_time)))
+    return service_type, device_type, device_types, version, versions, begin_date, end_date
+
+def get_report_filter_param_values(request, table):
+    service_type, device_type, device_types, version, versions, begin_date, end_date = get_filter_param_values(request, table)
+    version2 = request.GET.get("version2", "")
+    versions2=versions
+    return service_type, device_type, device_types, version, versions, version2, versions2, begin_date, end_date

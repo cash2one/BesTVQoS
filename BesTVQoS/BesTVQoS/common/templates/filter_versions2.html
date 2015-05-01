@@ -1,9 +1,9 @@
 {% if versions %}
 <div class="ctrlitem"> 
-    <label>版本号:</label>
-    <select name="version" id="version">
-        {% for item in versions %}   
-            {% ifequal item default_version %}
+    <label>对比版本:</label>
+    <select name="version2" id="version2">
+        {% for item in versions2 %}   
+            {% ifequal item default_version2 %}
                 <option value="{{ item }}" selected>{{ item }}</option>
             {% else %}
                 <option value="{{ item }}" >{{ item }}</option>

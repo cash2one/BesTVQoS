@@ -7,15 +7,6 @@
         <div class="pageitem">
             <div class="ctrlbox">  
                 <div class="ctrlitem">  
-                    <label>异常状态码</label>
-                    <select name="code_filter">
-                        <option></option>
-                        <option>5xx</option>
-                        <option>4xx</option>
-                        <option>3xx</option>
-                    </select>
-                </div>        
-                <div class="ctrlitem">  
                     <label>日期</label>
                     {% if is_mobile %}
                         <input name="date" type="date" value="{{default_date}}">
@@ -36,7 +27,7 @@
         {% endfor %}
         
         {% for row in table.msub %}
-            <tr onclick="jump_to('show_server_detail?ip={{row.1}}&end_date={{default_date}}')">
+            <tr onclick="jump_to('show_server_detail?server_ip={{row.1}}&end_date={{default_date}}')">
             {% for col in row %}
                 <td>
                     {{col}}

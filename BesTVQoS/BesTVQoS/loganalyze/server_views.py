@@ -6,25 +6,23 @@ import json
 from django.shortcuts import render_to_response
 from django.db import connection
 from common.views import HtmlTable
-#from common.views import make_plot_item
 from common.date_time_tool import today
 from common.date_time_tool import current_time
 from common.date_time_tool import get_days_region
+from common.date_time_tool import get_days_offset
 
 logger = logging.getLogger("django.request")
 
 
-def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, ytitle2=""):
+def make_plot_item2(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, ytitle2="", interval=1):
     item = {}
     item["index"] = item_idx
-    item["title"] = title  # u"首次缓冲成功率"
-    item["subtitle"] = subtitle  # u"全天24小时/全类型"
-    item["y_title1"] = ytitle1  # u"成功率"
-    item["y_title2"] = ytitle2  # u"成功率"
+    item["title"] = title
+    item["subtitle"] = subtitle
+    item["y_title1"] = ytitle1
+    item["y_title2"] = ytitle2
     item["xAxis"] = xAlis
-    item["t_interval"] = 1
-    if len(xAlis) > 30:
-        item["t_interval"] = len(xAlis) / 30
+    item["t_interval"] = interval
 
     series = []
     for (i, j, desc) in keys:
@@ -40,22 +38,48 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, 
     return item
 
 
+def get_multidays_interval(days):
+    intervals = [1, 1, 2, 3, 4, 4, 6, 6, 8, 8, 8, 8, 12]
+    interval = 1
+    if days < 12:
+        interval = intervals[days]
+    elif days < 24:
+        interval = 12
+    else:
+        interval = int(days / 24) * 24
+
+    return interval    
+
+
 def show_server_list(request, dev=""):
     context = {}
 
     code_filter = request.GET.get("code_filter", "")
-    #end_date = request.GET.get("end_date", str(today()))
-    end_date = request.GET.get("end_date", "2015-04-28")
+    end_date = request.GET.get("date", str(today()))
 
     table = HtmlTable()
     table.mtitle = u"服务器运行状况"
     table.mheader = [u"驻地", "IP", u"200占比(%)", u"记录数"]
     table.msub = []
 
-    subs = [["江苏移动", "10.50.131.112", "89.3", "1000"],
-            ["江苏移动", "10.50.131.9", "60.5", "500"]]
+    sql  = "select Area, ISP, IP, 100*Ratio, Records from view_servers_status "
+    sql += "where Date='%s'" % end_date
 
-    # sql = 
+    logger.debug("Server List SQL - %s" % sql)
+
+    cu = connection.cursor()
+    begin_time = current_time()
+    cu.execute(sql)
+    results = cu.fetchall()
+    logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
+    subs = []
+    for row in results:
+        sub = []
+        sub.append("%s_%s" % (row[0], row[1]))
+        sub.append("%s" % row[2])
+        sub.append("%.2f" % (float(row[3])))
+        sub.append("%s" % row[4])
+        subs.append(sub)
 
     table.msub = subs
 
@@ -65,55 +89,56 @@ def show_server_list(request, dev=""):
     return render_to_response('show_server_list.html', context)
 
 
-def prepare_hourly_ratio_history(ip, code, datum):
+def prepare_hourly_ratio_history(ip, code, begin_date, end_date, xalis):
     data_by_hour = {}
     if_has_data = False
+    data_count = len(xalis)
 
-    db = MySQLdb.connect('localhost', 'root', 'funshion', 'test')
-    cu = db.cursor()
+    cu = connection.cursor()
 
     # for ratio
-    sql  = "select Hour, Ratio from view_codeinfo "
-    sql += "where IP='%s' and Date='%s' " % (ip, datum)
-    sql += "and Code=%d" % (code)
+    sql  = "select Date, Hour, 100*Ratio from view_codeinfo "
+    sql += "where IP='%s' and Date>='%s' and Date<='%s' " % (ip, begin_date, end_date)
+    sql += "and Hour<24 and Code=%d " % (code)
 
-    logger.debug("Daily Ratio SQL - %s" % sql)
+    logger.debug("Ratio SQL - %s" % sql)
 
-    date_ratio = [0.0 for k in range(24)]
+    date_ratio = [0.0 for k in range(data_count)]
 
     begin_time = current_time()
     cu.execute(sql)
     results = cu.fetchall()
     logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
     for row in results:
-        date_ratio[row[0]] = row[1]
-        if row[0] > 0:
+        day_offset = get_days_offset(begin_date, str(row[0]))
+        data_idx = 24 * day_offset + row[1]
+        date_ratio[data_idx] = "%.2f" % float(row[2])
+        if row[2] > 0:
             if_has_data = True
 
     data_by_hour[0] = ['%s' % k for k in date_ratio]
 
     # for Record
-    sql  = "select Hour, sum(Records) from view_codeinfo "
-    sql += "where IP='%s' and Date='%s' " % (ip, datum)
-    sql += "group by Hour"
+    sql  = "select Date, Hour, sum(Records) from view_codeinfo "
+    sql += "where IP='%s' and Date>='%s' and Date<='%s' " % (ip, begin_date, end_date)
+    sql += "and Hour<24 group by Hour"
 
-    logger.debug("Daily Records SQL - %s" % sql)
+    logger.debug("Records SQL - %s" % sql)
     
-    date_records = [0.0 for k in range(24)]
+    date_records = [0.0 for k in range(data_count)]
 
     begin_time = current_time()
     cu.execute(sql)
     results = cu.fetchall()
     logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
     for row in results:
-        date_records[row[0]] = row[1]
-        if row[0] > 0:
+        day_offset = get_days_offset(begin_date, str(row[0]))
+        data_idx = 24 * day_offset + row[1]
+        date_records[data_idx] = "%d" % row[2]
+        if row[2] > 0:
             if_has_data = True
 
     data_by_hour[1] = ['%s' % k for k in date_records]
-
-
-    db.close()
 
     if if_has_data == False:
         return None
@@ -121,63 +146,63 @@ def prepare_hourly_ratio_history(ip, code, datum):
     return data_by_hour
 
 
-def prepare_daily_ratio_history(ip, code, begin_date, end_date):    
-    
-    return None
-
-
 def get_ratio_history(ip, code, begin_date, end_date):
     keys = [(0, 0, u"%d占比" % code), (1, 1, u"记录数")]
 
     if begin_date == end_date:
-        datas = prepare_hourly_ratio_history(ip, code, end_date)
         xalis = ["%d" % i for i in range(24)]
     else:
-        datas = prepare_daily_ratio_history(ip, code, begin_date, end_date)
         days_region = get_days_region(begin_date, end_date)
-        xalis = ["%s%s" % (i[5:7], i[8:10]) for i in days_region]
-    
+        xalis_day = ["%s-%s" % (i[5:7], i[8:10]) for i in days_region]
+        xalis = []
+        for d in xalis_day:
+            xalis_hour = ["%s" % i for i in range(24)]
+            xalis_hour[0] = d
+            xalis += xalis_hour
+
+    datas = prepare_hourly_ratio_history(ip, code, begin_date, end_date, xalis)
     if datas is None:
         raise NoDataError("No data between %s - %s" % (begin_date, end_date))
 
-    item = make_plot_item(datas, keys, 0, xalis, (u"%d占比及记录数" % code), "", u"百分比(%)", u"记录数")
+    interval = get_multidays_interval(len(xalis)/24)
+    item = make_plot_item2(datas, keys, 0, xalis, (u"%d占比及记录数" % code), "", u"百分比(%)", u"记录数", interval)
 
     return item
 
 
-def prepare_hourly_delay_history(ip, code, datum):
-    db = MySQLdb.connect('localhost', 'root', 'funshion', 'test')
-    cu = db.cursor()
+def prepare_hourly_delay_history(ip, code, begin_date, end_date, xalis):
+    data_count = len(xalis)
+    series_count = 6
+
+    cu = connection.cursor()
 
     data_by_hour = {}
     
-    sql  = "SELECT P25, P50, P75, P90, P95, AvgTime, Hour From view_respdelayinfo "
-    sql += "where IP='%s' and Date='%s' " % (ip, datum)
-    sql += "and Code=%d" % (code)
+    sql  = "SELECT P25, P50, P75, P90, P95, AvgTime, Date, Hour From view_respdelayinfo "
+    sql += "where IP='%s' and Date>='%s' and Date<='%s' " % (ip, begin_date, end_date)
+    sql += "and Hour<24 and Code=%d" % (code)
 
-    logger.debug("Daily Delay SQL - %s" % sql)
+    logger.debug("Delay SQL - %s" % sql)
 
     display_data = {}
-    data_count = 6
-    for data_idx in range(data_count):
-        display_data[data_idx] = ["0" for k in range(24)]
+    for serie_idx in range(series_count):
+        display_data[serie_idx] = ["0" for k in range(data_count)]
 
     if_has_data = False
     cu.execute(sql)
     results = cu.fetchall()
     for row in results:
-        hour = row[6]
-        for data_idx in range(data_count):
-            display_data[data_idx][hour] = "%s" % row[data_idx]
+        day_offset = get_days_offset(begin_date, str(row[6]))
+        data_idx = 24 * day_offset + row[7]
+        for serie_idx in range(series_count):
+            display_data[serie_idx][data_idx] = "%s" % row[serie_idx]
 
-            if row[data_idx] > 0:
+            if row[serie_idx] > 0:
                 if_has_data = True
 
     if if_has_data:
-        for data_idx in range(data_count):
-            data_by_hour[data_idx] = display_data[data_idx]
-
-    db.close()
+        for serie_idx in range(series_count):
+            data_by_hour[serie_idx] = display_data[serie_idx]
 
     if len(data_by_hour) == 0:
         return None
@@ -189,17 +214,22 @@ def get_delay_history(ip, code, begin_date, end_date):
     keys = [(0, 0, "P25"), (1, 0, "P50"), (2, 0, "P75"), (3, 0, "P90"), (4, 0, "P95")]
 
     if begin_date == end_date:
-        datas = prepare_hourly_delay_history(ip, code, end_date)
         xalis = ["%d" % i for i in range(24)]
     else:
-        datas = prepare_daily_delay_history(ip, code, begin_date, end_date)
         days_region = get_days_region(begin_date, end_date)
-        xalis = ["%s%s" % (i[5:7], i[8:10]) for i in days_region]
+        xalis_day = ["%s-%s" % (i[5:7], i[8:10]) for i in days_region]
+        xalis = []
+        for d in xalis_day:
+            xalis_hour = ["%s" % i for i in range(24)]
+            xalis_hour[0] = d
+            xalis += xalis_hour
     
+    datas = prepare_hourly_delay_history(ip, code, begin_date, end_date, xalis)
     if datas is None:
         raise NoDataError("No data between %s - %s" % (begin_date, end_date))
-
-    item = make_plot_item(datas, keys, 1, xalis, u"服务器响应时延", "", u"百分比(%)")
+    
+    interval = get_multidays_interval(len(xalis)/24)
+    item = make_plot_item2(datas, keys, 1, xalis, u"服务器响应时延", "", u"百分比(%)", interval)
 
     return item
 
@@ -211,12 +241,11 @@ def get_code_distribute(server_ip, begin_date, end_date):
     sql  = "select Code, sum(Records) from view_codeinfo "
     sql += "where IP='%s' " % (server_ip)
     sql += "and Date>='%s' and Date<='%s' " % (begin_date, end_date)
-    sql += "group by Code"
+    sql += "and Hour<24 group by Code"
     
     logger.debug("Code Distribute SQL - %s" % sql)
     
-    db = MySQLdb.connect('localhost', 'root', 'funshion', 'test')
-    cu = db.cursor()
+    cu = connection.cursor()
 
     begin_time = current_time()
     cu.execute(sql)
@@ -245,8 +274,6 @@ def get_code_distribute(server_ip, begin_date, end_date):
         series.append(serie_item)
 
     item["series"] = ",".join(series)
-    
-    db.close()    
 
     if if_has_data == False:
         return None
@@ -257,7 +284,7 @@ def get_code_distribute(server_ip, begin_date, end_date):
 def show_server_detail(request, dev=""):
     context = {}
 
-    server_ip = request.GET.get("ip", "Null")
+    server_ip = request.GET.get("server_ip", "Null")
     end_date = request.GET.get("end_date", str(today()))
     begin_date = request.GET.get("begin_date", end_date)
 
