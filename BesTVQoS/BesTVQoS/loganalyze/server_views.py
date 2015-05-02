@@ -15,7 +15,7 @@ from common.date_time_tool import get_days_offset
 logger = logging.getLogger("django.request")
 
 
-def make_plot_item2(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, ytitle2="", interval=1):
+def make_plot_item2(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, interval=1, ytitle2=""):
     item = {}
     item["index"] = item_idx
     item["title"] = title
@@ -166,7 +166,7 @@ def get_ratio_history(ip, code, begin_date, end_date):
         raise NoDataError("No data between %s - %s" % (begin_date, end_date))
 
     interval = get_multidays_interval(len(xalis)/24)
-    item = make_plot_item2(datas, keys, 0, xalis, (u"%d占比及记录数" % code), "", u"百分比(%)", u"记录数", interval)
+    item = make_plot_item2(datas, keys, 0, xalis, (u"%d占比及记录数" % code), "", u"百分比(%)", interval, u"记录数")
 
     return item
 
