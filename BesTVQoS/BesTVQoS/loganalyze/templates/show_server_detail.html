@@ -71,7 +71,7 @@
                 var url_distribute = data["url_distribute"];
 
                 var tbs = '<div align=center><h4>' + url_distribute["mtitle"] + '</h4></div>';
-                tbs += '<div style="height:300;overflow:scroll;">'
+                tbs += '<div style="height:300;overflow:auto;">'
                 tbs += '<table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >'
                 for (var i = 0; i < url_distribute["mheader"].length; i++) {
                     tbs += '<th>' + url_distribute["mheader"][i] + '</th>';

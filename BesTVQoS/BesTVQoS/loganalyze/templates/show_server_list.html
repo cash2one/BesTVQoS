@@ -21,13 +21,13 @@
         </div>
     </form>
     
-    <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+    <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse;" >
         {% for header in table.mheader%}
             <th>{{header}}</th>
         {% endfor %}
         
         {% for row in table.msub %}
-            <tr onclick="jump_to('show_server_detail?server_ip={{row.1}}&end_date={{default_date}}')">
+            <tr onclick="jump_to('show_server_detail?server_ip={{row.1}}&end_date={{default_date}}')" style="cursor:pointer">
             {% for col in row %}
                 <td>
                     {{col}}
