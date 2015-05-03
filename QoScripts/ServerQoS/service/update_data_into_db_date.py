@@ -43,7 +43,7 @@ def update_code_info(svrtype, svrip, isp, area, date, hour, code, records, ratio
    print response.read()
 
 
-def update_time(datatype, svrtype, svrip, isp, area, date, hour, code, url, p25, p50, p75, p90, p95, avg):
+def update_time(datatype, svrtype, svrip, isp, area, date, hour, code, requrl, p25, p50, p75, p90, p95, avg):
 
    url = "http://127.0.0.1:6699/update/log/%s"%(datatype)
    
@@ -55,7 +55,7 @@ def update_time(datatype, svrtype, svrip, isp, area, date, hour, code, url, p25,
    request['date'] = date
    request['hour'] = hour
    request['code'] = code
-   request['url'] = url
+   request['url'] = requrl
    request['P25'] = p25*1000
    request['P50'] = p50*1000
    request['P75'] = p75*1000
