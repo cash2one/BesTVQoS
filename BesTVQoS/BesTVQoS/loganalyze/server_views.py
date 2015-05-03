@@ -122,7 +122,7 @@ def prepare_hourly_ratio_history(ip, code, begin_date, end_date, xalis):
     # for Record
     sql  = "select Date, Hour, sum(Records) from view_codeinfo "
     sql += "where IP='%s' and Date>='%s' and Date<='%s' " % (ip, begin_date, end_date)
-    sql += "and Hour<24 group by Hour"
+    sql += "and Hour<24 group by Date, Hour"
 
     logger.debug("Records SQL - %s" % sql)
     
