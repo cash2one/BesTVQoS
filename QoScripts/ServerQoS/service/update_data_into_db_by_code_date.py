@@ -45,9 +45,11 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, requrl, record, rati
         
 def save_url_to_DB(filename, svrtype, svrip, isp, area, date, hour, code):
     data = np.genfromtxt(filename, delimiter="|", names="url,records,ratio", usecols=(1,2,3), dtype="S32,i8,f8")
-    
-    i = len(data['url'])
-    if i == 1:
+
+    i = -1    
+    try:
+       i = len(data['url'])
+    except Exception, e:
         update_url(svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio'])
         print svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio']
         return
