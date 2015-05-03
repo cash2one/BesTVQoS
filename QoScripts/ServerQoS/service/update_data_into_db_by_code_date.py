@@ -27,9 +27,9 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, requrl, record, rati
    request['date'] = date
    request['hour'] = hour
    request['code'] = int(code)
-   request['url'] = requrl
-   request['records'] = record
-   request['ratio'] = ratio
+   request['url'] = '%s'%(requrl)
+   request['records'] = record*1.0
+   request['ratio'] = ratio*1.0
    
    items = []
    items.append(request)
@@ -46,8 +46,10 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, requrl, record, rati
 def save_url_to_DB(filename, svrtype, svrip, isp, area, date, hour, code):
     data = np.genfromtxt(filename, delimiter="|", names="url,records,ratio", usecols=(1,2,3), dtype="S32,i8,f8")
     
-    i = len(data['url'])
-    if i == 1:
+    i = -1
+    try:
+        i = len(data['url'])
+    except Exception, e:
         update_url(svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio'])
         print svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio']
         return
