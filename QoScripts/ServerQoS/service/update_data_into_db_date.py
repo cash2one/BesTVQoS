@@ -95,9 +95,11 @@ def save_tm_to_DB(filename, datatype, svrtype, svrip, isp, area, date, hour, cod
        
 def save_code_to_DB(filename, svrtype, svrip, isp, area, date, hour):       
     data = np.genfromtxt(filename, delimiter="|", names="code,records,ratio", usecols=(1,2,3), dtype="i8,i8,f8")
-        
-    i = len(data['code'])
-    if i == 1:
+    
+    i = -1
+    try: 
+       i = len(data['code'])
+    except Exception, e:
         update_code_info(svrtype, svrip, isp, area, date, hour, data['code'], data['records'], data['ratio'])
         print svrtype, svrip, isp, area, date, hour, data['code'], data['records'], data['ratio']
         return

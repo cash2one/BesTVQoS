@@ -22,15 +22,22 @@ while(<FILE>) {
 	else {
 		$fail{$key} += 1;
 	}
+
+	$record{$key} += 1;
 }
 close FILE;
 
 # for write results
-foreach $k (sort {$suc{$b}<=>$suc{$a}} %suc) {
+foreach $k (sort {$record{$b}<=>$record{$a}} %suc) {
 	$tw = 0;
 	
 	$total = $suc{$k}+$fail{$k};
-	$ratio = ($total == 0) ? 0 : $suc{$k}/$total;
+	
+	if($total <= 0) {
+		next;
+	}
+
+	$ratio = $suc{$k}/$total;
 	
 	@ptime = split / /, $suc_time{$k};
 	
@@ -48,8 +55,8 @@ foreach $k (sort {$suc{$b}<=>$suc{$a}} %suc) {
 	open OUT, ">>$savedir/response_data_CDF_by_url_${idx}_${hour}";
 	printf OUT ("|%s|%.2f|%.2f|%.3f|%.3f|%.3f|%.3f|%.3f|%d|\n", $k, $ratio, $time_sorted[$idx_25], $time_sorted[$idx_50], $time_sorted[$idx_75], $time_sorted[$idx_90], $time_sorted[$idx_95], $avgw, $total);
 	close OUT;
-	
-	delete @suc{keys %suc};
-	delete @fail{keys %fail};
-	delete @suc_time{keys %suc_time};
 }
+	
+delete @suc{keys %suc};
+delete @fail{keys %fail};
+delete @suc_time{keys %suc_time};
