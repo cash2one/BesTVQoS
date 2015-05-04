@@ -27,9 +27,9 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, requrl, record, rati
    request['date'] = date
    request['hour'] = hour
    request['code'] = int(code)
-   request['url'] = requrl
-   request['records'] = record
-   request['ratio'] = ratio
+   request['url'] = '%s'%(requrl)
+   request['records'] = record*1.0
+   request['ratio'] = ratio*1.0
    
    items = []
    items.append(request)
