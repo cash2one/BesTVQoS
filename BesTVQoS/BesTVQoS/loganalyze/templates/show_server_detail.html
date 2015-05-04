@@ -1,0 +1,101 @@
+{% include 'top.html' %}
+<div id ="content" >
+    
+    <form method="get">
+        <div class="pageitem">
+            <div class="ctrlbox">
+                <div class="ctrlitem">  
+                    <label>服务器IP</label>
+                    <input name="server_ip" type="text" value="{{server_ip}}" id="server_ip" />
+                </div>
+                <div class="ctrlitem">  
+                    <label>起始日期</label>
+                    {% if is_mobile %}
+                        <input name="begin_date" type="date" value="{{default_begin_date}}" id="begin_date" />
+                    {% else %}
+                        <input class="Wdate" name="begin_date" type="text" value="{{default_begin_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})" id="begin_date" />
+                    {% endif %}
+                </div>
+                <div class="ctrlitem">  
+                    <label>结束日期</label>
+                    {% if is_mobile %}
+                        <input name="end_date" type="date" value="{{default_end_date}}" id="end_date" />
+                    {% else %}
+                        <input class="Wdate" name="end_date" type="text" value="{{default_end_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})" id="end_date" />
+                    {% endif %}
+                </div>
+                <div class="ctrlitem">
+                    <input type="submit" value="查询">
+                </div>
+            </div>
+        </div>
+    </form>
+    
+    {% include 'highcharts_plot.html' %}
+    {% include 'highcharts_pie.html' %}
+
+    <div class="pageitem">
+        {% for item in contents %}
+            <div id="tabs_{{item.index}}"style="min-width:320px;height:230px" ></div>
+        {% endfor %}
+    </div>
+
+    <div class="pageitem">
+        {% for item in pie_contents %}
+            <div id="pie_{{item.index}}" style="min-width:320px;height:300px" ></div>
+        {% endfor %}
+        <div id="url_list" class="pageitem" style="padding:10px 0px 0px 10px;min-width:320px;display:none"></div>
+    </div>
+    
+</div>
+
+<script type="text/javascript">
+    function on_pie_click() {
+        var server_ip = $("#server_ip").val()
+        var begin_date = $("#begin_date").val()
+        var end_date = $("#end_date").val()
+        var code = this.name
+
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: "get_server_url_distribute",
+            data: { 
+                'server_ip': server_ip,
+                'begin_date': begin_date,
+                'end_date': end_date,
+                'code': code
+            },
+            success: function (data) {
+                var has_data = false;
+                var url_distribute = data["url_distribute"];
+
+                var tbs = '<div align=center><h4>' + url_distribute["mtitle"] + '</h4></div>';
+                tbs += '<div style="height:300;overflow:auto;">'
+                tbs += '<table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >'
+                for (var i = 0; i < url_distribute["mheader"].length; i++) {
+                    tbs += '<th>' + url_distribute["mheader"][i] + '</th>';
+                };
+                for (var i = 0; i < url_distribute["msub"].length; i++) {
+                    has_data = true
+                    tbs += '<tr>'
+                    for (var j = 0; j < url_distribute["msub"][i].length; j++) {
+                        tbs += '<td>' + url_distribute["msub"][i][j] + '</td>'
+                    };
+                    tbs += '</tr>'
+                };
+                tbs += '</table>'; 
+                tbs += '</div>'
+
+                if (has_data) {
+                    document.getElementById('url_list').style.display = ""
+                    document.getElementById('url_list').innerHTML = tbs;
+                }
+                else
+                {
+                    document.getElementById('url_list').style.display = "none"      
+                }
+            }
+        });
+    }
+</script>

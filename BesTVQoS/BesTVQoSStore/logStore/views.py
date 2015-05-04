@@ -48,14 +48,14 @@ def get_CodeID(db, cursor,  IP, ServiceType, ISP, Area, Date, Hour, Code):
     codeID=0
     serverID=get_ServerID(db, cursor,  IP, ServiceType, ISP, Area)
     query_sql="select CodeID from codeinfo where ServerID=%d and Date='%s' \
-                    and Hour=%d and Code=%d"%(serverID, Date, Hour, Code)
+                    and Hour=%s and Code=%d"%(serverID, Date, Hour, Code)
     print query_sql
     cursor.execute(query_sql)
     record = cursor.fetchone()
     if record is None:
         insert_sql="INSERT INTO codeinfo(ServerID,\
             Date, Hour, Code)\
-            VALUES (%d, '%s', %d, %d)"%(serverID, Date, Hour, Code)
+            VALUES (%d, '%s', %s, %d)"%(serverID, Date, Hour, Code)
         execute_insert(db, cursor, insert_sql)
         #codeID = cursor.lastrowid
         cursor.execute(query_sql)
@@ -98,16 +98,16 @@ def respcode(request):
                 serverID=get_ServerID(db, cursor, item['ip'], item['servicetype'], item['isp'], item['area'])
                 insert_codeinfo_sql = "INSERT INTO codeinfo(ServerID,\
                         Date, Hour, Code, Records, Ratio)\
-                        VALUES (%d, '%s', %d, %d, %d, %f)"%(serverID, item['date'], item['hour'], \
+                        VALUES (%d, '%s', %s, %d, %d, %f)"%(serverID, item['date'], item['hour'], \
                         item['code'], item['records'], item['ratio'])
                 update_codeinfo_sql="UPDATE codeinfo SET Records=%d, Ratio=%f \
-                        WHERE ServerID=%d and Date='%s' and Hour=%d and Code=%d"%(item['records'], item['ratio'],\
+                        WHERE ServerID=%d and Date='%s' and Hour=%s and Code=%d"%(item['records'], item['ratio'],\
                         serverID, item['date'], item['hour'], item['code'])
                 execute_insert(db, cursor, insert_codeinfo_sql, update_codeinfo_sql)
         except ValueError, e:
             result = "valueerror: %s" % e
         except Exception, e:
-            result = "error: %s" % e
+            result = "error: %s|%s" % (e, contents)
 
         db.close()
     else:
@@ -138,7 +138,7 @@ def urlinfo(request):
         except ValueError, e:
             result = "valueerror: %s" % e
         except Exception, e:
-            result = "error: %s" % e
+            result = "error: %s|%s" % (e, contents)
 
         db.close()
     else:
@@ -171,7 +171,7 @@ def handle_delay(request, table):
         except ValueError, e:
             result = "valueerror: %s" % e
         except Exception, e:
-            result = "error: %s" % e
+            result = "error: %s|%s" % (e, contents)
 
         db.close()
     else:

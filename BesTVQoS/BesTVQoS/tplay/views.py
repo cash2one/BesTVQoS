@@ -21,42 +21,6 @@ VIEW_TYPES = [
     (0, u"总体"), (1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")]
 
 
-def make_chart_item(key_values, item_idx, title, subtitle, y_title, xAlis):
-    begin_time = current_time()
-    item = {}
-    item["index"] = item_idx
-    item["title"] = title
-    item["subtitle"] = subtitle
-    item["y_title"] = y_title
-    item["xAxis"] = xAlis
-    item["t_interval"] = 1
-
-    try:
-        series = []
-        for (i, desc) in VIEW_TYPES:
-            serie_item = '''{
-                name: '%s',
-                yAxis: 0,
-                type: 'spline',
-                data: [%s]
-            }''' % (desc, ",".join(key_values[i]))
-            series.append(serie_item)
-    except:
-        logger.error("make_chart_item() failed with args: %s" %
-                     (",".join(key_values[i])))
-
-    item["series"] = ",".join(series)
-    logger.debug("make_chart_item() cost %s" % (current_time() - begin_time))
-
-    return item
-
-
-class HtmlTable:
-    mtitle = "title"
-    mheader = ["header"]
-    mysub = [['sub1'], ['sub2']]
-
-
 class PlayInfo:
 
     def __init__(self, request):
@@ -86,30 +50,6 @@ class PlayInfo:
 
         self.get_common_filter()
 
-    def read_filter_group_form(self, request):
-        if(request.method == 'GET'):
-            filters_map = get_default_values_from_cookie(request)
-            self.service_type = request.GET.get(
-                "service_type", filters_map["st"])
-            self.device_type = request.GET.get(
-                "device_type", filters_map["dt"])
-            self.version = request.GET.get("version", filters_map["vt"])
-            self.begin_date = request.GET.get(
-                "begin_date", filters_map["begin"])
-            self.end_date = request.GET.get("end_date", filters_map["end"])
-
-        self.device_types = get_device_types1(
-            "playinfo", self.service_type, self.begin_date,
-            self.end_date, self.cu)
-
-        if len(self.device_types) == 0:
-            self.device_types.append("")
-
-        if self.device_type == '':
-            self.device_type = self.device_types[0]
-
-        self.get_common_filter()
-
     def get_common_filter(self):
         self.date_filter = " Date >= '%s' and Date <= '%s'" % (
             self.begin_date, self.end_date)
@@ -127,72 +67,6 @@ class PlayInfo:
         self.min_rec_filter = " and Records >= %s" % (self.min_rec)
 
         self.common_filter = self.date_filter + self.service_type_filter
-
-    def get_playinfo_item(self, item_index):
-        begin_time = current_time()
-
-        x_axis = []
-        y_axises = {}
-
-        if self.begin_date == self.end_date:
-            '''24 hours view'''
-            fn_get_sql_cmd = self.get_hourly_sql_command
-            for m in range(0, 24):
-                x_axis.append('%s' % m)
-        else:
-            '''multidays view'''
-            fn_get_sql_cmd = self.get_daily_sql_command
-            tmp_end_date = datetime.strptime(
-                self.end_date, '%Y-%m-%d')
-            tmp_begin_date = datetime.strptime(
-                self.begin_date, '%Y-%m-%d')
-            for i in range((tmp_end_date - tmp_begin_date).days + 1):
-                day = tmp_begin_date + timedelta(days=i)
-                day_str = day.strftime('%Y-%m-%d')
-                x_axis.append("%s" % day_str)
-
-        for (vt, desc) in VIEW_TYPES:
-            y_axise = []
-            for x in x_axis:
-                sql_command = fn_get_sql_cmd(x, vt)
-                self.cu.execute(sql_command)
-
-                records = '0'
-                for item in self.cu.fetchall():
-                    if item[0]:
-                        records = '%d' % (item[0])
-                y_axise.append(records)
-
-            y_axises[vt] = y_axise
-
-        time_cost = current_time() - begin_time
-        logger.debug(
-            "get_playinfo_item() exlude make_chart_item cost: %s" % (time_cost))
-
-        return make_chart_item(y_axises, item_index, u'用户观看量',
-                               u'', u'观看量', x_axis)
-
-    def get_daily_sql_command(self, date, view_type):
-        sql_command = "select sum(Records) from playinfo where Date = '%s'" % (
-            date)
-        sql_command += self.service_type_filter
-        sql_command += self.device_type_filter
-        sql_command += " and Hour = 24"
-        if view_type != 0:
-            sql_command += " and ViewType = '%s'" % (view_type)
-
-        return sql_command
-
-    def get_hourly_sql_command(self, hour, view_type):
-        sql_command = "select sum(Records) from playinfo where %s" % (
-            self.date_filter)
-        sql_command += self.service_type_filter
-        sql_command += self.device_type_filter
-        sql_command += " and Hour = %s" % (hour)
-        if view_type != 0:
-            sql_command += " and ViewType = '%s'" % (view_type)
-
-        return sql_command
 
 
 def get_play_info_today(context, playinfo):

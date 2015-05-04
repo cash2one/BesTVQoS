@@ -15,7 +15,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-def update_url(svrtype, svrip, isp, date, area, hour, code, url, record, ratio):
+def update_url(svrtype, svrip, isp, date, area, hour, code, requrl, record, ratio):
 
    url = "http://127.0.0.1:6699/update/log/urlinfo"
 
@@ -26,10 +26,10 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, url, record, ratio):
    request['area'] = area
    request['date'] = date
    request['hour'] = hour
-   request['code'] = code*1.0
-   request['url'] = url
-   request['record'] = record*1.0
-   request['ratio'] = ratio*1.0
+   request['code'] = int(code)
+   request['url'] = requrl
+   request['records'] = record
+   request['ratio'] = ratio
    
    items = []
    items.append(request)
@@ -45,15 +45,17 @@ def update_url(svrtype, svrip, isp, date, area, hour, code, url, record, ratio):
         
 def save_url_to_DB(filename, svrtype, svrip, isp, area, date, hour, code):
     data = np.genfromtxt(filename, delimiter="|", names="url,records,ratio", usecols=(1,2,3), dtype="S32,i8,f8")
-    
-    i = len(data['url'])
-    if i == 1:
-        update_code_info(svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio'])
+
+    i = -1    
+    try:
+       i = len(data['url'])
+    except Exception, e:
+        update_url(svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio'])
         print svrtype, svrip, isp, date, area, hour, code, data['url'], data['records'], data['ratio']
         return
     
     for k in range(i):
-        update_code_info(svrtype, svrip, isp, date, area, hour, code, data['url'][k], data['records'][k], data['ratio'][k])
+        update_url(svrtype, svrip, isp, date, area, hour, code, data['url'][k], data['records'][k], data['ratio'][k])
         print svrtype, svrip, isp, date, area, hour, code, data['url'][k], data['records'][k], data['ratio'][k]
 
 def main(svrtype, svrip, date, hour, code, filename):

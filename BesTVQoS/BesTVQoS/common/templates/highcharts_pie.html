@@ -1,0 +1,51 @@
+﻿<script type="text/javascript" src="/static/js/highcharts/highcharts.js"></script>
+<script type="text/javascript" src="/static/js/highcharts/modules/exporting.js"></script>
+
+<script>
+    $(function () {
+        {% for item in pie_contents %}
+            $('#pie_{{item.index}}').highcharts({
+                credits: {
+                    enabled: true,
+                    text: 'www.bestv.com.cn',
+                    href: 'http://www.bestv.com.cn'
+                },
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    text: '{{item.title}}'
+                },
+                subtitle: {
+                    text: '{{item.subtitle}}'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+                },
+                plotOptions: {
+                    series: {
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: on_pie_click
+                            }
+                        }
+                    },
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            color: '#000000',
+                            connectorColor: '#000000',
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        }
+                    }
+                },
+                series: [{{item.series|safe}}]
+            });
+        {% endfor %}
+    });             
+</script>

@@ -29,6 +29,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="logStore\models.py" />
+    <Compile Include="logStore\post_reqdelay.py" />
+    <Compile Include="logStore\post_urlinfo.py" />
     <Compile Include="logStore\tests.py" />
     <Compile Include="logStore\views.py" />
     <Compile Include="logStore\__init__.py" />

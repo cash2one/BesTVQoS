@@ -10,7 +10,7 @@
     <InterpreterArguments />
     <DjangoSettingsModule />
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
+    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
     <InterpreterVersion>2.7</InterpreterVersion>
     <WebBrowserPort>80</WebBrowserPort>
   </PropertyGroup>
@@ -39,6 +39,7 @@
     <Compile Include="BesTVQoS\settings.py" />
     <Compile Include="BesTVQoS\urls.py" />
     <Compile Include="BesTVQoS\wsgi.py" />
+    <Compile Include="common\date_time_tool.py" />
     <Compile Include="common\forms.py" />
     <Compile Include="common\mobile.py" />
     <Compile Include="common\models.py" />
@@ -46,6 +47,10 @@
     <Compile Include="common\tests.py" />
     <Compile Include="common\views.py" />
     <Compile Include="common\__init__.py" />
+    <Compile Include="loganalyze\models.py" />
+    <Compile Include="loganalyze\tests.py" />
+    <Compile Include="loganalyze\server_views.py" />
+    <Compile Include="loganalyze\__init__.py" />
     <Compile Include="manage.py" />
     <Compile Include="realtime\models.py" />
     <Compile Include="realtime\tests.py" />
@@ -65,6 +70,8 @@
   <ItemGroup>
     <Folder Include="common\" />
     <Folder Include="common\templates\" />
+    <Folder Include="loganalyze\" />
+    <Folder Include="loganalyze\templates\" />
     <Folder Include="realtime\" />
     <Folder Include="realtime\Templates\" />
     <Folder Include="tplay\" />
@@ -87,6 +94,7 @@
     <Content Include="common\templates\navi_menu.html" />
     <Content Include="common\templates\no_data.html" />
     <Content Include="common\templates\index.html" />
+    <Content Include="loganalyze\templates\index.html" />
     <Content Include="requirements.txt" />
     <Content Include="tplay\templates\show_3sratio.html" />
     <Content Include="tplay\templates\show_avg_pcount.html" />
