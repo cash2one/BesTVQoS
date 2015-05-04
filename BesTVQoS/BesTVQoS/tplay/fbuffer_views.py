@@ -321,11 +321,11 @@ def prepare_pnvalue_hour_data(filterParams, view_types, pnvalue_types, base_radi
         results = cursor.fetchall()
         for row in results:
             display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[1] / base_radix)
-            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[2] / base_radix)
-            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[3] / base_radix)
-            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[4] / base_radix)
-            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[5] / base_radix)
-            display_data[pnvalue_types[0][0]][row[0]] = "%s" % (row[6] / base_radix)
+            display_data[pnvalue_types[1][0]][row[0]] = "%s" % (row[2] / base_radix)
+            display_data[pnvalue_types[2][0]][row[0]] = "%s" % (row[3] / base_radix)
+            display_data[pnvalue_types[3][0]][row[0]] = "%s" % (row[4] / base_radix)
+            display_data[pnvalue_types[4][0]][row[0]] = "%s" % (row[5] / base_radix)
+            display_data[pnvalue_types[5][0]][row[0]] = "%s" % (row[6] / base_radix)
             if row[1]+row[2]+row[3]+row[4]+row[5]+row[6]>0:
                 display_if_has_data = True
 
