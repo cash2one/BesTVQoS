@@ -1,0 +1,40 @@
+{% include 'top.html' %}
+<div id ="content" >
+    <form method="get" class="bordered1" >
+        <span style="padding-left:1%;"></span>
+        <b>{{table.mtitle}}</b>
+        <br>
+        <div class="pageitem">
+            <div class="ctrlbox">  
+                <div class="ctrlitem">  
+                    <label>日期</label>
+                    {% if is_mobile %}
+                        <input name="date" type="date" value="{{default_date}}">
+                    {% else %}
+                        <input class="Wdate" name="date" value="{{default_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})">
+                    {% endif %}
+                </div>
+                <div class="ctrlitem">
+                    <input type="submit" value="查询"> 
+                </div>
+            </div>  
+        </div>
+    </form>
+    
+    <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse;" >
+        {% for header in table.mheader%}
+            <th>{{header}}</th>
+        {% endfor %}
+        
+        {% for row in table.msub %}
+            <tr>
+            {% for col in row %}
+                <td>
+                    {{col|safe}}
+                </td>             
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    
+</div>
