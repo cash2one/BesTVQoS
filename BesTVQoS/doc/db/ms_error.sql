@@ -17,4 +17,4 @@ create table IF NOT EXISTS ms_error_info(
 	PRIMARY KEY(RecordID)	
 );
 
-create unique index ClientIP on ms_error_info (ClientIP, ServIP, URL(200));
+create unique index ClientIP on ms_error_info (ClientIP, ServIP, Date, URL(200));
