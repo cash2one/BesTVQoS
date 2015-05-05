@@ -69,6 +69,10 @@ urlpatterns = patterns(
     # cdn Mon
     url(r'^((?P<dev>m)/)?show_ms_error$',
         'cdnMon.views.show_ms_error'),
+    url(r'^((?P<dev>m)/)?show_tsdelay$',
+        'cdnMon.views.show_tsdelay'),
+    url(r'^((?P<dev>m)/)?show_cdn_detail$',
+        'cdnMon.views.show_cdn_detail'),
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),
