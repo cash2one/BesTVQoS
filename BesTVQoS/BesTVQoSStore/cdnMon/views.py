@@ -55,10 +55,10 @@ def ts_delay(request):
         try:               
             contents = json.loads(request.body)
             for item in contents:
-                insert_sql = "INSERT INTO ts_delay(Date, \
+                insert_sql = "INSERT INTO ts_delay(Date, ServiceType, \
                         ServIP, ServArea, ServISP, Flow, Info) \
-                        VALUES ('%s', '%s', '%s', '%s', %s, '%s')"\
-                        %(item['date'], item['servip'], item['servarea'], item['servisp'], item['flow'], item['info'])
+                        VALUES ('%s', '%s', '%s', '%s', '%s', %s, '%s')"\
+                        %(item['date'], item['servicetype'], item['servip'], item['servarea'], item['servisp'], item['flow'], item['info'])
                 try:
                     cursor.execute(insert_sql)
                     db.commit()
