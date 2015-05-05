@@ -151,13 +151,13 @@ def get_ratio_history(ip, code, begin_date, end_date):
     keys = [(0, 0, u"%d占比" % code), (1, 1, u"记录数")]
 
     if begin_date == end_date:
-        xalis = ["%d" % i for i in range(24)]
+        xalis = ["%d:00" % i for i in range(24)]
     else:
         days_region = get_days_region(begin_date, end_date)
-        xalis_day = ["%s-%s" % (i[5:7], i[8:10]) for i in days_region]
+        xalis_day = [i for i in days_region]
         xalis = []
         for d in xalis_day:
-            xalis_hour = ["%s" % i for i in range(24)]
+            xalis_hour = ["%s:00" % i for i in range(24)]
             xalis_hour[0] = d
             xalis += xalis_hour
 
@@ -215,13 +215,13 @@ def get_delay_history(ip, code, begin_date, end_date):
     keys = [(0, 0, "P25"), (1, 0, "P50"), (2, 0, "P75"), (3, 0, "P90"), (4, 0, "P95")]
 
     if begin_date == end_date:
-        xalis = ["%d" % i for i in range(24)]
+        xalis = ["%d:00" % i for i in range(24)]
     else:
         days_region = get_days_region(begin_date, end_date)
-        xalis_day = ["%s-%s" % (i[5:7], i[8:10]) for i in days_region]
+        xalis_day = [i for i in days_region]
         xalis = []
         for d in xalis_day:
-            xalis_hour = ["%s" % i for i in range(24)]
+            xalis_hour = ["%s:00" % i for i in range(24)]
             xalis_hour[0] = d
             xalis += xalis_hour
     
