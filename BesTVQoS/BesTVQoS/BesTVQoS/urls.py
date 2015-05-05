@@ -66,6 +66,10 @@ urlpatterns = patterns(
     url(r'^((?P<dev>m)/)?get_server_url_distribute$',
         'loganalyze.server_views.get_server_url_distribute'),
 
+    # cdn Mon
+    url(r'^((?P<dev>m)/)?show_ms_error$',
+        'cdnMon.views.show_ms_error'),
+
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),
     url(r'^update/playinfo$', 'tplay.update_views.playinfo'),
