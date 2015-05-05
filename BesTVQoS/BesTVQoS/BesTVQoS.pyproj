@@ -10,7 +10,7 @@
     <InterpreterArguments />
     <DjangoSettingsModule />
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
+    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
     <InterpreterVersion>2.7</InterpreterVersion>
     <WebBrowserPort>80</WebBrowserPort>
   </PropertyGroup>
@@ -39,6 +39,10 @@
     <Compile Include="BesTVQoS\settings.py" />
     <Compile Include="BesTVQoS\urls.py" />
     <Compile Include="BesTVQoS\wsgi.py" />
+    <Compile Include="cdnMon\models.py" />
+    <Compile Include="cdnMon\tests.py" />
+    <Compile Include="cdnMon\views.py" />
+    <Compile Include="cdnMon\__init__.py" />
     <Compile Include="common\date_time_tool.py" />
     <Compile Include="common\forms.py" />
     <Compile Include="common\mobile.py" />
@@ -68,6 +72,8 @@
     <Compile Include="BesTVQoS\__init__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="cdnMon\" />
+    <Folder Include="cdnMon\templates\" />
     <Folder Include="common\" />
     <Folder Include="common\templates\" />
     <Folder Include="loganalyze\" />
@@ -79,6 +85,7 @@
     <Folder Include="BesTVQoS\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="cdnMon\templates\show_ms_error.html" />
     <Content Include="common\templates\basic_table.html" />
     <Content Include="common\templates\filter_device_type.html" />
     <Content Include="common\templates\filter_group.html" />
