@@ -29,6 +29,9 @@ urlpatterns = patterns('',
     url(r'^update/log/respdelay$', 'logStore.views.respdelay'),
     url(r'^update/log/reqdelay$', 'logStore.views.reqdelay'),
 
+    # cdn Monitor
+    url(r'^update/mon/mserror$', 'cdnMon.views.ms_error_info'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
