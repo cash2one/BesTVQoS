@@ -164,9 +164,9 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 0: spec
     #
     spec_xf=ezxf('font: name Arial, colour Red')
-    spec_data=[
+    spec_data= [
         [u'日期: %s - %s'%(begin_date, end_date)],
-        [u'%s -- %s'%(beta_ver, u'公测版')]
+        [u'%s -- %s'%(u'公测版', beta_ver)]
         ]
     if len(master_ver)>0:
         spec_data.append([u'%s -- %s'%(master_ver, u'正式版')])
@@ -238,28 +238,95 @@ def pre_day_reporter(request, dev=""):
     context['versions2'] = versions2
     context['default_begin_date'] = str(begin_date)
     context['default_end_date'] = str(end_date)
+    context['has_table']=False
     response = render_to_response('show_daily_report.html', context)
     return response
 
-def day_reporter(request, dev=""):
-    wb = xlwt.Workbook()
-    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", "BesTV_Lite_A_2.6.4.2")
+def get_daily_report_tables(begin_date, end_date, beta_ver, master_ver=""):
+    tables=[]
+    # 0. date-ver table
+    table = HtmlTable()
+    table.mtitle = u"records信息"
+    table.mheader = [u'日期-版本']
+    table.msub = [
+        [u'日期: %s - %s'%(begin_date, end_date)],
+        [u'%s -- %s'%(u'公测版', beta_ver)]
+        ]
+    tables.append(table)
 
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=day_report_%s.xls'%('2015-04-22')
-    wb.save(response)
+    # 1. record table
+    table = HtmlTable()
+    table.mtitle = u"日期版本信息"
+    table.mheader = [u'记录数/版本', u'点播', u'回看', u'直播', u'连看', u'总计'] 
+    table.msub = get_records_data(begin_date, end_date, beta_ver, master_ver)
+    tables.append(table)
+
+    # 2. single Qos table
+    table = HtmlTable()
+    table.mtitle = u"SingleQos信息"
+    table.mheader = [u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
+    table.msub = get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
+    tables.append(table)
+
+    # 3. playtm table
+    table = HtmlTable()
+    table.mtitle = u"playtm信息"
+    table.mheader = [u'播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    table.msub = get_playtm_data(begin_date, end_date, beta_ver, master_ver)
+    tables.append(table)
+
+    # 4. fbuffer table
+    table = HtmlTable()
+    table.mtitle = u"fbuffer信息"
+    table.mheader = [u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    table.msub = get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
+    tables.append(table)
+
+    # 5. remarks table
+    table = HtmlTable()
+    table.mtitle = u"备注信息"
+    table.mheader = [u'备注']
+    table.msub = [
+        [u'一次不卡比例：无卡顿播放次数/加载成功的播放次数'], [u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长'],\
+        [u'多天报表的算均值：算均值可能存在差错']]
+    tables.append(table)
+    
+    return tables
+
+def display_daily_reporter(request, dev=""):
+    (service_type, device_type, device_types, 
+            version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
+    context = {}
+    context['default_service_type'] = service_type
+    context['service_types'] = ["All", "B2B", "B2C"]
+    context['default_device_type'] = device_type
+    context['device_types'] = device_types
+    context['default_version'] = version
+    context['versions'] = versions
+    context['default_version2'] = version
+    context['versions2'] = versions2
+    context['default_begin_date'] = str(begin_date)
+    context['default_end_date'] = str(end_date)
+
+    if version!="All":
+        version='%s_%s' % (device_type, version) 
+    else:
+        version=device_type
+    if version2!="All":
+        version2='%s_%s' % (device_type, version2) 
+    else:
+        version2=device_type
+    if version==version2:
+        version2=""
+
+    tables=get_daily_report_tables(begin_date, end_date, version, version2)
+    context['has_table']=True
+    context['tables']=tables
+
+    response = render_to_response('show_daily_report.html', context)
     return response
 
-def week_reporter(request, dev=""):
-    wb = xlwt.Workbook()
-    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", "BesTV_Lite_A_2.6.4.2")
-
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=week_report_%s.xls'%('2015-04-22')
-    wb.save(response)
-    return response
-
-def bestv_reporter(request, dev=""):
+def download_daily_reporter(request, dev=""):
     (service_type, device_type, device_types, 
             version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
 
@@ -278,5 +345,23 @@ def bestv_reporter(request, dev=""):
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=%s_report_%s.xls'%(version, begin_date)
+    wb.save(response)
+    return response
+
+def day_reporter(request, dev=""):
+    wb = xlwt.Workbook()
+    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", "BesTV_Lite_A_2.6.4.2")
+
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=day_report_%s.xls'%('2015-04-22')
+    wb.save(response)
+    return response
+
+def week_reporter(request, dev=""):
+    wb = xlwt.Workbook()
+    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", "BesTV_Lite_A_2.6.4.2")
+
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=week_report_%s.xls'%('2015-04-22')
     wb.save(response)
     return response
