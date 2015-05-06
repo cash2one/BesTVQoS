@@ -14,6 +14,8 @@ from common.date_time_tool import get_days_offset
 
 logger = logging.getLogger("django.request")
 
+business_types = ["ALL", "AAA", "EPG", "BSD", "PS"]
+
 
 def make_plot_item2(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, interval=1, ytitle2=""):
     item = {}
@@ -55,16 +57,18 @@ def get_multidays_interval(days):
 def show_server_list(request, dev=""):
     context = {}
 
-    code_filter = request.GET.get("code_filter", "")
+    business_type = request.GET.get("business_type", business_types[0])
     end_date = request.GET.get("date", str(today()))
 
     table = HtmlTable()
     table.mtitle = u"服务器运行状况"
-    table.mheader = [u"驻地", "IP", u"200占比(%)", u"记录数"]
+    table.mheader = [u"驻地", "业务类型", "IP", u"200占比(%)", u"记录数"]
     table.msub = []
 
-    sql  = "select Area, ISP, IP, 100*Ratio, Records from view_servers_status "
+    sql  = "select Area, ISP, Type, IP, 100*Ratio, Records from view_servers_status "
     sql += "where Date='%s'" % end_date
+    if business_type != business_types[0]:
+        sql += " and Type='%s'" % business_type
 
     logger.debug("Server List SQL - %s" % sql)
 
@@ -78,14 +82,17 @@ def show_server_list(request, dev=""):
         sub = []
         sub.append("%s_%s" % (row[0], row[1]))
         sub.append("%s" % row[2])
-        sub.append("%.2f" % (float(row[3])))
-        sub.append("%s" % row[4])
+        sub.append("%s" % row[3])
+        sub.append("%.2f" % (float(row[4])))
+        sub.append("%s" % row[5])
         subs.append(sub)
 
     table.msub = subs
 
     context['table'] = table
     context['default_date'] = end_date
+    context['business_types'] = business_types
+    context['default_business_type'] = business_type
 
     return render_to_response('show_server_list.html', context)
 

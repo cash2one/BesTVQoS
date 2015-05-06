@@ -1,4 +1,23 @@
 {% include 'top.html' %}
+
+<link rel="stylesheet" type="text/css" href="/static/js/multiselectSrc/jquery.multiselect.css" />
+<link rel="stylesheet" type="text/css" href="/static/js/ui/jquery-ui.css" />
+<script type="text/javascript" src="/static/js/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
+
+<script type="text/javascript">     
+    $(function(){
+        $("#business_type").multiselect({
+            selectedList:1,
+            height:160,
+            multiple:false,
+            header:false,
+            minWidth:100
+        });
+    });
+</script>
+
 <div id ="content" >
     <form method="get" class="bordered1" >
         <span style="padding-left:1%;"></span>
@@ -6,6 +25,18 @@
         <br>
         <div class="pageitem">
             <div class="ctrlbox">  
+                <div class="ctrlitem">  
+                    <label>业务类型</label>
+                    <select name="business_type" id="business_type">
+                        {% for item in business_types %}
+                            {% ifequal item default_business_type %}
+                                <option value="{{ item }}" selected>{{ item }}</option>
+                            {% else %}
+                                <option value="{{ item }}" >{{ item }}</option>
+                            {% endifequal %}
+                        {% endfor %}
+                    </select>
+                </div>
                 <div class="ctrlitem">  
                     <label>日期</label>
                     {% if is_mobile %}
@@ -27,7 +58,7 @@
         {% endfor %}
         
         {% for row in table.msub %}
-            <tr onclick="jump_to('show_server_detail?server_ip={{row.1}}&end_date={{default_date}}')" style="cursor:pointer">
+            <tr onclick="jump_to('show_server_detail?server_ip={{row.2}}&end_date={{default_date}}')" style="cursor:pointer">
             {% for col in row %}
                 <td>
                     {{col}}
