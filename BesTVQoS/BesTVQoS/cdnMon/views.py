@@ -54,10 +54,10 @@ def show_tsdelay(request, dev=""):
 
     table = HtmlTable()
     table.mtitle = u"CDN信息"
-    table.mheader = ["ServerIP", u"省份", u"运营商", u'流量(G)', '详情']
+    table.mheader = ["ServerIP", u"省份", u"运营商", u'流量(G)', u'内网流量占比(%)', '详情']
     table.msub = []
 
-    sql = "select ServIP, ServArea, ServISP, Flow, ServiceType \
+    sql = "select ServIP, ServArea, ServISP, Flow, InnerFlow, ServiceType \
             from ts_delay where Date='%s'" % date
 
     logger.debug("Server List SQL - %s" % sql)
@@ -73,6 +73,7 @@ def show_tsdelay(request, dev=""):
         for i in range(3):
             sub.append(row[i])
         sub.append("%.3f"%(float(row[3])/1024/1024/1024))
+        sub.append("%.1f"%(float(row[4]*1.0/row[3]*100)))
         sub.append(u'''<a href="/show_cdn_detail?ip=%s&date=%s&servicetype=%s" target="main">详情</a>'''%(row[0], date, row[4]))
         subs.append(sub)
 
