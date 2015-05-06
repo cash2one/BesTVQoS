@@ -149,6 +149,15 @@ def get_playtm_data(begin_date, end_date, beta_ver, master_ver):
 def get_fbuffer_data(begin_date, end_date, beta_ver, master_ver):
     return get_multi_qos_data("fbuffer", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver)
 
+def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
+    desc=[
+        [u'日期: %s - %s'%(begin_date, end_date)],
+        [u'%s -- %s'%(u'首选版本', beta_ver)]
+        ]
+    if len(master_ver)>0:
+        desc.append([u'%s -- %s'%(u'对比版本', master_ver)])
+    return desc
+
 def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     begin_time = current_time()
     book = wb
@@ -164,12 +173,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 0: spec
     #
     spec_xf=ezxf('font: name Arial, colour Red')
-    spec_data= [
-        [u'日期: %s - %s'%(begin_date, end_date)],
-        [u'%s -- %s'%(u'公测版', beta_ver)]
-        ]
-    if len(master_ver)>0:
-        spec_data.append([u'%s -- %s'%(master_ver, u'正式版')])
+    spec_data= get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
     
     rowx=write_xls(book, sheet, rowx, [], spec_data, [], spec_xf)
     rowx+=2
@@ -248,10 +252,7 @@ def get_daily_report_tables(begin_date, end_date, beta_ver, master_ver=""):
     table = HtmlTable()
     table.mtitle = u"records信息"
     table.mheader = [u'日期-版本']
-    table.msub = [
-        [u'日期: %s - %s'%(begin_date, end_date)],
-        [u'%s -- %s'%(u'公测版', beta_ver)]
-        ]
+    table.msub = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 1. record table
