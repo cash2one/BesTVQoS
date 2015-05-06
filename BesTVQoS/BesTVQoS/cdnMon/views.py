@@ -84,6 +84,37 @@ def show_tsdelay(request, dev=""):
     return render_to_response('show_tsdelay.html', context)
 
 # 广东+电信+4906156100+11976708_福建+电信+3268066792+10235635
+def make_pie_items(ip, area, isp, info):
+    pie_items=[]
+    pie_item={}
+    pie_item["index"] = 0
+    pie_item['title']=u'流量分布（%）'
+    pie_item['subtitle']='单位(G)'
+
+    #flows
+    items=info.split("_")
+    flows=[]
+    for i in items:
+        subitems=i.split("+")
+        flow_item=[]
+        key='%s%s'%(subitems[0], subitems[1])
+        flow_item.append(key)
+        f='%.3f'%(float(subitems[2])/1024/1024/1024)
+        flow_item.append(float(f))
+        flows.append(flow_item)
+
+    series = []
+    serie_item = '''{
+            type: 'pie',
+            name: '占比',
+            data: %s
+        }''' % (json.dumps(flows))
+    series.append(serie_item)        
+
+    pie_item["series"] = ",".join(series)
+    pie_items.append(pie_item)
+    return pie_items
+
 def make_rates(area, isp, info):
     flows=[]
     items=info.split("_")
@@ -173,6 +204,9 @@ def show_cdn_detail(request, dev=""):
     item={}
     item["title"]=u'%s-%s-%s'%(ip, area, isp)
     info=row[4]
+    context["pie_contents"]=make_pie_items(ip, area, isp, info)
+
+    # maps
     item["geos"]=get_china_geos(area, isp, info)
     item["rates"]=make_rates(area, isp, info)
     item["flows"]=make_flows(info)
