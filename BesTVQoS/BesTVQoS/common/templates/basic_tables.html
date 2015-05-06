@@ -1,0 +1,20 @@
+﻿{% if has_table %}
+    {% for table in tables %}
+    <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+        {% for header in table.mheader%}
+            <th>{{header}}</th>
+        {% endfor %}
+        
+        {% for row in table.msub %}
+            <tr>
+            {% for col in row %}
+                <td>   
+                    {{col}}
+                </td>             
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <p>
+    {% endfor %}
+{% endif %}

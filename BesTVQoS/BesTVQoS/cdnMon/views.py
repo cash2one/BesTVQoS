@@ -46,3 +46,43 @@ def show_ms_error(request, dev=""):
     context['default_date'] = date
 
     return render_to_response('show_ms_error.html', context)
+
+def show_tsdelay(request, dev=""):
+    context = {}
+
+    date = request.GET.get("date", str(get_day_of_day(-1)))
+
+    table = HtmlTable()
+    table.mtitle = u"CDN信息"
+    table.mheader = ["ServerIP", u"省份", u"运营商", u'流量(G)', u'内网流量占比(%)', '详情']
+    table.msub = []
+
+    sql = "select ServIP, ServArea, ServISP, Flow, InnerFlow, ServiceType \
+            from ts_delay where Date='%s'" % date
+
+    logger.debug("Server List SQL - %s" % sql)
+
+    cu = connection.cursor()
+    begin_time = current_time()
+    cu.execute(sql)
+    results = cu.fetchall()
+    logger.info("execute sql:  %s, cost: %s" % (sql, (current_time() - begin_time)))
+    subs = []
+    for row in results:
+        sub = []
+        for i in range(3):
+            sub.append(row[i])
+        sub.append("%.3f"%(float(row[3])/1024/1024/1024))
+        sub.append("%.1f"%(float(row[4]*1.0/row[3]*100)))
+        sub.append(u'''<a href="/show_cdn_detail?ip=%s&date=%s&servicetype=%s" target="main">详情</a>'''%(row[0], date, row[4]))
+        subs.append(sub)
+
+    table.msub = subs
+
+    context['table'] = table
+    context['default_date'] = date
+
+    return render_to_response('show_tsdelay.html', context)
+
+def show_cdn_detail(request, dev=""):
+    return HttpResponse("see later with pie and echarts map...");

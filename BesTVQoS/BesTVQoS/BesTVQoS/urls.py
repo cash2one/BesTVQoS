@@ -52,11 +52,13 @@ urlpatterns = patterns(
         'tplay.fbuffer_views.show_avg_ptime'),
 
     url(r'^((?P<dev>m)/)?day_reporter$',
-        'tplay.report_views.pre_day_reporter'),
+        'tplay.report_views.pre_day_reporter'),    
+    url(r'^((?P<dev>m)/)?display_daily_report$',
+        'tplay.report_views.display_daily_reporter'),
+    url(r'^((?P<dev>m)/)?download_daily_report$',
+        'tplay.report_views.download_daily_reporter'),
     url(r'^((?P<dev>m)/)?week_reporter$',
         'tplay.report_views.pre_day_reporter'),
-    url(r'^((?P<dev>m)/)?generate_report$',
-        'tplay.report_views.bestv_reporter'),
 
     # log analyze
     url(r'^((?P<dev>m)/)?show_server_list$',
@@ -69,6 +71,10 @@ urlpatterns = patterns(
     # cdn Mon
     url(r'^((?P<dev>m)/)?show_ms_error$',
         'cdnMon.views.show_ms_error'),
+    url(r'^((?P<dev>m)/)?show_tsdelay$',
+        'cdnMon.views.show_tsdelay'),
+    url(r'^((?P<dev>m)/)?show_cdn_detail$',
+        'cdnMon.views.show_cdn_detail'),
 
     # data interface
     url(r'^update/playprofile$', 'tplay.update_views.playprofile'),

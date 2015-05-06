@@ -86,7 +86,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cdnMon\templates\show_ms_error.html" />
+    <Content Include="cdnMon\templates\show_tsdelay.html" />
     <Content Include="common\templates\basic_table.html" />
+    <Content Include="common\templates\basic_tables.html" />
     <Content Include="common\templates\filter_device_type.html" />
     <Content Include="common\templates\filter_group.html" />
     <Content Include="common\templates\filter_group_daily_report.html" />

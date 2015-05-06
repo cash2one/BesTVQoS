@@ -96,7 +96,7 @@ function get_version(device_type) {
 </script>
 
 
-<form action="generate_report" method="get">
+<form name="report" method="get">
     <div class="pageitem">
         <span style="float:left;padding-left:1%;"></span>
             {% include 'filter_service_type.html'%}
@@ -121,8 +121,21 @@ function get_version(device_type) {
                 {% endif %}
             </div>
             <div class="ctrlitem">
-                <input type="submit" value="生成/下载报表">
+                <input type="button" value="生成" onclick="generate()">
+                <input type="button" value="下载" onclick="download()">
             </div>
         </div>
     </div>
 </form>
+
+<script type="text/javascript">    
+    function generate(){
+        report.action="display_daily_report";
+        report.submit();
+    }
+
+    function download(){
+        report.action="download_daily_report";
+        report.submit();
+    }
+</script>
