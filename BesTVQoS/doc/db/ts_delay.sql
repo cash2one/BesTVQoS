@@ -10,6 +10,7 @@ create table IF NOT EXISTS ts_delay(
 	ServArea varchar(64),
 	ServISP varchar(32),	
 	Flow Bigint,
+	InnerFlow Bigint,
 	Info varchar(900),
 	PRIMARY KEY(RecordID)	
 );
