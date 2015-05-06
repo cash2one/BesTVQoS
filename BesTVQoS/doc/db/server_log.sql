@@ -7,6 +7,7 @@ create table IF NOT EXISTS serverinfo(
 	ServiceType varchar(8),
 	ISP varchar(32),
 	Area varchar(64),
+	Type varchar(64),
 	PRIMARY KEY(ServerID)	
 );
 
