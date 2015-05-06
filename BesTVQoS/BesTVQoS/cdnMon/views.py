@@ -108,7 +108,8 @@ def make_flows(info):
         subitems=i.split("+")
         flow_item={}
         flow_item["client_name"]="%s%s"%(subitems[0], subitems[1])
-        flow_item["flow"]="%.3f"%(float(subitems[2])/1024/1024/1024)
+        #flow_item["flow"]="%.3f"%(float(subitems[2])/1024/1024/1024)
+        flow_item["flow"]="%d"%(float(subitems[2])/float(subitems[3]))
         flows.append(flow_item)
         count+=1
         if count==15:
