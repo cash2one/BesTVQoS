@@ -115,36 +115,32 @@ def make_pie_items(ip, area, isp, info):
     pie_items.append(pie_item)
     return pie_items
 
-def make_rates(area, isp, info):
+def make_rates(area, isp, info, tflow, percent):
     flows=[]
     items=info.split("_")
-    count=0
     for i in items:
         subitems=i.split("+")
+        if float(subitems[2])/tflow < percent:
+            break;
+
         flow_item={}
         flow_item["server_name"]="%s%s"%(area, isp)
         flow_item["client_name"]="%s%s"%(subitems[0], subitems[1])
         flow_item["rate"]="%d"%(float(subitems[2])/float(subitems[3]))
         flows.append(flow_item)
-        count+=1
-        if count==15:
-            break;
     return flows
 
-def make_flows(info):
+def make_flows(info, tflow, percent):
     flows=[]
     items=info.split("_")
-    count=0
     for i in items:
         subitems=i.split("+")
+        if float(subitems[2])/tflow < percent:
+            break;
         flow_item={}
         flow_item["client_name"]="%s%s"%(subitems[0], subitems[1])
-        #flow_item["flow"]="%.3f"%(float(subitems[2])/1024/1024/1024)
-        flow_item["flow"]="%d"%(float(subitems[2])/float(subitems[3]))
+        flow_item["flow"]="%.3f"%(float(subitems[2])/tflow*100)        
         flows.append(flow_item)
-        count+=1
-        if count==15:
-            break;
     return flows
 
 def get_geo_from_db(area):
@@ -197,6 +193,7 @@ def show_cdn_detail(request, dev=""):
     row=results[0]
     area=row[0]
     isp=row[1]
+    tflow=row[2]
     context['title']=u'服务器信息: 速率KBps'
     context['subtitle']=u'%s-%s-%s'%(area, isp, date)
     context['legendTxt']=ip
@@ -208,8 +205,8 @@ def show_cdn_detail(request, dev=""):
 
     # maps
     item["geos"]=get_china_geos(area, isp, info)
-    item["rates"]=make_rates(area, isp, info)
-    item["flows"]=make_flows(info)
+    item["rates"]=make_rates(area, isp, info, tflow, 0.02)
+    item["flows"]=make_flows(info, tflow, 0.02)
 
     context['item']=item
     return render_to_response('bestv_servers_map.html', context)
