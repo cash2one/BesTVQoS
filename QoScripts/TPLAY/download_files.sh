@@ -10,7 +10,7 @@ while(($i<$MAX_TRY))
 do
 	bash download_files_by_FTP.sh ${date} ${hour}
 
-	if [ -e TPLAY_${date}${hour}55_jsdx_.zip ]; then
+	if [ -e TPLAY_${date}${hour}55_JSDX_.zip ]; then
 		break
 	fi
 
