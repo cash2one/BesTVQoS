@@ -198,7 +198,7 @@ def show_cdn_detail(request, dev=""):
     area=row[0]
     isp=row[1]
     context['title']=u'服务器信息: 速率KBps'
-    context['subtitle']=u'%s-%s-%s-%s'%(ip, area, isp, date)
+    context['subtitle']=u'%s-%s-%s'%(area, isp, date)
     context['legendTxt']=ip
 
     item={}
