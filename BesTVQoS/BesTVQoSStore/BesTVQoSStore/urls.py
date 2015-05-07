@@ -31,7 +31,8 @@ urlpatterns = patterns('',
 
     # cdn Monitor
     url(r'^update/mon/mserror$', 'cdnMon.views.ms_error_info'),
-     url(r'^update/mon/ts_delay$', 'cdnMon.views.ts_delay'),
+    url(r'^update/mon/ts_delay$', 'cdnMon.views.ts_delay'),
+    url(r'^update/mon/province_geo$', 'cdnMon.views.province_geo'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

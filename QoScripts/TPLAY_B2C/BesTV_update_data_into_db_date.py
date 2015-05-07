@@ -12,7 +12,7 @@ sys.setdefaultencoding("utf-8")
 
 def update_fbuffer_3s_ratio_data(svrtype, dev, isp, date, area, ratio):
 
-   url = "http://10.100.12.5:80/update/bestv3Sratio"
+   url = "http://10.100.12.5:6699/update/bestv3Sratio"
 
    request = {}
    request['servicetype'] = svrtype
@@ -36,7 +36,7 @@ def update_fbuffer_3s_ratio_data(svrtype, dev, isp, date, area, ratio):
 
 def update_avg_pchoke_data(svrtype, dev, isp, date, area, avgc, avgt):
 
-   url = "http://10.100.12.5:80/update/bestvavgpchoke"
+   url = "http://10.100.12.5:6699/update/bestvavgpchoke"
 
    request = {}
    request['servicetype'] = svrtype

@@ -238,7 +238,7 @@ def pre_day_reporter(request, dev=""):
     context['device_types'] = device_types
     context['default_version'] = version
     context['versions'] = versions
-    context['default_version2'] = version
+    context['default_version2'] = version2
     context['versions2'] = versions2
     context['default_begin_date'] = str(begin_date)
     context['default_end_date'] = str(end_date)
@@ -294,21 +294,7 @@ def get_daily_report_tables(begin_date, end_date, beta_ver, master_ver=""):
     
     return tables
 
-def display_daily_reporter(request, dev=""):
-    (service_type, device_type, device_types, 
-            version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
-    context = {}
-    context['default_service_type'] = service_type
-    context['service_types'] = ["All", "B2B", "B2C"]
-    context['default_device_type'] = device_type
-    context['device_types'] = device_types
-    context['default_version'] = version
-    context['versions'] = versions
-    context['default_version2'] = version
-    context['versions2'] = versions2
-    context['default_begin_date'] = str(begin_date)
-    context['default_end_date'] = str(end_date)
-
+def get_version_version2(device_type, version, version2):
     if version!="All":
         version='%s_%s' % (device_type, version) 
     else:
@@ -319,6 +305,24 @@ def display_daily_reporter(request, dev=""):
         version2=device_type
     if version==version2:
         version2=""
+    return (version, version2)
+
+def display_daily_reporter(request, dev=""):
+    (service_type, device_type, device_types, 
+            version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
+    context = {}
+    context['default_service_type'] = service_type
+    context['service_types'] = ["All", "B2B", "B2C"]
+    context['default_device_type'] = device_type
+    context['device_types'] = device_types
+    context['default_version'] = version
+    context['versions'] = versions
+    context['default_version2'] = version2
+    context['versions2'] = versions2
+    context['default_begin_date'] = str(begin_date)
+    context['default_end_date'] = str(end_date)
+
+    (version, version2)=get_version_version2(device_type, version, version2)
 
     tables=get_daily_report_tables(begin_date, end_date, version, version2)
     context['has_table']=True
@@ -331,16 +335,8 @@ def download_daily_reporter(request, dev=""):
     (service_type, device_type, device_types, 
             version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
 
-    if version!="All":
-        version='%s_%s' % (device_type, version) 
-    else:
-        version=device_type
-    if version2!="All":
-        version2='%s_%s' % (device_type, version2) 
-    else:
-        version2=device_type
-    if version==version2:
-        version2=""
+    (version, version2)=get_version_version2(device_type, version, version2)
+
     wb = xlwt.Workbook()
     generate_report(wb, begin_date, end_date, version, version2)
 
