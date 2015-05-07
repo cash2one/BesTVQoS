@@ -237,7 +237,7 @@ def get_delay_history(ip, code, begin_date, end_date):
         raise NoDataError("No data between %s - %s" % (begin_date, end_date))
     
     interval = get_multidays_interval(len(xalis)/24)
-    item = make_plot_item2(datas, keys, 1, xalis, u"服务器响应时延", "", u"百分比(%)", interval)
+    item = make_plot_item2(datas, keys, 1, xalis, u"服务器响应时延", "", u"时延(ms)", interval)
 
     return item
 
