@@ -14,6 +14,7 @@ create table IF NOT EXISTS ms_error_info(
 	ServISP varchar(32),
 	ServArea varchar(64),
 	URL varchar(512),
+	Count smallint,
 	PRIMARY KEY(RecordID)	
 );
 

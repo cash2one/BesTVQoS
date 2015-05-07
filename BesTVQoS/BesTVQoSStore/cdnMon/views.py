@@ -22,10 +22,10 @@ def ms_error_info(request):
             for item in contents:
                 insert_sql = "INSERT INTO ms_error_info(Date, \
                         Resp, TsType, ClientIP, ClientISP, ClientArea, \
-                        ServIP, ServISP, ServArea, URL) \
-                        VALUES ('%s', %s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s' \
+                        ServIP, ServISP, ServArea, URL, Count) \
+                        VALUES ('%s', %s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s \
                         )"%(item['date'], item['resp'], item['type'], item['clientip'], item['clientisp'], item['clientarea'], \
-                        item['servip'], item['servisp'], item['servarea'], item['url'])
+                        item['servip'], item['servisp'], item['servarea'], item['url'], item['count'])
                 try:
                     cursor.execute(insert_sql)
                     db.commit()
