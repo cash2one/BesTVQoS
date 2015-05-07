@@ -254,6 +254,7 @@ def get_records_data_for_table(urls_suffix, begin_date, end_date, beta_ver, mast
     tables=[]
     for i, data in enumerate(datas):
         item={}
+        item['click']=True
         item['url']="show_playing_trend?%s"%(urls_suffix[i])
         item['data']=data
         tables.append(item)
@@ -271,6 +272,7 @@ def get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, beta_ver, 
         else:
             i=0
         item={}
+        item['click']=True
         item['url']="%s%s"%(urls_prefix[j], urls_suffix[i])
         item['data']=data
         tables.append(item)
@@ -285,6 +287,7 @@ def get_playtm_data_for_table(urls_suffix, begin_date, end_date, beta_ver, maste
         else:
             i=0
         item={}
+        item['click']=True
         item['url']="show_play_time?%s"%(urls_suffix[i])
         item['data']=data
         tables.append(item)
@@ -299,6 +302,7 @@ def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, beta_ver, mast
         else:
             i=0
         item={}
+        item['click']=True
         item['url']="show_fbuffer_time?%s"%(urls_suffix[i])
         item['data']=data
         tables.append(item)
@@ -310,7 +314,14 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
     table = HtmlTable()
     table.mtitle = u"records信息"
     table.mheader = [u'日期-版本']
-    table.msub = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
+    table.msub = []
+    descs = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
+    for i, desc in enumerate(descs):
+        item={}
+        item['click']=False
+        item['url']='' 
+        item['data']=desc
+        table.msub.append(item)
     tables.append(table)
 
     # 1. record table
@@ -354,7 +365,8 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
         [u'多天报表的算均值：算均值可能存在差错']]
     for i, data in enumerate(datas):
         item={}
-        item['url']=''
+        item['click']=False
+        item['url']='' 
         item['data']=data
         table.msub.append(item)
     
