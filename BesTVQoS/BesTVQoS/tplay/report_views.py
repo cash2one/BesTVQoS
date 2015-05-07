@@ -137,7 +137,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
                     temp[i+1]+=row[i]
                 count+=1
 
-            if count>1:
+            if count>0:
                 for i in range(6):
                     temp[i+1]=temp[i+1]/count/base_radis
 
