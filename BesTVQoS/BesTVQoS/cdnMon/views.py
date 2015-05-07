@@ -138,8 +138,8 @@ def make_flows(info, tflow, percent):
         if float(subitems[2])/tflow < percent:
             break;
         flow_item={}
-        flow_item["client_name"]="%s%s"%(subitems[0], subitems[1])
-        flow_item["flow"]="%.3f"%(float(subitems[2])/tflow*100)        
+        flow_item["client_name"]='%s%s  %.1f'%(subitems[0], subitems[1], float(subitems[2])/tflow*100)
+        flow_item["flow"]="%d"%(float(subitems[2])/float(subitems[3]))
         flows.append(flow_item)
     return flows
 
@@ -154,7 +154,7 @@ def get_geo_from_db(area):
         return "%s,%s"%(record[0], record[1])
     return "1,1"
 
-def get_china_geos(area, isp, info):
+def get_china_geos(area, isp, info, tflow, percent):
     geos=[]
     subkey='%s%s'%(area, isp)
     item={}
@@ -166,10 +166,19 @@ def get_china_geos(area, isp, info):
     count=0
     for i in items:
         subitems=i.split("+")
+        if float(subitems[2])/tflow < percent:
+            break;
+
         subkey="%s%s"%(subitems[0], subitems[1])
         if subkey not in geos:
             item={}
             item["area"]=subkey
+            item["geo"]=get_geo_from_db(subitems[0])
+            geos.append(item)
+        subkey2='%s%s  %.1f'%(subitems[0], subitems[1], float(subitems[2])/tflow*100)
+        if subkey2 not in geos:
+            item={}
+            item["area"]=subkey2
             item["geo"]=get_geo_from_db(subitems[0])
             geos.append(item)
     return geos
@@ -204,7 +213,7 @@ def show_cdn_detail(request, dev=""):
     context["pie_contents"]=make_pie_items(ip, area, isp, info)
 
     # maps
-    item["geos"]=get_china_geos(area, isp, info)
+    item["geos"]=get_china_geos(area, isp, info, tflow, 0.02)
     item["rates"]=make_rates(area, isp, info, tflow, 0.02)
     item["flows"]=make_flows(info, tflow, 0.02)
 
