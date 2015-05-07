@@ -53,9 +53,9 @@ urlpatterns = patterns(
 
     url(r'^((?P<dev>m)/)?day_reporter$',
         'tplay.report_views.pre_day_reporter'),    
-    url(r'^((?P<dev>m)/)?display_daily_report$',
+    url(r'^((?P<dev>m)/)?display_daily_reporter$',
         'tplay.report_views.display_daily_reporter'),
-    url(r'^((?P<dev>m)/)?download_daily_report$',
+    url(r'^((?P<dev>m)/)?download_daily_reporter$',
         'tplay.report_views.download_daily_reporter'),
     url(r'^((?P<dev>m)/)?week_reporter$',
         'tplay.report_views.pre_day_reporter'),

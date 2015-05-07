@@ -85,6 +85,7 @@
     <Folder Include="BesTVQoS\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="cdnMon\templates\bestv_servers_map.html" />
     <Content Include="cdnMon\templates\show_ms_error.html" />
     <Content Include="cdnMon\templates\show_tsdelay.html" />
     <Content Include="common\templates\basic_table.html" />
