@@ -1,4 +1,23 @@
 {% include 'top.html' %}
+
+<link rel="stylesheet" type="text/css" href="/static/js/multiselectSrc/jquery.multiselect.css" />
+<link rel="stylesheet" type="text/css" href="/static/js/ui/jquery-ui.css" />
+<script type="text/javascript" src="/static/js/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
+
+<script type="text/javascript">     
+    $(function(){
+        $("#service_type").multiselect({
+            selectedList:1,
+            height:100,
+            multiple:false,
+            header:false,
+            minWidth:100
+        });
+    });
+</script>
+
 <div id ="content" >
     <form method="get" class="bordered1" >
         <span style="padding-left:1%;"></span>
@@ -8,7 +27,7 @@
             <div class="ctrlbox">  
                 <div class="ctrlitem">  
                     <label>服务类型</label>
-                    <select name="service_type">
+                    <select name="service_type" id="service_type">
                         {% for item in service_types %}
                             {% ifequal item default_service_type %}
                                 <option value="{{ item }}" selected>{{ item }}</option>

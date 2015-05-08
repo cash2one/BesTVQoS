@@ -2,6 +2,7 @@
 
 $svrtype = shift @ARGV;
 $svrip = shift @ARGV;
+$servicetype = shift @ARGV;
 $date = shift @ARGV;
 $hour = shift @ARGV;
 $key = shift @ARGV;
@@ -20,7 +21,7 @@ foreach $filename (@ARGV) {
 		$count{$element[$idx]}++;
 		
 		if ($written == 1) {
-			open SUBFILE1, ">>tmp/${svrtype}/${date}/${svrip}/$element[$idx]\_hour";
+			open SUBFILE1, ">>tmp/${svrtype}/${date}/${servicetype}/${svrip}/$element[$idx]\_hour";
 			print SUBFILE1 $_."\n";
 			close SUBFILE1;
 		}
@@ -31,7 +32,7 @@ foreach $filename (@ARGV) {
 	close FILE;
 }
 
-$outfilename = "$svrtype/$date/$svrip/distribution_data_${key}_${hour}";
+$outfilename = "$svrtype/$date/${servicetype}/$svrip/distribution_data_${key}_${hour}";
 open OUT, ">$outfilename";
 
 foreach $key (sort {$count{$b}<=>$count{$a}} %count) {
