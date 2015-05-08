@@ -186,7 +186,7 @@ def prepare_hourly_delay_history(ip, code, begin_date, end_date, xalis):
 
     data_by_hour = {}
     
-    sql  = "SELECT P25, P50, P75, P90, P95, AvgTime, Date, Hour From view_respdelayinfo "
+    sql  = "SELECT P25, P50, P75, P90, P95, AvgTime, Date, Hour From view_reqdelayinfo "
     sql += "where IP='%s' and Date>='%s' and Date<='%s' " % (ip, begin_date, end_date)
     sql += "and Hour<24 and Code=%d" % (code)
 
@@ -339,7 +339,7 @@ def get_server_url_distribute(request, dev=""):
         sql  = "select sum(Records) from view_urlinfo "
         sql += "where IP='%s' and Code=%s " % (server_ip, code)
         sql += "and Date>='%s' and Date<='%s' " % (begin_date, end_date)
-        sql += "and Hour<24 and URL!='ALL' and Records>0"        
+        sql += "and Hour<24 and URL!='all' and Records>0"        
         logger.debug("Count URL SQL - %s" % sql)
     
         cu = connection.cursor()
@@ -360,7 +360,7 @@ def get_server_url_distribute(request, dev=""):
         sql  = "select URL, sum(Records), 100*sum(Records)/%s " % (total_records)
         sql += "from view_urlinfo where IP='%s' and Code=%s " % (server_ip, code)
         sql += "and Date>='%s' and Date<='%s' " % (begin_date, end_date)
-        sql += "and Hour<24 and URL!='ALL' and Records>0 "
+        sql += "and Hour<24 and URL!='all' and Records>0 "
         sql += "group by URL order by Records desc"        
         logger.debug("URL Distribute SQL - %s" % sql)
 
