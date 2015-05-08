@@ -186,7 +186,7 @@ def prepare_hourly_delay_history(ip, code, begin_date, end_date, xalis):
 
     data_by_hour = {}
     
-    sql  = "SELECT P25, P50, P75, P90, P95, AvgTime, Date, Hour From view_respdelayinfo "
+    sql  = "SELECT P25, P50, P75, P90, P95, AvgTime, Date, Hour From view_reqdelayinfo "
     sql += "where IP='%s' and Date>='%s' and Date<='%s' " % (ip, begin_date, end_date)
     sql += "and Hour<24 and Code=%d" % (code)
 
