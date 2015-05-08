@@ -111,7 +111,8 @@ def append_to_excel(wb, table, sheet, row_idx):
     begin_time = current_time()
 
     sheet = wb.add_sheet(sheet)
-    sheet.col(0).width=10000
+    sheet.col(0).width=3000
+    sheet.col(2).width=4000
     
     heading_xf=xlwt.easyxf('borders: left thin, right thin, top thin, bottom thin; font: bold on; pattern: pattern solid, fore_colour bright_green')
     data_xf=xlwt.easyxf('borders: left thin, right thin, top thin, bottom thin; font: name Arial')
