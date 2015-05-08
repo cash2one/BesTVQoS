@@ -34,7 +34,7 @@ do
 	perl calc_response_time_CDF.pl ${date} ${hour} 5 ${savedir} tmp/${type}/${date}/${servicetype}/${svr}_hour
 	perl calc_response_time_CDF_by_url.pl ${date} ${hour} 5 ${savedir} tmp/${type}/${date}/${servicetype}/${svr}_hour
 
-	python update_data_into_db_date.py ${type} ${svr} ${date} ${hour} ${type}/${date}/${servicetype}/${svr}/response_data_CDF_5 ${type}/${date}/${servicetype}/${svr}/response_data_CDF_4 ${type}/${date}/${servicetype}/${svr}/distribution_data_code_${hour}
+	python update_data_into_db_date.py ${type} ${svr} ${servicetype} ${date} ${hour} ${type}/${date}/${servicetype}/${svr}/response_data_CDF_5 ${type}/${date}/${servicetype}/${svr}/response_data_CDF_4 ${type}/${date}/${servicetype}/${svr}/distribution_data_code_${hour}
 	
 	# calc qos by code	
 	bash server_qos_by_code.sh ${type} ${svr} ${servicetype} ${date} ${hour} ${type}/${date}/${servicetype}/${svr}/distribution_data_code_${hour}
