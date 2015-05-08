@@ -17,7 +17,7 @@ do
 	
 	perl url_distribution_calc.pl ${type} ${svr} ${servicetype} ${date} ${hour} url_${code} 0 tmp/${type}/${date}/${servicetype}/${svr}/${code}_hour
 
-	python update_data_into_db_by_code_date.py ${type} ${svr} ${date} ${hour} ${code} ${type}/${date}/${servicetype}/${svr}/distribution_data_url_${code}_${hour}
+	python update_data_into_db_by_code_date.py ${type} ${svr} ${servicetype} ${date} ${hour} ${code} ${type}/${date}/${servicetype}/${svr}/distribution_data_url_${code}_${hour}
 	
 	rm tmp/${type}/${date}/${servicetype}/${svr}/${code}_hour
 done
