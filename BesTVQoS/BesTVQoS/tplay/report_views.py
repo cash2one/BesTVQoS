@@ -110,7 +110,7 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
     return qos_data
 
 # p25, 50, 75, 90, 95, avg
-def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master_ver):
+def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master_ver, p95_exception_value, base_radis=1):
     db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
     cursor = db.cursor()
 
@@ -131,23 +131,25 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
             results = cursor.fetchall()
             count=0
             for row in results:
-                count+=1
+                if row[4]<p95_exception_value:
+                    continue
                 for i in range(6):
                     temp[i+1]+=row[i]
+                count+=1
 
-            if count>1:
+            if count>0:
                 for i in range(6):
-                    temp[i+1]/=count
+                    temp[i+1]=temp[i+1]/count/base_radis
 
             qos_data.append(temp)
     db.close()
     return qos_data
 
 def get_playtm_data(begin_date, end_date, beta_ver, master_ver):
-    return get_multi_qos_data("playtime", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver)
+    return get_multi_qos_data("playtime", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver, 1800, 60)
 
 def get_fbuffer_data(begin_date, end_date, beta_ver, master_ver):
-    return get_multi_qos_data("fbuffer", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver)
+    return get_multi_qos_data("fbuffer", VIEW_TYPES[1:4], begin_date, end_date, beta_ver, master_ver, 3)
 
 def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
     desc=[
@@ -219,6 +221,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #    
     remark_xf=ezxf('font: name Arial, colour Red')
     remarks=[u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
+        u'缓冲异常值过滤：如果P95<3秒，则认为数据有问题', u'播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题', \
         u'多天报表的算均值：算均值可能存在差错']
     rowx=write_remarks_to_xls(book, sheet, rowx, remarks, remark_xf)
     rowx+=2
@@ -246,50 +249,127 @@ def pre_day_reporter(request, dev=""):
     response = render_to_response('show_daily_report.html', context)
     return response
 
-def get_daily_report_tables(begin_date, end_date, beta_ver, master_ver=""):
+def get_records_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
+    datas=get_records_data(begin_date, end_date, beta_ver, master_ver)
+    tables=[]
+    for i, data in enumerate(datas):
+        item={}
+        item['click']=True
+        item['url']="show_playing_trend?%s"%(urls_suffix[i])
+        item['data']=data
+        tables.append(item)
+    return tables
+
+def get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
+    datas=get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
+    tables=[]
+    urls_prefix=['show_fbuffer_sucratio?', 'show_fluency?', 'show_fluency_pratio?']
+    for i, data in enumerate(datas):
+        j=i
+        if len(datas)==6:
+            j/=2
+            i%=2
+        else:
+            i=0
+        item={}
+        item['click']=True
+        item['url']="%s%s"%(urls_prefix[j], urls_suffix[i])
+        item['data']=data
+        tables.append(item)
+    return tables
+
+def get_playtm_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
+    datas=get_playtm_data(begin_date, end_date, beta_ver, master_ver)
+    tables=[]
+    for i, data in enumerate(datas):
+        if len(datas)==6:
+            i%=2
+        else:
+            i=0
+        item={}
+        item['click']=True
+        item['url']="show_play_time?%s"%(urls_suffix[i])
+        item['data']=data
+        tables.append(item)
+    return tables
+
+def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
+    datas=get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
+    tables=[]
+    for i, data in enumerate(datas):
+        if len(datas)==6:
+            i%=2
+        else:
+            i=0
+        item={}
+        item['click']=True
+        item['url']="show_fbuffer_time?%s"%(urls_suffix[i])
+        item['data']=data
+        tables.append(item)
+    return tables
+
+def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_ver=""):
     tables=[]
     # 0. date-ver table
     table = HtmlTable()
     table.mtitle = u"records信息"
     table.mheader = [u'日期-版本']
-    table.msub = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
+    table.msub = []
+    descs = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
+    for i, desc in enumerate(descs):
+        item={}
+        item['click']=False
+        item['url']='' 
+        item['data']=desc
+        table.msub.append(item)
     tables.append(table)
 
     # 1. record table
     table = HtmlTable()
     table.mtitle = u"日期版本信息"
     table.mheader = [u'记录数/版本', u'点播', u'回看', u'直播', u'连看', u'总计'] 
-    table.msub = get_records_data(begin_date, end_date, beta_ver, master_ver)
+    table.msub = get_records_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 2. single Qos table
     table = HtmlTable()
     table.mtitle = u"SingleQos信息"
     table.mheader = [u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
-    table.msub = get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
+    table.msub = get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 3. playtm table
     table = HtmlTable()
     table.mtitle = u"playtm信息"
     table.mheader = [u'播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
-    table.msub = get_playtm_data(begin_date, end_date, beta_ver, master_ver)
+    table.msub = get_playtm_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 4. fbuffer table
     table = HtmlTable()
     table.mtitle = u"fbuffer信息"
     table.mheader = [u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
-    table.msub = get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
+    table.msub = get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 5. remarks table
     table = HtmlTable()
     table.mtitle = u"备注信息"
     table.mheader = [u'备注']
-    table.msub = [
+    table.msub=[]
+    datas = [
+        [u'点击表格可跳转到相应的Qos'],
         [u'一次不卡比例：无卡顿播放次数/加载成功的播放次数'], [u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长'],\
+        [u'缓冲异常值过滤：如果P95<3秒，则认为数据有问题'],
+        [u'播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题'],
         [u'多天报表的算均值：算均值可能存在差错']]
+    for i, data in enumerate(datas):
+        item={}
+        item['click']=False
+        item['url']='' 
+        item['data']=data
+        table.msub.append(item)
+    
     tables.append(table)
     
     return tables
@@ -322,9 +402,11 @@ def display_daily_reporter(request, dev=""):
     context['default_begin_date'] = str(begin_date)
     context['default_end_date'] = str(end_date)
 
+    urls_suffix=['device_type=%s&version=%s&begin_date=%s&end_date=%s'%(device_type, version, begin_date, end_date), \
+        'device_type=%s&version=%s&begin_date=%s&end_date=%s'%(device_type, version2, begin_date, end_date),]
     (version, version2)=get_version_version2(device_type, version, version2)
 
-    tables=get_daily_report_tables(begin_date, end_date, version, version2)
+    tables=get_daily_report_tables(urls_suffix, begin_date, end_date, version, version2)
     context['has_table']=True
     context['tables']=tables
 

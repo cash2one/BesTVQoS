@@ -6,8 +6,12 @@
         {% endfor %}
         
         {% for row in table.msub %}
+            {% if row.click %}
+            <tr onclick="jump_to('{{row.url}}')" style="cursor:pointer">
+            {% else %}
             <tr>
-            {% for col in row %}
+            {% endif %}
+            {% for col in row.data %}
                 <td>   
                     {{col}}
                 </td>             
@@ -18,3 +22,10 @@
     <p>
     {% endfor %}
 {% endif %}
+
+<script type="text/javascript">
+    function jump_to(url)
+    {
+        window.location.href = url;
+    }
+</script>
