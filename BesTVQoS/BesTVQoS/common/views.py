@@ -51,6 +51,27 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
     return item
 
 
+# 
+def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
+    for colx, value in enumerate(headings):
+        sheet.write(rowx, colx, value, heading_xf)
+
+    for row in data:
+        rowx+=1
+        for colx, value in enumerate(row):
+            sheet.write(rowx, colx, value, data_xf)
+
+    return rowx
+
+
+def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
+    for value in data:
+        sheet.write(rowx, 0, value, data_xf)
+        rowx+=1
+
+    return rowx
+
+
 def home(request):
     logger.debug("Qos request")
     return render_to_response('index.html', Context())

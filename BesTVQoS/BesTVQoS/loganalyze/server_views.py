@@ -3,10 +3,14 @@
 import logging
 import MySQLdb
 import json
+import xlwt as xlwt
+
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.db import connection
 from common.views import HtmlTable
+from common.views import write_xls
+from common.views import write_remarks_to_xls
 from common.date_time_tool import today
 from common.date_time_tool import current_time
 from common.date_time_tool import get_days_region
@@ -54,19 +58,14 @@ def get_multidays_interval(days):
     return interval    
 
 
-def show_server_list(request, dev=""):
-    context = {}
-
-    business_type = request.GET.get("business_type", business_types[0])
-    end_date = request.GET.get("date", str(today()))
-
+def get_server_list_table(business_type, datum):
     table = HtmlTable()
     table.mtitle = u"服务器运行状况"
-    table.mheader = [u"驻地", "业务类型", "IP", u"200占比(%)", u"记录数"]
+    table.mheader = [u"驻地", u"业务类型", "IP", u"200占比(%)", u"记录数"]
     table.msub = []
 
     sql  = "select Area, ISP, Type, IP, 100*Ratio, Records from view_servers_status "
-    sql += "where Date='%s'" % end_date
+    sql += "where Date='%s'" % datum
     if business_type != business_types[0]:
         sql += " and Type='%s'" % business_type
 
@@ -89,12 +88,54 @@ def show_server_list(request, dev=""):
 
     table.msub = subs
 
+    return table
+
+
+def show_server_list(request, dev=""):
+    context = {}
+
+    business_type = request.GET.get("business_type", business_types[0])
+    end_date = request.GET.get("date", str(today()))
+
+    table = get_server_list_table(business_type, end_date)
+
     context['table'] = table
     context['default_date'] = end_date
     context['business_types'] = business_types
     context['default_business_type'] = business_type
 
     return render_to_response('show_server_list.html', context)
+
+
+def append_to_excel(wb, table, sheet, row_idx):
+    begin_time = current_time()
+
+    sheet = wb.add_sheet(sheet)
+    sheet.col(0).width=10000
+    
+    heading_xf=xlwt.easyxf('borders: left thin, right thin, top thin, bottom thin; font: bold on; pattern: pattern solid, fore_colour bright_green')
+    data_xf=xlwt.easyxf('borders: left thin, right thin, top thin, bottom thin; font: name Arial')
+    spec_xf=xlwt.easyxf('font: name Arial, colour Red')
+
+    row_idx = write_remarks_to_xls(wb, sheet, row_idx, [table.mtitle], spec_xf)
+    row_idx += 1
+
+    row_idx = write_xls(wb, sheet, row_idx, table.mheader, table.msub, heading_xf, data_xf)
+
+
+def export_server_list(request, dev=""):
+    business_type = request.GET.get("business_type", business_types[0])
+    datum = request.GET.get("date", str(today()))
+
+    table = get_server_list_table(business_type, datum)
+    wb = xlwt.Workbook()
+    append_to_excel(wb, table, "ServerList_%s" % datum, 0)
+    
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=server_list_%s_%s.xls'%(datum, business_type)
+    wb.save(response)
+
+    return response
 
 
 def prepare_hourly_ratio_history(ip, code, begin_date, end_date, xalis):

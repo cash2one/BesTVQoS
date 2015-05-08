@@ -63,6 +63,8 @@ urlpatterns = patterns(
     # log analyze
     url(r'^((?P<dev>m)/)?show_server_list$',
         'loganalyze.server_views.show_server_list'),
+    url(r'^((?P<dev>m)/)?export_server_list$',
+        'loganalyze.server_views.export_server_list'),
     url(r'^((?P<dev>m)/)?show_server_detail$',
         'loganalyze.server_views.show_server_detail'),
     url(r'^((?P<dev>m)/)?get_server_url_distribute$',

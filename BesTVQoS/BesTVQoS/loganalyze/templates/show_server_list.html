@@ -19,7 +19,7 @@
 </script>
 
 <div id ="content" >
-    <form method="get" class="bordered1" >
+    <form name="server_list" method="get" class="bordered1" >
         <span style="padding-left:1%;"></span>
         <b>{{table.mtitle}}</b>
         <br>
@@ -48,6 +48,9 @@
                 <div class="ctrlitem">
                     <input type="submit" value="查询"> 
                 </div>
+                <div class="ctrlitem">
+                    <input type="button" value="导出到Excel" onclick="export2excel()"> 
+                </div>
             </div>  
         </div>
     </form>
@@ -74,5 +77,10 @@
     function jump_to(url)
     {
         window.location.href = url;
+    }
+
+    function export2excel(){
+        server_list.action="/export_server_list";
+        server_list.submit();
     }
 </script>

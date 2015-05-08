@@ -18,23 +18,23 @@ VIEW_TYPES = [
 
 logger = logging.getLogger("django.request")
 
-def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
-    for colx, value in enumerate(headings):
-        sheet.write(rowx, colx, value, heading_xf)
+#def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
+#    for colx, value in enumerate(headings):
+#        sheet.write(rowx, colx, value, heading_xf)
 
-    for row in data:
-        rowx+=1
-        for colx, value in enumerate(row):
-            sheet.write(rowx, colx, value, data_xf)
+#    for row in data:
+#        rowx+=1
+#        for colx, value in enumerate(row):
+#            sheet.write(rowx, colx, value, data_xf)
 
-    return rowx
+#    return rowx
 
-def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
-    for value in data:
-        sheet.write(rowx, 0, value, data_xf)
-        rowx+=1
+#def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
+#    for value in data:
+#        sheet.write(rowx, 0, value, data_xf)
+#        rowx+=1
 
-    return rowx
+#    return rowx
 
 def get_records_data(begin_date, end_date, beta_ver, master_ver):
     db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
