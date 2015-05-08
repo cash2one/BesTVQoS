@@ -51,14 +51,29 @@ def make_plot_item(key_values, keys, item_idx, xAlis, title, subtitle, ytitle):
     return item
 
 
+def get_cell_width(num_characters):
+    return int((1+num_characters) * 256)
+
 # 
 def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
     for colx, value in enumerate(headings):
+        try:
+            width = get_cell_width(len(value))
+        except Exception, e:
+            width = -1
+        if width > sheet.col(colx).width:
+            sheet.col(colx).width = width
         sheet.write(rowx, colx, value, heading_xf)
 
     for row in data:
         rowx+=1
         for colx, value in enumerate(row):
+            try:
+                width = get_cell_width(len(value))
+            except Exception, e:
+                width = -1
+            if width > sheet.col(colx).width:
+                sheet.col(colx).width = width
             sheet.write(rowx, colx, value, data_xf)
 
     return rowx

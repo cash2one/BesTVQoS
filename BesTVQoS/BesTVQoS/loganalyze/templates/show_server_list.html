@@ -46,7 +46,7 @@
                     {% endif %}
                 </div>
                 <div class="ctrlitem">
-                    <input type="submit" value="查询"> 
+                    <input type="button" value="查询" onclick="query()"> 
                 </div>
                 <div class="ctrlitem">
                     <input type="button" value="导出到Excel" onclick="export2excel()"> 
@@ -77,6 +77,11 @@
     function jump_to(url)
     {
         window.location.href = url;
+    }
+
+    function query(){
+        server_list.action="/show_server_list";
+        server_list.submit();
     }
 
     function export2excel(){
