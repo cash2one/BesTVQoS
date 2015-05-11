@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 import logging
 import MySQLdb
@@ -77,8 +77,9 @@ def show_tsdelay(request, dev=""):
             sub.append(row[i])
         sub.append("%.3f" % (float(row[3])/1024/1024/1024))
         sub.append("%.1f" % (float(row[4]*1.0/row[3]*100)))
-        sub.append('''<a href="/show_cdn_detail?ip=%s&date=%s&servicetype=%s" \
-            target="main">详情</a>''' % (row[0], date, row[5]))
+        #sub.append("%s"%"详情")
+        sub.append("<a href='/show_cdn_detail?ip=%s&date=%s&servicetype=%s' \
+            target='main'>%s</a>" % (row[0], date, row[5], u"详情"))
         subs.append(sub)
     table.msub = subs
 
