@@ -69,6 +69,8 @@ urlpatterns = patterns(
         'loganalyze.server_views.show_server_detail'),
     url(r'^((?P<dev>m)/)?get_server_url_distribute$',
         'loganalyze.server_views.get_server_url_distribute'),
+    url(r'^((?P<dev>m)/)?get_ip_list$',
+        'loganalyze.server_views.get_ip_list'),
 
     # cdn Mon
     url(r'^((?P<dev>m)/)?show_ms_error$',

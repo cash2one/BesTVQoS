@@ -1,12 +1,83 @@
 {% include 'top.html' %}
+
+<link rel="stylesheet" type="text/css" href="/static/js/multiselectSrc/jquery.multiselect.css" />
+<link rel="stylesheet" type="text/css" href="/static/js/ui/jquery-ui.css" />
+<script type="text/javascript" src="/static/js/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
+
+<script type="text/javascript">     
+    $(function(){
+        $("#business_type").multiselect({
+            selectedList:1,
+            height:160,
+            multiple:false,
+            header:false,
+            minWidth:100
+        });
+        $("#server_ip").multiselect({
+            selectedList:1,
+            height:110,
+            multiple:false,
+            header:false,
+            minWidth:150
+        });
+    });
+
+    function get_ip_list(business_type) {
+        var begin_date = $("#begin_date").val()
+        var end_date = $("#end_date").val()
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: "/get_ip_list",
+            data: { 
+                'business_type': business_type,
+                'begin_date': begin_date,
+                'end_date': end_date,
+            },
+            success: function (data) {
+                $("#server_ip").empty()
+                server_ips = data["server_ips"];
+
+                for(i=0; i<server_ips.length; i++)
+                {
+                    $("#server_ip").append("<option value='"+server_ips[i]+"'>"+server_ips[i]+"</option>");
+                }
+                $("#server_ip").multiselect('refresh'); 
+            }
+        });
+    }   
+</script>
+
 <div id ="content" >
     
     <form method="get">
         <div class="pageitem">
             <div class="ctrlbox">
                 <div class="ctrlitem">  
+                    <label>业务类型</label>
+                    <select name="business_type" onchange="get_ip_list(this.value)" id="business_type">
+                        {% for item in business_types %}
+                            {% ifequal item default_business_type %}
+                                <option value="{{ item }}" selected>{{ item }}</option>
+                            {% else %}
+                                <option value="{{ item }}" >{{ item }}</option>
+                            {% endifequal %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="ctrlitem">  
                     <label>服务器IP</label>
-                    <input name="server_ip" type="text" value="{{server_ip}}" id="server_ip" />
+                    <select name="server_ip" id="server_ip">
+                        {% for item in server_ips %}
+                            {% ifequal item default_server_ip %}
+                                <option value="{{ item }}" selected>{{ item }}</option>
+                            {% else %}
+                                <option value="{{ item }}" >{{ item }}</option>
+                            {% endifequal %}
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="ctrlitem">  
                     <label>起始日期</label>

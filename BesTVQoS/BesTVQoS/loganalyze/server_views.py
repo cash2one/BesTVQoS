@@ -333,10 +333,12 @@ def get_code_distribute(server_ip, begin_date, end_date):
 
 def show_server_detail(request, dev=""):
     context = {}
-
+    
+    business_type = request.GET.get("business_type", "ALL")
     server_ip = request.GET.get("server_ip", "Null")
     end_date = request.GET.get("end_date", str(today()))
     begin_date = request.GET.get("begin_date", end_date)
+    server_ips = []
 
     try:
         items = []
@@ -356,10 +358,26 @@ def show_server_detail(request, dev=""):
 
         context['pie_contents'] = items_pie
 
+        sql = "select IP from serverinfo "
+        if business_type != 'ALL':
+            sql += "where Type='%s'" % business_type
+        logger.debug("Get IP SQL - %s" % sql)
+    
+        cu = connection.cursor()
+        
+        cu.execute(sql)
+
+        results = cu.fetchall()
+        for row in results:
+            server_ips.append(str(row[0]))
+
     except Exception, e:
         logger.debug(e)
-
-    context["server_ip"] = server_ip
+        
+    context['business_types'] = business_types
+    context['default_business_type'] = business_type
+    context["server_ips"] = server_ips
+    context["default_server_ip"] = server_ip
     context["default_begin_date"] = begin_date
     context["default_end_date"] = end_date
 
@@ -423,4 +441,28 @@ def get_server_url_distribute(request, dev=""):
         url_distribute["mheader"] = []
 
     respStr = json.dumps({"url_distribute": url_distribute})
+    return HttpResponse(respStr, content_type="text/json")
+
+
+def get_ip_list(request, dev=""):
+    business_type = request.GET.get("business_type", "ALL")
+    server_ips = []
+    try:
+        sql = "select IP from serverinfo "
+        if business_type != 'ALL':
+            sql += "where Type='%s'" % business_type
+        logger.debug("Get IP SQL - %s" % sql)
+    
+        cu = connection.cursor()
+        
+        cu.execute(sql)
+
+        results = cu.fetchall()
+        for row in results:
+            server_ips.append(str(row[0]))
+    except Exception, e:
+        logger.debug(e)
+    
+    respStr = json.dumps({"server_ips": server_ips})
+
     return HttpResponse(respStr, content_type="text/json")

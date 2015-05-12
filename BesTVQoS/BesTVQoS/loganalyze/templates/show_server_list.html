@@ -61,7 +61,7 @@
         {% endfor %}
         
         {% for row in table.msub %}
-            <tr onclick="jump_to('show_server_detail?server_ip={{row.2}}&end_date={{default_date}}')" style="cursor:pointer">
+            <tr onclick="jump_to('show_server_detail?business_type={{row.1}}&server_ip={{row.2}}&end_date={{default_date}}')" style="cursor:pointer">
             {% for col in row %}
                 <td>
                     {{col}}
