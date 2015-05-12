@@ -13,8 +13,8 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import Context
 from django.db import connection
-from navi import Navi
-from date_time_tool import today, current_time
+from common.navi import Navi
+from common.date_time_tool import today, current_time
 
 logger = logging.getLogger("django.request")
 
@@ -250,12 +250,11 @@ def set_default_values_to_cookie(response, context):
 def get_filter_param_values(request, table):
     begin_time = current_time()
     filters_map = get_default_values_from_cookie(request)
-    service_type = request.GET.get("service_type", filters_map["st"])
-    device_type = request.GET.get("device_type", filters_map["dt"])
-    version = request.GET.get("version", filters_map["vt"])
-    begin_date = request.GET.get("begin_date", filters_map["begin"])
-    end_date = request.GET.get("end_date", filters_map["end"])
-
+    service_type = request.GET.get("service_type", filters_map["st"]).encode("utf-8")
+    device_type = request.GET.get("device_type", filters_map["dt"]).encode("utf-8")
+    version = request.GET.get("version", filters_map["vt"]).encode("utf-8")
+    begin_date = request.GET.get("begin_date", filters_map["begin"]).encode("utf-8")
+    end_date = request.GET.get("end_date", filters_map["end"]).encode("utf-8")
     logger.info("get_filter_values: %s - %s - %s" %
                 (service_type, device_type, version))
 
@@ -289,6 +288,6 @@ def get_filter_param_values(request, table):
 
 def get_report_filter_param_values(request, table):
     service_type, device_type, device_types, version, versions, begin_date, end_date = get_filter_param_values(request, table)
-    version2 = request.GET.get("version2", "")
-    versions2=versions
+    version2 = request.GET.get("version2", "").encode("utf-8")
+    versions2 = versions
     return service_type, device_type, device_types, version, versions, version2, versions2, begin_date, end_date

@@ -12,7 +12,7 @@ from common.date_time_tool import current_time
 ezxf=xlwt.easyxf
 
 VIEW_TYPES = [
-    (0, u"总体"), (1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")]
+    (0, "总体"), (1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")]
 
 logger = logging.getLogger("django.request")
 
@@ -38,28 +38,29 @@ def get_records_data(begin_date, end_date, beta_ver, master_ver):
     mysql_db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
     cursor = mysql_db.cursor()
 
-    qos_data=[]
-    vers=[]
+    qos_data = []
+    vers = []
     if len(beta_ver)>0:
         vers.append(beta_ver)
     if len(master_ver)>0:
         vers.append(master_ver)
 
-    view_type=[1, 2, 3, 4] #(1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")
+    view_type = [1, 2, 3, 4] #(1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")
     for ver in vers:
-        temp=[]
+        temp = []
         temp.append("%s"%(ver))
-        total=0
+        total = 0
         for view in view_type:
-            sql="SELECT Records FROM playinfo WHERE DeviceType='%s' and Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d"%(
+            sql = "SELECT Records FROM playinfo WHERE DeviceType='%s' and \
+                Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d" % (
                     ver, begin_date, end_date, view)
             cursor.execute(sql)
             results = cursor.fetchall()
-            sum=0
+            record_sum = 0
             for row in results:
-                sum += row[0]
-            temp.append(sum)
-            total+=sum
+                record_sum += row[0]
+            temp.append(record_sum)
+            total += record_sum
         temp.append(total)
         qos_data.append(temp)
 
@@ -77,14 +78,14 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
     if len(master_ver)>0:
         vers.append(master_ver)
     
-    single_qos=['fbuffer', 'fluency', 'fluency']
-    qos_name=['SucRatio', 'Fluency', 'PRatio']
-    qos_desc=[u'首次缓冲成功率', u'一次不卡比例', u'卡用户卡时间比']
-    view_type=[1, 2, 3, 4]  #(1, u"点播"), (2, u"回看"), (3, u"直播"), (4, u"连看"), (5, u"未知")
+    single_qos = ['fbuffer', 'fluency', 'fluency']
+    qos_name = ['SucRatio', 'Fluency', 'PRatio']
+    qos_desc = ['首次缓冲成功率', '一次不卡比例', '卡用户卡时间比']
+    view_type = [1, 2, 3, 4]  #(1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")
     for index, qos in enumerate(qos_name):
         for ver in vers:
             temp = []
-            temp.append(u"%s-%s"%(qos_desc[index], ver))
+            temp.append("%s-%s"%(qos_desc[index], ver))
             for view in view_type:
                 begin_time = current_time()                
                 qos_sum = 0
@@ -123,7 +124,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
     for (view, second) in view_types:
         for ver in vers:
             temp = [0 for i in range(7)]
-            temp[0] = u"%s-%s" % (ver, second)
+            temp[0] = "%s-%s" % (ver, second)
             sql = "SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE \
                 DeviceType='%s' and Date >= '%s' and Date <= '%s' \
                 and Hour=24 and ViewType=%d" % (
@@ -156,11 +157,11 @@ def get_fbuffer_data(begin_date, end_date, beta_ver, master_ver):
 
 def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
     desc = [
-        [u'日期: %s - %s' % (begin_date, end_date)],
-        [u'%s -- %s' % (u'首选版本', beta_ver)]
+        ['日期: %s - %s' % (begin_date, end_date)],
+        ['%s -- %s' % ('首选版本', beta_ver)]
         ]
     if len(master_ver)>0:
-        desc.append([u'%s -- %s'%(u'对比版本', master_ver)])
+        desc.append(['%s -- %s'%('对比版本', master_ver)])
     return desc
 
 def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
@@ -169,8 +170,10 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     sheet = book.add_sheet("version-report")
     sheet.col(0).width=10000
     
-    heading_xf = ezxf('borders: left thin, right thin, top thin, bottom thin; font: bold on; pattern: pattern solid, fore_colour bright_green')
-    data_xf = ezxf('borders: left thin, right thin, top thin, bottom thin; font: name Arial')
+    heading_xf = ezxf('borders: left thin, right thin, top thin, bottom thin; \
+        font: bold on; pattern: pattern solid, fore_colour bright_green')
+    data_xf = ezxf('borders: left thin, right thin, top thin, bottom thin; \
+        font: name Arial')
 
     rowx = 0
 
@@ -178,7 +181,8 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 0: spec
     #
     spec_xf = ezxf('font: name Arial, colour Red')
-    spec_data = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
+    spec_data = get_desc_for_daily_report(begin_date, end_date, \
+        beta_ver, master_ver)
     
     rowx = write_xls(book, sheet, rowx, [], spec_data, [], spec_xf)
     rowx += 2
@@ -186,7 +190,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 1: records
     #
-    records_headings = [u'记录数/版本', u'点播', u'回看', u'直播', u'连看', u'总计']
+    records_headings = ['记录数/版本', '点播', '回看', '直播', '连看', '总计']
     # prepare data
     records_data = get_records_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, records_headings, records_data, 
@@ -196,7 +200,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 2: single Qos
     #     
-    single_qos_headings = [u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
+    single_qos_headings = ['单指标QoS/版本', '点播', '回看', '直播', '连看']
     single_qos_data = get_single_qos_data2(begin_date, end_date, beta_ver, 
         master_ver)
     rowx = write_xls(book, sheet, rowx, single_qos_headings, single_qos_data, 
@@ -207,7 +211,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 3: playtm
     #    
-    playtm_headings = [u'播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    playtm_headings = ['播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     playtm_data = get_playtm_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, playtm_headings, playtm_data, 
         heading_xf, data_xf)
@@ -217,7 +221,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 4: fbuffer
     #    
-    fbuffer_headings = [u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    fbuffer_headings = ['首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     fbuffer_data = get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, fbuffer_headings, fbuffer_data, 
         heading_xf, data_xf)
@@ -228,9 +232,9 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 5: remarks
     #    
     remark_xf = ezxf('font: name Arial, colour Red')
-    remarks=[u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
-        u'缓冲异常值过滤：如果P95<3秒，则认为数据有问题', u'播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题', \
-        u'多天报表的算均值：算均值可能存在差错']
+    remarks = ['备注: ', '一次不卡比例：无卡顿播放次数/加载成功的播放次数', '卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
+        '缓冲异常值过滤：如果P95<3秒，则认为数据有问题', '播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题', \
+        '多天报表的算均值：算均值可能存在差错']
     rowx = write_remarks_to_xls(book, sheet, rowx, remarks, remark_xf)
     rowx += 2
     print "step 4: ", current_time() - begin_time
@@ -264,7 +268,7 @@ def get_records_data_for_table(urls_suffix, begin_date, end_date, beta_ver, mast
     for i, data in enumerate(datas):
         item = {}
         item['click'] = True
-        item['url'] = "show_playing_trend?%s"%(urls_suffix[i])
+        item['url'] = "show_playing_trend?%s" % (urls_suffix[i])
         item['data'] = data
         tables.append(item)
     return tables
@@ -322,10 +326,11 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
     tables = []
     # 0. date-ver table
     table = HtmlTable()
-    table.mtitle = u"records信息"
-    table.mheader = [u'日期-版本']
+    table.mtitle = "records信息"
+    table.mheader = ['日期-版本']
     table.msub = []
-    descs = get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver)
+    descs = get_desc_for_daily_report(begin_date, end_date, 
+        beta_ver, master_ver)
     for desc in descs:
         item = {}
         item['click'] = False
@@ -336,47 +341,47 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
 
     # 1. record table
     table = HtmlTable()
-    table.mtitle = u"日期版本信息"
-    table.mheader = [u'记录数/版本', u'点播', u'回看', u'直播', u'连看', u'总计'] 
+    table.mtitle = "日期版本信息"
+    table.mheader = ['记录数/版本', '点播', '回看', '直播', '连看', '总计'] 
     table.msub = get_records_data_for_table(urls_suffix, begin_date, 
         end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 2. single Qos table
     table = HtmlTable()
-    table.mtitle = u"SingleQos信息"
-    table.mheader = [u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
+    table.mtitle = "SingleQos信息"
+    table.mheader = ['单指标QoS/版本', '点播', '回看', '直播', '连看']
     table.msub = get_single_qos_data2_for_table(urls_suffix, 
         begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 3. playtm table
     table = HtmlTable()
-    table.mtitle = u"playtm信息"
-    table.mheader = [u'播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    table.mtitle = "playtm信息"
+    table.mheader = ['播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     table.msub = get_playtm_data_for_table(urls_suffix, 
         begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 4. fbuffer table
     table = HtmlTable()
-    table.mtitle = u"fbuffer信息"
-    table.mheader = [u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
+    table.mtitle = "fbuffer信息"
+    table.mheader = ['首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     table.msub = get_fbuffer_data_for_table(urls_suffix, 
         begin_date, end_date, beta_ver, master_ver)
     tables.append(table)
 
     # 5. remarks table
     table = HtmlTable()
-    table.mtitle = u"备注信息"
-    table.mheader = [u'备注']
+    table.mtitle = "备注信息"
+    table.mheader = ['备注']
     table.msub = []
     datas = [
-        [u'点击表格可跳转到相应的Qos'],
-        [u'一次不卡比例：无卡顿播放次数/加载成功的播放次数'], [u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长'],\
-        [u'缓冲异常值过滤：如果P95<3秒，则认为数据有问题'],
-        [u'播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题'],
-        [u'多天报表的算均值：算均值可能存在差错']]
+        ['点击表格可跳转到相应的Qos'],
+        ['一次不卡比例：无卡顿播放次数/加载成功的播放次数'], ['卡用户卡时间比：卡顿总时长/卡顿用户播放总时长'],\
+        ['缓冲异常值过滤：如果P95<3秒，则认为数据有问题'],
+        ['播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题'],
+        ['多天报表的算均值：算均值可能存在差错']]
     for data in datas:
         item = {}
         item['click'] = False
@@ -432,38 +437,38 @@ def display_daily_reporter(request, dev=""):
     return response
 
 def download_daily_reporter(request, dev=""):
-    (service_type, device_type, device_types, 
-            version, versions, version2, versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
+    (service_type, device_type, device_types, version, versions, version2, \
+        versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
 
     (version, version2)=get_version_version2(device_type, version, version2)
 
-    wb = xlwt.Workbook()
-    generate_report(wb, begin_date, end_date, version, version2)
+    xlwt_wb = xlwt.Workbook()
+    generate_report(xlwt_wb, begin_date, end_date, version, version2)
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=%s_report_%s.xls' \
         % (version, begin_date)
-    wb.save(response)
+    xlwt_wb.save(response)
     return response
 
 def day_reporter(request, dev=""):
-    wb = xlwt.Workbook()
-    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
+    xlwt_wb = xlwt.Workbook()
+    generate_report(xlwt_wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
         "BesTV_Lite_A_2.6.4.2")
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=day_report_%s.xls' \
         % ('2015-04-22')
-    wb.save(response)
+    xlwt_wb.save(response)
     return response
 
 def week_reporter(request, dev=""):
-    wb = xlwt.Workbook()
-    generate_report(wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
+    xlwt_wb = xlwt.Workbook()
+    generate_report(xlwt_wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
         "BesTV_Lite_A_2.6.4.2")
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=week_report_%s.xls'\
         % ('2015-04-22')
-    wb.save(response)
+    xlwt_wb.save(response)
     return response
