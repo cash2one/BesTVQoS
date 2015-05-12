@@ -17,6 +17,11 @@ foreach $filename (@ARGV) {
 	while (<FILE>) {
 		chomp;
 		@element = split /\|/;
+		
+		if ($key =~ /^code$/) {
+			$count = @element;
+			$idx = $count-2;
+		}
 
 		$count{$element[$idx]}++;
 		
