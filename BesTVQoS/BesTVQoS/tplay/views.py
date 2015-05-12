@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from datetime import datetime
-from datetime import timedelta
 
 from django.shortcuts import render_to_response
 from django.db import connection

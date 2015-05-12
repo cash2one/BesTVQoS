@@ -85,7 +85,7 @@ def prepare_hour_data_of_single_Qos(filter_params, view_types, qos_name, base_ra
             and Date <= '%s' and Hour<24" % (qos_name, filter_params.table, \
             filter_params.devicetype, filter_params.begin_date, \
             filter_params.end_date)
-        if view_idx >= 0:
+        if view_idx > 0:
             sql = "%s and ViewType=%d" % (sql, view_idx)
 
         tmp_list = [0.0 for k in range(24)]
