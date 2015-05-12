@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import logging
 import xlwt as xlwt
 import MySQLdb
@@ -8,11 +8,9 @@ from django.shortcuts import render_to_response
 from common.views import write_xls, write_remarks_to_xls, \
     get_report_filter_param_values, HtmlTable
 from common.date_time_tool import current_time
+from tplay.fbuffer_views import VIEW_TYPES
 
 ezxf=xlwt.easyxf
-
-VIEW_TYPES = [
-    (0, "总体"), (1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")]
 
 logger = logging.getLogger("django.request")
 
