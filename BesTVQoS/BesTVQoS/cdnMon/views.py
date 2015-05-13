@@ -12,7 +12,7 @@ from common.date_time_tool import current_time
 
 logger = logging.getLogger("django.request")
 
-#@login_required
+@login_required
 def show_ms_error(request, dev=""):
     context = {}
 
@@ -51,7 +51,7 @@ def show_ms_error(request, dev=""):
     return render_to_response('show_ms_error.html', context)
 
 
-#@login_required
+@login_required
 def show_tsdelay(request, dev=""):
     context = {}
 
@@ -199,7 +199,7 @@ def get_china_geos(area, isp, info, tflow, percent):
     return geos
 
 
-#@login_required
+@login_required
 def show_cdn_detail(request, dev=""):
     context = {}
     date = request.GET.get("date", str(get_day_of_day(-1)))
