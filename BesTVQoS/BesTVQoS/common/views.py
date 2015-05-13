@@ -6,7 +6,9 @@ Definition of views.
 
 import logging
 import json
-import redis
+import platform
+if platform.system() != "Windows":
+    import redis
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -117,6 +119,8 @@ def navi(request, target_url=""):
         return m_home(request)
 
 def get_types_from_cache(table, begin_date, end_date, type_name):
+    if platform.system() == "Windows":
+        return None
     types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
     try:
         redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
@@ -128,6 +132,8 @@ def get_types_from_cache(table, begin_date, end_date, type_name):
         return None
 
 def cache_types(table, begin_date, end_date, type_name, types_list):
+    if platform.system() == "Windows":
+        return None
     types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
     try:
         redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
