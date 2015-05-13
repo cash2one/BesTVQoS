@@ -135,8 +135,8 @@ def cache_types(table, begin_date, end_date, type_name, types_list):
         base_date = todaystr()
         if cmp(begin_date, base_date) < 0 and cmp(end_date, base_date) < 0:
             redis_cache.expire(types_key, 3600*2)
-    except:
-        logger.info("cache deivce types fail")
+    except Exception, e:
+        logger.info("cache deivce types fail: %s" % e)
 
 DEVICE_KEY = "devices"
 VERSION_KEY = "versions"
