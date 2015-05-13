@@ -9,7 +9,7 @@ from common.forms import BootstrapAuthenticationForm
 # Uncomment the next lines to enable the admin:
 from django.conf.urls import include
 from django.contrib import admin
-# admin.autodiscover()
+admin.autodiscover()
 
 urlpatterns = patterns(
     '',
