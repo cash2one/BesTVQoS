@@ -10,7 +10,7 @@ from common.date_time_tool import current_time, get_days_offset, \
 
 logger = logging.getLogger("django.request")
 
-SERVICE_TYPES = ["All", "B2B", "B2C"]
+SERVICE_TYPES = ["B2B", "B2C"]
 
 VIEW_TYPES = [
     (0, "总体"), (1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")]

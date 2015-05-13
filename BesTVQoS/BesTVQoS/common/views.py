@@ -240,7 +240,7 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     cu.execute(sql_command)
 
     version_pos = len(device_type) + 1
-    version_types = ["All"]
+    version_types = []
     for item in cu.fetchall():
         version_types.append(item[0][version_pos:])
 
@@ -273,7 +273,7 @@ def get_version(request, dev=""):
 
 
 def get_default_values_from_cookie(request):
-    filter_map = json.loads('{"st":"All","dt":"","vt":"","begin":"%s","end":"%s"}' % (
+    filter_map = json.loads('{"st":"B2C","dt":"","vt":"","begin":"%s","end":"%s"}' % (
         today(), today()))
     try:
         filter_map = json.loads(request.COOKIES["bestvFilters"])
