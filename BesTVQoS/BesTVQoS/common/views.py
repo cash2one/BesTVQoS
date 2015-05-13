@@ -121,10 +121,10 @@ def navi(request, target_url=""):
     else:
         return m_home(request)
 
-def get_types_from_cache(table, begin_date, end_date, type_name):
+def get_types_from_cache(table, begin_date, end_date, type_name, base_name):
     if platform.system() == "Windows":
         return None
-    types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
+    types_key = "%s:%s:%s:%s:%s" % (type_name, base_name, table, begin_date, end_date)
     try:
         redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
         types_list = redis_cache.lrange(types_key, 0, -1)
@@ -134,10 +134,10 @@ def get_types_from_cache(table, begin_date, end_date, type_name):
         logger.info("get redis cache fail: %s" % (types_key))
         return None
 
-def cache_types(table, begin_date, end_date, type_name, types_list):
+def cache_types(table, begin_date, end_date, type_name, base_name, types_list):
     if platform.system() == "Windows":
         return None
-    types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
+    types_key = "%s:%s:%s:%s:%s" % (type_name, base_name, table, begin_date, end_date)
     try:
         redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
         for item in types_list:
@@ -152,11 +152,12 @@ def cache_types(table, begin_date, end_date, type_name, types_list):
         logger.info("cache deivce types fail: %s" % e)
 
 DEVICE_KEY = "devices"
+DEVICE_KEY_BASE = "all"
 VERSION_KEY = "versions"
 
 def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     # get devices type from cache
-    devices_list = get_types_from_cache(table, begin_date, end_date, DEVICE_KEY)
+    devices_list = get_types_from_cache(table, begin_date, end_date, DEVICE_KEY, DEVICE_KEY_BASE)
     if devices_list:
         return devices_list
 
@@ -180,7 +181,7 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
         device_types = ['']
 
     # cache devices type
-    cache_types(table, begin_date, end_date, DEVICE_KEY, device_types)
+    cache_types(table, begin_date, end_date, DEVICE_KEY, DEVICE_KEY_BASE, device_types)
 
     return device_types
 
@@ -228,7 +229,7 @@ def get_device_type(request, dev=""):
 def get_versions1(table, service_type, device_type, begin_date, end_date, cu=None):
     # get devices type from cache
     versions_list = get_types_from_cache(table, begin_date, end_date, 
-        VERSION_KEY)
+        VERSION_KEY, device_type)
     if versions_list:
         return versions_list
 
@@ -250,7 +251,8 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
         version_types.append(item[0][version_pos:])
 
     # cache devices type
-    cache_types(table, begin_date, end_date, VERSION_KEY, version_types)
+    cache_types(table, begin_date, end_date, VERSION_KEY, device_type, 
+        version_types)
 
     return version_types
 
