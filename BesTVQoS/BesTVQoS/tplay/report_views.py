@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import logging
 import xlwt as xlwt
 import MySQLdb
@@ -8,31 +8,11 @@ from django.shortcuts import render_to_response
 from common.views import write_xls, write_remarks_to_xls, \
     get_report_filter_param_values, HtmlTable
 from common.date_time_tool import current_time
+from tplay.fbuffer_views import VIEW_TYPES
 
 ezxf=xlwt.easyxf
 
-VIEW_TYPES = [
-    (0, "总体"), (1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")]
-
 logger = logging.getLogger("django.request")
-
-#def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
-#    for colx, value in enumerate(headings):
-#        sheet.write(rowx, colx, value, heading_xf)
-
-#    for row in data:
-#        rowx+=1
-#        for colx, value in enumerate(row):
-#            sheet.write(rowx, colx, value, data_xf)
-
-#    return rowx
-
-#def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
-#    for value in data:
-#        sheet.write(rowx, 0, value, data_xf)
-#        rowx+=1
-
-#    return rowx
 
 def get_records_data(begin_date, end_date, beta_ver, master_ver):
     mysql_db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
@@ -102,8 +82,8 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
                 if count > 0:
                     avg = qos_sum/count
                 temp.append(float("%.3f"%(avg)))
-                logger.info("aggregate22 qos %s, count %d, cost: %s" 
-                            %(qos, count, (current_time() - begin_time)))
+                logger.info("execute sql:  %s, cost: %s" % (sql, 
+                    (current_time() - begin_time)))
             qos_data.append(temp)
 
     mysql_db.close()
@@ -123,6 +103,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
 
     for (view, second) in view_types:
         for ver in vers:
+            begin_time = current_time()
             temp = [0 for i in range(7)]
             temp[0] = "%s-%s" % (ver, second)
             sql = "SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE \
@@ -142,6 +123,8 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
             if count > 0:
                 for i in range(6):
                     temp[i+1] = temp[i+1]/count/base_radis
+            logger.info("execute sql:  %s, cost: %s" % (sql, 
+                    (current_time() - begin_time)))
 
             qos_data.append(temp)
     mysql_db.close()
@@ -407,6 +390,7 @@ def get_version_version2(device_type, version, version2):
     return (version, version2)
 
 def display_daily_reporter(request, dev=""):
+    begin_time = current_time()
     (service_type, device_type, device_types, 
             version, versions, version2, versions2, begin_date, end_date) \
         = get_report_filter_param_values(request, "playinfo")
@@ -434,6 +418,8 @@ def display_daily_reporter(request, dev=""):
     context['tables'] = tables
 
     response = render_to_response('show_daily_report.html', context)
+    logger.info("generate report, cost: %s" % (current_time() - begin_time))
+
     return response
 
 def download_daily_reporter(request, dev=""):
