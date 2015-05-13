@@ -14,24 +14,6 @@ ezxf=xlwt.easyxf
 
 logger = logging.getLogger("django.request")
 
-#def write_xls(book, sheet, rowx, headings, data, heading_xf, data_xf):
-#    for colx, value in enumerate(headings):
-#        sheet.write(rowx, colx, value, heading_xf)
-
-#    for row in data:
-#        rowx+=1
-#        for colx, value in enumerate(row):
-#            sheet.write(rowx, colx, value, data_xf)
-
-#    return rowx
-
-#def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
-#    for value in data:
-#        sheet.write(rowx, 0, value, data_xf)
-#        rowx+=1
-
-#    return rowx
-
 def get_records_data(begin_date, end_date, beta_ver, master_ver):
     mysql_db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
     cursor = mysql_db.cursor()
@@ -405,6 +387,7 @@ def get_version_version2(device_type, version, version2):
     return (version, version2)
 
 def display_daily_reporter(request, dev=""):
+    begin_time = current_time()
     (service_type, device_type, device_types, 
             version, versions, version2, versions2, begin_date, end_date) \
         = get_report_filter_param_values(request, "playinfo")
@@ -432,6 +415,8 @@ def display_daily_reporter(request, dev=""):
     context['tables'] = tables
 
     response = render_to_response('show_daily_report.html', context)
+    logger.info("generate report, cost: %s" % (current_time() - begin_time))
+
     return response
 
 def download_daily_reporter(request, dev=""):
