@@ -218,7 +218,7 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     # get devices type from cache
     versions_list = get_types_from_cache(table, begin_date, end_date, 
         VERSION_KEY)
-    if versions_list is not None:
+    if versions_list:
         return versions_list
 
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
