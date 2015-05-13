@@ -24,9 +24,9 @@ def today():
 
 def todaystr():
     '''
-    get date string, date format="YYYYMMDD"
+    get date string, date format="YYYY-MM-DD"
     '''
-    return year+mon+day
+    return str(today())
 
 #def datetime():
 #    '''''
@@ -179,6 +179,7 @@ def get_today_month(n=0):
 if __name__=="__main__":
     print today()  
     print todaystr()
+    print isinstance(todaystr(), unicode)
     #print datetime()
     print datetimestr()
     print get_day_of_day(20)

@@ -6,15 +6,14 @@ Definition of views.
 
 import logging
 import json
-
-from datetime import timedelta, date, datetime
+import redis
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import Context
 from django.db import connection
 from common.navi import Navi
-from common.date_time_tool import today, current_time
+from common.date_time_tool import today, current_time, todaystr
 
 logger = logging.getLogger("django.request")
 
@@ -117,8 +116,37 @@ def navi(request, target_url=""):
     else:
         return m_home(request)
 
+def get_types_from_cache(table, begin_date, end_date, type_name):
+    types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
+    try:
+        redis_cache = redis.StrictRedis(host='localhos', port=6379, db=2)
+        types_list = redis_cache.lrange(types_key, 0, -1)
+        return types_list
+    except:
+        logger.info("get redis cache fail: %s" % (types_key))
+        return None
+
+def cache_types(table, begin_date, end_date, type_name, types_list):
+    types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
+    try:
+        redis_cache = redis.StrictRedis(host='localhos', port=6379, db=2)
+        for item in types_list:
+            redis_cache.rpush(types_key, item)
+        base_date = todaystr()
+        if cmp(begin_date, base_date) < 0 and cmp(end_date, base_date) < 0:
+            redis_cache.expire(types_key, 3600*2)
+    except:
+        logger.info("cache deivce types fail")
+
+DEVICE_KEY = "devices"
+VERSION_KEY = "versions"
 
 def get_device_types1(table, service_type, begin_date, end_date, cu=None):
+    # get devices type from cache
+    devices_list = get_types_from_cache(table, begin_date, end_date, DEVICE_KEY)
+    if devices_list is not None:
+        return devices_list
+
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
         fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
@@ -137,6 +165,9 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
 
     if len(device_types) == 0:
         device_types = ['']
+
+    # cache devices type
+    cache_types(table, begin_date, end_date, DEVICE_KEY, device_types)
 
     return device_types
 
@@ -182,6 +213,12 @@ def get_device_type(request, dev=""):
 
 
 def get_versions1(table, service_type, device_type, begin_date, end_date, cu=None):
+    # get devices type from cache
+    versions_list = get_types_from_cache(table, begin_date, end_date, 
+        VERSION_KEY)
+    if versions_list is not None:
+        return versions_list
+
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
         fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
@@ -195,11 +232,15 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     cu.execute(sql_command)
 
     version_pos = len(device_type) + 1
-    device_types = ["All"]
+    version_types = ["All"]
     for item in cu.fetchall():
-        device_types.append(item[0][version_pos:])
+        print isinstance(item[0], unicode)
+        version_types.append(item[0][version_pos:])
 
-    return device_types
+    # cache devices type
+    cache_types(table, begin_date, end_date, VERSION_KEY, version_types)
+
+    return version_types
 
 
 def get_version(request, dev=""):
