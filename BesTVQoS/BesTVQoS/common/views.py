@@ -119,7 +119,7 @@ def navi(request, target_url=""):
 def get_types_from_cache(table, begin_date, end_date, type_name):
     types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
     try:
-        redis_cache = redis.StrictRedis(host='localhos', port=6379, db=2)
+        redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
         types_list = redis_cache.lrange(types_key, 0, -1)
         return types_list
     except:
@@ -129,7 +129,7 @@ def get_types_from_cache(table, begin_date, end_date, type_name):
 def cache_types(table, begin_date, end_date, type_name, types_list):
     types_key = "%s:%s:%s:%s" % (type_name, table, begin_date, end_date)
     try:
-        redis_cache = redis.StrictRedis(host='localhos', port=6379, db=2)
+        redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
         for item in types_list:
             redis_cache.rpush(types_key, item)
         base_date = todaystr()
@@ -234,7 +234,7 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     version_pos = len(device_type) + 1
     version_types = ["All"]
     for item in cu.fetchall():
-        print isinstance(item[0], unicode)
+        logger.debug(isinstance(item[0], unicode))
         version_types.append(item[0][version_pos:])
 
     # cache devices type
