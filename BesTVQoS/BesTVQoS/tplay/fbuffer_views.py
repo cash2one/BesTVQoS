@@ -85,6 +85,8 @@ def prepare_hour_data_of_single_Qos(filter_params, view_types, qos_name, base_ra
             and Date <= '%s' and Hour<24" % (qos_name, filter_params.table, \
             filter_params.devicetype, filter_params.begin_date, \
             filter_params.end_date)
+        if filter_params.servicetype != 'All':
+            sql = "%s and ServiceType='%s'" % (sql, filter_params.servicetype)
         if view_idx > 0:
             sql = "%s and ViewType=%d" % (sql, view_idx)
 
@@ -120,6 +122,8 @@ def prepare_daily_data_of_single_Qos(filter_params, days_region, view_types, qos
             Date >= '%s' and Date <= '%s'" % (qos_name, filter_params.table, \
             filter_params.devicetype, filter_params.begin_date, 
             filter_params.end_date)
+        if filter_params.servicetype != 'All':
+            sql = "%s and ServiceType='%s'" % (sql, filter_params.servicetype)
         if hour_flag:
             sql = "%s and Hour=24" % sql
         if view_idx != 0:
@@ -320,6 +324,8 @@ def prepare_pnvalue_hour_data(filter_params, view_types, pnvalue_types, base_rad
             Date <= '%s' and Hour<24 and ViewType=%d" % (
             filter_params.table, filter_params.devicetype, 
             filter_params.begin_date, filter_params.end_date, i)
+        if filter_params.servicetype != 'All':
+            sql = "%s and ServiceType='%s'" % (sql, filter_params.servicetype)
         display_data = {}
         for (pn_idx, _) in pnvalue_types:
             display_data[pn_idx] = ["0" for k in range(24)]
@@ -359,6 +365,8 @@ def prepare_pnvalue_daily_data(filterParams, days_region, view_types, pnvalue_ty
             Date <= '%s' and Hour=24 and ViewType=%d" % (
             filterParams.table, filterParams.devicetype, 
             filterParams.begin_date, filterParams.end_date, i)
+        if filter_params.servicetype != 'All':
+            sql = "%s and ServiceType='%s'" % (sql, filter_params.servicetype)
         display_data = {}
         for (pn_idx, _) in pnvalue_types:
             display_data[pn_idx] = ["0" for k in days_region]
