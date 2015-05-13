@@ -236,7 +236,6 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     version_pos = len(device_type) + 1
     version_types = ["All"]
     for item in cu.fetchall():
-        logger.debug(isinstance(item[0], unicode))
         version_types.append(item[0][version_pos:])
 
     # cache devices type
