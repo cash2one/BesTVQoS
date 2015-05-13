@@ -82,8 +82,8 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
                 if count > 0:
                     avg = qos_sum/count
                 temp.append(float("%.3f"%(avg)))
-                logger.info("aggregate22 qos %s, count %d, cost: %s" 
-                            %(qos, count, (current_time() - begin_time)))
+                logger.info("execute sql:  %s, cost: %s" % (sql, 
+                    (current_time() - begin_time)))
             qos_data.append(temp)
 
     mysql_db.close()
@@ -103,6 +103,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
 
     for (view, second) in view_types:
         for ver in vers:
+            begin_time = current_time()
             temp = [0 for i in range(7)]
             temp[0] = "%s-%s" % (ver, second)
             sql = "SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE \
@@ -122,6 +123,8 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
             if count > 0:
                 for i in range(6):
                     temp[i+1] = temp[i+1]/count/base_radis
+            logger.info("execute sql:  %s, cost: %s" % (sql, 
+                    (current_time() - begin_time)))
 
             qos_data.append(temp)
     mysql_db.close()
