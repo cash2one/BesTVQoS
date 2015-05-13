@@ -3,6 +3,7 @@
 import logging
 
 from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
 from django.db import connection
 from common.date_time_tool import *
 from common.mobile import do_mobile_support
@@ -170,6 +171,7 @@ def get_play_profile_history(context, play_profile):
     return table
 
 
+@login_required
 def show_playing_daily(request, dev=""):
     context = {}
     table = HtmlTable()
@@ -193,6 +195,7 @@ def show_playing_daily(request, dev=""):
     return render_to_response('show_playing_daily.html', context)
 
 
+@login_required
 def show_playing_trend(request, dev=""):
     context = process_single_Qos(
         request, "playinfo", "Records", u"用户观看量",

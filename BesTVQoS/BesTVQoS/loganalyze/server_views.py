@@ -7,6 +7,7 @@ import xlwt as xlwt
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
 from django.db import connection
 from common.views import HtmlTable
 from common.views import write_xls
@@ -91,6 +92,7 @@ def get_server_list_table(business_type, datum):
     return table
 
 
+@login_required
 def show_server_list(request, dev=""):
     context = {}
 
@@ -124,6 +126,7 @@ def append_to_excel(wb, table, sheet, row_idx):
     row_idx = write_xls(wb, sheet, row_idx, table.mheader, table.msub, heading_xf, data_xf)
 
 
+@login_required
 def export_server_list(request, dev=""):
     business_type = request.GET.get("business_type", business_types[0])
     datum = request.GET.get("date", str(today()))
@@ -331,6 +334,7 @@ def get_code_distribute(server_ip, begin_date, end_date):
     return item
 
 
+@login_required
 def show_server_detail(request, dev=""):
     context = {}
     
@@ -383,6 +387,8 @@ def show_server_detail(request, dev=""):
 
     return render_to_response('show_server_detail.html', context)
 
+
+@login_required
 def get_server_url_distribute(request, dev=""):
     url_distribute = {}
     try:
@@ -444,6 +450,7 @@ def get_server_url_distribute(request, dev=""):
     return HttpResponse(respStr, content_type="text/json")
 
 
+@login_required
 def get_ip_list(request, dev=""):
     business_type = request.GET.get("business_type", "ALL")
     server_ips = []

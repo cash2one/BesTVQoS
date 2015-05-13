@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import Context
 from django.db import connection
+from django.contrib.auth.decorators import login_required
 from common.navi import Navi
 from common.date_time_tool import today, current_time, todaystr
 
@@ -87,14 +88,16 @@ def write_remarks_to_xls(book, sheet, rowx, data, data_xf):
 
     return rowx
 
-
+@login_required
 def home(request):
     logger.debug("Qos request")
     return render_to_response('index.html', Context())
 
+@login_required
 def p_home(request):
     return render_to_response('home.html', Context())
 
+@login_required
 def m_home(reuest):
     context = {}
     context["is_mobile"] = True
@@ -103,7 +106,7 @@ def m_home(reuest):
 
     return render_to_response('m_navi_menu.html', context)
 
-
+@login_required
 def navi(request, target_url=""):
     if target_url:
         navi = Navi()
@@ -200,7 +203,7 @@ def get_table_name(url):
 
     return table_name
 
-
+@login_required
 def get_device_type(request, dev=""):
     respStr = json.dumps({"device_types": []})
     if(request.method == 'GET'):
@@ -251,7 +254,7 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
 
     return version_types
 
-
+@login_required
 def get_version(request, dev=""):
     respStr = json.dumps({"versions": []})
     if(request.method == 'GET'):

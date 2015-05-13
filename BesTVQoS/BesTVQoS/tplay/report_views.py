@@ -4,6 +4,7 @@ import xlwt as xlwt
 import MySQLdb
 
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from common.views import write_xls, write_remarks_to_xls, \
     get_report_filter_param_values, HtmlTable
@@ -226,6 +227,8 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
                 (begin_date, end_date, (current_time() - begin_time)))
     print begin_date, end_date, beta_ver, current_time() - begin_time
 
+
+@login_required
 def pre_day_reporter(request, dev=""):
     (service_type, device_type, device_types, 
             version, versions, version2, versions2, begin_date, end_date) \
@@ -389,6 +392,8 @@ def get_version_version2(device_type, version, version2):
         version2 = ""
     return (version, version2)
 
+
+@login_required
 def display_daily_reporter(request, dev=""):
     begin_time = current_time()
     (service_type, device_type, device_types, 
@@ -422,6 +427,7 @@ def display_daily_reporter(request, dev=""):
 
     return response
 
+@login_required
 def download_daily_reporter(request, dev=""):
     (service_type, device_type, device_types, version, versions, version2, \
         versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
@@ -437,6 +443,7 @@ def download_daily_reporter(request, dev=""):
     xlwt_wb.save(response)
     return response
 
+@login_required
 def day_reporter(request, dev=""):
     xlwt_wb = xlwt.Workbook()
     generate_report(xlwt_wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
@@ -448,6 +455,8 @@ def day_reporter(request, dev=""):
     xlwt_wb.save(response)
     return response
 
+
+@login_required
 def week_reporter(request, dev=""):
     xlwt_wb = xlwt.Workbook()
     generate_report(xlwt_wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 

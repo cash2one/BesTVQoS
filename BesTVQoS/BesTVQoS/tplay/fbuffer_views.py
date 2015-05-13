@@ -3,6 +3,7 @@ import logging
 import MySQLdb
 
 from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
 from common.mobile import do_mobile_support
 from common.views import get_filter_param_values, set_default_values_to_cookie
 from common.date_time_tool import current_time, get_days_offset, \
@@ -220,6 +221,7 @@ def process_single_Qos(request, table, qos_name, title, subtitle, ytitle, view_t
     return context
 
 
+@login_required
 def show_fbuffer_sucratio(request, dev=""):
     context = process_single_Qos(
         request, "fbuffer", "SucRatio", "首次缓冲成功率", "加载成功的播放次数/播放总次数", \
@@ -232,6 +234,7 @@ def show_fbuffer_sucratio(request, dev=""):
     # return render_to_response('show_fbuffer_sucratio.html', context)
 
 
+@login_required
 def show_fluency(request, dev=""):
     context = process_single_Qos(
         request, "fluency", "Fluency", "一次不卡比例", "无卡顿播放次数/加载成功的播放次数", \
@@ -243,6 +246,7 @@ def show_fluency(request, dev=""):
     return response
 
 
+@login_required
 def show_fluency_pratio(request, dev=""):
     context = process_single_Qos(
         request, "fluency", "PRatio", "卡用户卡时间比", "卡顿总时长/卡顿用户播放总时长", \
@@ -254,6 +258,7 @@ def show_fluency_pratio(request, dev=""):
     return response
 
 
+@login_required
 def show_fluency_allpratio(request, dev=""):
     context = process_single_Qos(
         request, "fluency", "AllPRatio", "所有用户卡时间比", "卡顿总时长/所有用户播放总时长", \
@@ -265,6 +270,7 @@ def show_fluency_allpratio(request, dev=""):
     return response
 
 
+@login_required
 def show_fluency_avgcount(request, dev=""):
     context = process_single_Qos(
         request, "fluency", "AvgCount", "卡顿播放平均卡次数", "卡顿总次数/卡顿播放数", \
@@ -276,6 +282,7 @@ def show_fluency_avgcount(request, dev=""):
     return response
 
 
+@login_required
 def show_3sratio(request, dev=""):
     context = process_single_Qos(
         request, "bestv3sratio", "Ratio", "3秒起播占比", "首次载入时长小于等于3秒的播放次数/播放总次数", \
@@ -287,6 +294,7 @@ def show_3sratio(request, dev=""):
     return response
 
 
+@login_required
 def show_avg_pcount(request, dev=""):
     context = process_single_Qos(
         request, "bestvavgpchoke", "AvgCount", "每小时播放卡顿平均次数", \
@@ -298,6 +306,7 @@ def show_avg_pcount(request, dev=""):
     return response
 
 
+@login_required
 def show_avg_ptime(request, dev=""):
     context = process_single_Qos(
         request, "bestvavgpchoke", "AvgTime", "每小时播放卡顿平均时长", \
@@ -480,6 +489,7 @@ def process_multi_plot(request, table, title, subtitle, ytitle, view_types, pnva
     return context
 
 
+@login_required
 def show_fbuffer_time(request, dev=""):
     context = process_multi_plot(
         request, "fbuffer", "缓冲PN值", "", "单位：秒", VIEW_TYPES[1:], PNVALUES_LIST)
@@ -491,6 +501,7 @@ def show_fbuffer_time(request, dev=""):
     return response
 
 
+@login_required
 def show_play_time(request, dev=""):
     context = process_multi_plot(
         request, "playtime", "播放时长PN值", "", "单位：分钟", VIEW_TYPES[1:], PNVALUES_LIST, 60)
