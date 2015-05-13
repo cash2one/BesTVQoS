@@ -121,6 +121,7 @@ def get_types_from_cache(table, begin_date, end_date, type_name):
     try:
         redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
         types_list = redis_cache.lrange(types_key, 0, -1)
+        logger.info("get redis cache suc: %s" % len(types_list))
         return types_list
     except:
         logger.info("get redis cache fail: %s" % (types_key))
@@ -135,6 +136,7 @@ def cache_types(table, begin_date, end_date, type_name, types_list):
         base_date = todaystr()
         if cmp(begin_date, base_date) < 0 and cmp(end_date, base_date) < 0:
             redis_cache.expire(types_key, 3600*2)
+        logger.info("cache device types suc: %s" % len(types_list))
     except Exception, e:
         logger.info("cache deivce types fail: %s" % e)
 
