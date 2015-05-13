@@ -100,7 +100,7 @@ def get_play_info_today(context, playinfo):
         sql_command = "select ServiceType, DeviceType, sum(Records) %s" % (
             filters)
         sql_command += playinfo.profile_exclude
-        sql_command += " group by DeviceType order by sum(Records) desc"
+        sql_command += " group by ServiceType, DeviceType order by sum(Records) desc"
         logger.debug("SQL: %s" % sql_command)
 
         begin_time = current_time()
