@@ -196,9 +196,9 @@ def get_table_name(url):
     elif url.find("fluency") != -1:
         table_name = "fluency"
     elif url.find("3sratio") != -1:
-        table_name = "Bestv3SRatio"
+        table_name = "bestv3sratio"
     elif url.find("avg_pcount") != -1 or url.find("avg_ptime") != -1:
-        table_name = "BestvAvgPchoke"
+        table_name = "bestvavgpchoke"
     elif url.find("reporter") != -1:
         table_name = "playinfo"
 
