@@ -10,7 +10,7 @@ year = strftime("%Y",localtime())
 mon  = strftime("%m",localtime())
 day  = strftime("%d",localtime())
 hour = strftime("%H",localtime())
-min  = strftime("%M",localtime())
+minute  = strftime("%M",localtime())
 sec  = strftime("%S",localtime())
 
 def current_time():
@@ -39,7 +39,7 @@ def datetimestr():
     get datetime string
     date format="YYYYMMDDHHMMSS"
     '''
-    return year+mon+day+hour+min+sec
+    return year+mon+day+hour+minute+sec
 
 def get_day_of_day(n=0):
     '''''
@@ -186,5 +186,3 @@ if __name__=="__main__":
     print get_day_of_day(-3)
     print get_today_month(-3)
     print get_today_month(3)
-
-    print get_days_xalis_list("2015-03-21", "2015-03-24")
