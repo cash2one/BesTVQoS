@@ -363,7 +363,7 @@ def prepare_pnvalue_hour_data(filter_params, view_types, pnvalue_types, base_rad
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
 
 
-def prepare_pnvalue_daily_data(filterParams, days_region, view_types, pnvalue_types, base_radix):
+def prepare_pnvalue_daily_data(filter_params, days_region, view_types, pnvalue_types, base_radix):
     db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
     cursor = db.cursor()
 
@@ -372,8 +372,8 @@ def prepare_pnvalue_daily_data(filterParams, days_region, view_types, pnvalue_ty
         sql = "SELECT Date, P25, P50, P75, P90, P95, AverageTime \
             FROM %s WHERE DeviceType='%s' and Date >= '%s' and \
             Date <= '%s' and Hour=24 and ViewType=%d" % (
-            filterParams.table, filterParams.devicetype, 
-            filterParams.begin_date, filterParams.end_date, i)
+            filter_params.table, filter_params.devicetype, 
+            filter_params.begin_date, filter_params.end_date, i)
         if filter_params.servicetype != 'All':
             sql = "%s and ServiceType='%s'" % (sql, filter_params.servicetype)
         display_data = {}
