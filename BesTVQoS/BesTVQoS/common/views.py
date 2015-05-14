@@ -121,6 +121,13 @@ def navi(request, target_url=""):
     else:
         return m_home(request)
 
+def flushdb2(request):
+    try:
+        redis_cache = redis.StrictRedis(host='localhost', port=6379, db=2)
+        redis_cache.flushdb()
+    except:
+        return None
+
 def get_types_from_cache(table, begin_date, end_date, type_name, base_name):
     if platform.system() == "Windows":
         return None
