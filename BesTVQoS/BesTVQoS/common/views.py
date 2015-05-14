@@ -172,7 +172,7 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     if service_type != "All":
         fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
     sql_command = "select distinct DeviceType from %s %s" % (table, fitlers)
-    sql_command += " and DeviceType not like '%.%'"
+    sql_command += " and DeviceType not like '%\.%'"
 
     if cu is None:
         cu = connection.cursor()
@@ -243,7 +243,7 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
         fitlers = fitlers + " and ServiceType = '%s'" % (service_type)
-    fitlers += " and DeviceType like '%s_%%'" % (device_type)
+    fitlers += " and DeviceType like '%s\_%%'" % (device_type)
     sql_command = "select distinct DeviceType from %s %s" % (table, fitlers)
 
     if cu is None:
