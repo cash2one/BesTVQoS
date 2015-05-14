@@ -23,7 +23,7 @@ VIEW_TYPES = [
 class PlayInfo:
 
     def __init__(self, request):
-        self.profile_exclude = " and DeviceType like '%.%'"
+        self.profile_exclude = " and DeviceType like '%\.%'"
         self.service_type = "All"
         self.end_date = str(today())
         self.begin_date = self.end_date
