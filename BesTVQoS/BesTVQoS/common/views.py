@@ -157,9 +157,9 @@ VERSION_KEY = "versions"
 
 def get_device_types1(table, service_type, begin_date, end_date, cu=None):
     # get devices type from cache
-    #devices_list = get_types_from_cache(table, begin_date, end_date, DEVICE_KEY, DEVICE_KEY_BASE)
-    #if devices_list:
-    #    return devices_list
+    devices_list = get_types_from_cache(table, begin_date, end_date, DEVICE_KEY, DEVICE_KEY_BASE)
+    if devices_list:
+        return devices_list
 
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
@@ -181,7 +181,7 @@ def get_device_types1(table, service_type, begin_date, end_date, cu=None):
         device_types = ['']
 
     # cache devices type
-    #cache_types(table, begin_date, end_date, DEVICE_KEY, DEVICE_KEY_BASE, device_types)
+    cache_types(table, begin_date, end_date, DEVICE_KEY, DEVICE_KEY_BASE, device_types)
 
     return device_types
 
@@ -228,10 +228,10 @@ def get_device_type(request, dev=""):
 
 def get_versions1(table, service_type, device_type, begin_date, end_date, cu=None):
     # get devices type from cache
-    #versions_list = get_types_from_cache(table, begin_date, end_date, 
-    #    VERSION_KEY, device_type)
-    #if versions_list:
-    #    return versions_list
+    versions_list = get_types_from_cache(table, begin_date, end_date, 
+        VERSION_KEY, device_type)
+    if versions_list:
+        return versions_list
 
     fitlers = "where Date >= '%s' and Date <= '%s'" % (begin_date, end_date)
     if service_type != "All":
@@ -251,8 +251,8 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
         version_types.append(item[0][version_pos:])
 
     # cache devices type
-    #cache_types(table, begin_date, end_date, VERSION_KEY, device_type, 
-    #    version_types)
+    cache_types(table, begin_date, end_date, VERSION_KEY, device_type, 
+        version_types)
 
     return version_types
 
