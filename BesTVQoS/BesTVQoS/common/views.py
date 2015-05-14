@@ -246,7 +246,7 @@ def get_versions1(table, service_type, device_type, begin_date, end_date, cu=Non
     cu.execute(sql_command)
 
     version_pos = len(device_type) + 1
-    version_types = []
+    version_types = ["All"]
     for item in cu.fetchall():
         version_types.append(item[0][version_pos:])
 
