@@ -9,7 +9,8 @@ from common.date_time_tool import *
 from common.mobile import do_mobile_support
 from common.views import *
 from common.date_time_tool import *
-from fbuffer_views import process_single_Qos
+import fbuffer_views
+from tplay.functions import process_single_Qos, get_device_types, get_versions
 from tplay.models import *
 
 logger = logging.getLogger("django.request")
@@ -197,7 +198,7 @@ def show_playing_daily(request, dev=""):
 
 @login_required
 def show_playing_trend(request, dev=""):
-    context = process_single_Qos(
+    context = fbuffer_views.process_single_Qos(
         request, "playinfo", "Records", u"用户观看量",
         u"", u"观看量", VIEW_TYPES, True, 1)
 
@@ -208,3 +209,36 @@ def show_playing_trend(request, dev=""):
     set_default_values_to_cookie(response, context)
 
     return response
+
+
+# the following codes are added by jiazhenchao.
+
+def show_fbuffer_sucratio(request, dev=""):
+    context = process_single_Qos(
+        request, "fbuffer", "SucRatio", "首次缓冲成功率(加速版)", "加载成功的播放次数/播放总次数", \
+        "成功率(%)", VIEW_TYPES[1:], True, 100)
+    do_mobile_support(request, dev, context)
+    response = render_to_response('show_fbuffer_sucratio.html', context)
+    set_default_values_to_cookie(response, context)
+    return response
+
+def get_device_type(request):
+    service_type = request.GET.get('service_type')
+    begin_date = request.GET.get('begin_date')
+    end_date = request.GET.get('end_date')
+
+    device_types = get_device_types(service_type, begin_date, end_date)
+    respStr = json.dumps({"device_types": device_types})
+    return HttpResponse(respStr, content_type="text/json")
+
+def get_version(request):
+    service_type = request.GET.get('service_type')
+    device_type = request.GET.get('device_type')
+    begin_date = request.GET.get('begin_date')
+    end_date = request.GET.get('end_date')
+
+    versions = get_versions(service_type, device_type, begin_date, end_date)
+    respStr = json.dumps({"versions": versions})
+    return HttpResponse(respStr, content_type="text/json")
+
+# the previous codes are added by jiazhenchao
