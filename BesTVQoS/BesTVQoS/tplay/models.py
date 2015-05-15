@@ -65,6 +65,13 @@ class BestvPlaytime(models.Model):
     def __str__(self):
         return "BestvPlaytime"
 
+class Title(models.Model):
+    ServiceType = models.CharField(max_length=30)
+    DeviceType = models.CharField(max_length=255)
+    Date = models.DateField()
+    class Meta:
+        unique_together = (
+            'ServiceType', 'DeviceType', 'Date',)
 
 class BestvFbuffer(models.Model):
     ServiceType = models.CharField(max_length=30)
