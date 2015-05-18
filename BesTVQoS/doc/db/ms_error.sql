@@ -15,6 +15,7 @@ create table IF NOT EXISTS ms_error_info(
 	ServArea varchar(64),
 	URL varchar(512),
 	Count smallint,
+	ContentLen INT,
 	PRIMARY KEY(RecordID)	
 );
 
