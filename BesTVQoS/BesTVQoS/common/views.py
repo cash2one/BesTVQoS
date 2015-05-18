@@ -130,6 +130,7 @@ def flushdb2(request):
         return HttpResponse("flushdb2 fail: %s"%e)
 
 def get_types_from_cache(table, begin_date, end_date, type_name, base_name):
+    return None
     if platform.system() == "Windows":
         return None
     types_key = "%s:%s:%s:%s:%s" % (type_name, base_name, table, begin_date, end_date)
@@ -143,6 +144,7 @@ def get_types_from_cache(table, begin_date, end_date, type_name, base_name):
         return None
 
 def cache_types(table, begin_date, end_date, type_name, base_name, types_list):
+    return None
     if platform.system() == "Windows":
         return None
     types_key = "%s:%s:%s:%s:%s" % (type_name, base_name, table, begin_date, end_date)
