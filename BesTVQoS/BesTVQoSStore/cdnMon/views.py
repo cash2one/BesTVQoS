@@ -40,7 +40,7 @@ def ms_error_info(request):
                 content_len = get_file_size(item['url'])
                 insert_sql = "INSERT INTO ms_error_info(Date, \
                         Resp, TsType, ClientIP, ClientISP, ClientArea, \
-                        ServIP, ServISP, ServArea, URL, Count) \
+                        ServIP, ServISP, ServArea, URL, Count, ContentLen) \
                         VALUES ('%s', %s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s, %s \
                         )"%(item['date'], item['resp'], item['type'], item['clientip'], item['clientisp'], item['clientarea'], \
                         item['servip'], item['servisp'], item['servarea'], item['url'], item['count'], content_len)
