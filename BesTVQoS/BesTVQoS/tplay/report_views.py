@@ -11,6 +11,11 @@ from common.views import write_xls, write_remarks_to_xls, \
 from common.date_time_tool import current_time
 from tplay.fbuffer_views import VIEW_TYPES
 
+import sys
+  
+reload(sys)
+sys.setdefaultencoding( "utf-8" )
+
 ezxf=xlwt.easyxf
 
 logger = logging.getLogger("django.request")
