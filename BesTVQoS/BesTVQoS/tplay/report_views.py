@@ -111,7 +111,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
         for ver in vers:
             begin_time = current_time()
             temp = [0 for i in range(7)]
-            temp[0] = "%s-%s" % (ver, second)
+            temp[0] = u"%s-%s" % (ver, second)
             sql = "SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE \
                 DeviceType='%s' and Date >= '%s' and Date <= '%s' \
                 and Hour=24 and ViewType=%d" % (
