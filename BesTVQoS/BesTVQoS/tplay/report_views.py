@@ -150,7 +150,7 @@ def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
         [u'%s -- %s' % ('首选版本', beta_ver)]
         ]
     if len(master_ver)>0:
-        desc.append(['%s -- %s'%('对比版本', master_ver)])
+        desc.append([u'%s -- %s'%('对比版本', master_ver)])
     return desc
 
 def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
