@@ -10,7 +10,7 @@
     <InterpreterArguments />
     <DjangoSettingsModule />
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
+    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
     <InterpreterVersion>2.7</InterpreterVersion>
     <WebBrowserPort>80</WebBrowserPort>
   </PropertyGroup>
@@ -60,7 +60,10 @@
     <Compile Include="realtime\tests.py" />
     <Compile Include="realtime\views.py" />
     <Compile Include="realtime\__init__.py" />
+    <Compile Include="tplay\0001_initial.py" />
     <Compile Include="tplay\fbuffer_views.py" />
+    <Compile Include="tplay\migrations\0001_initial.py" />
+    <Compile Include="tplay\migrations\__init__.py" />
     <Compile Include="tplay\models.py" />
     <Compile Include="tplay\report_views.py">
       <SubType>Code</SubType>
@@ -81,6 +84,7 @@
     <Folder Include="realtime\" />
     <Folder Include="realtime\Templates\" />
     <Folder Include="tplay\" />
+    <Folder Include="tplay\migrations\" />
     <Folder Include="tplay\templates\" />
     <Folder Include="BesTVQoS\" />
   </ItemGroup>
