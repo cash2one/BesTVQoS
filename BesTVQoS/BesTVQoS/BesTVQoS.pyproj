@@ -103,6 +103,7 @@
     <Content Include="common\templates\highcharts_pie.html" />
     <Content Include="common\templates\highcharts_plot.html" />
     <Content Include="common\templates\home.html" />
+    <Content Include="common\templates\login.html" />
     <Content Include="common\templates\m_home.html" />
     <Content Include="common\templates\m_navi_menu.html" />
     <Content Include="common\templates\m_topbar.html" />

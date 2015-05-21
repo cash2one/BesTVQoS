@@ -11,6 +11,11 @@ from common.views import write_xls, write_remarks_to_xls, \
 from common.date_time_tool import current_time
 from tplay.fbuffer_views import VIEW_TYPES
 
+import sys
+  
+reload(sys)
+sys.setdefaultencoding( "utf-8" )
+
 ezxf=xlwt.easyxf
 
 logger = logging.getLogger("django.request")
@@ -61,7 +66,7 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
     
     single_qos = ['fbuffer', 'fluency', 'fluency']
     qos_name = ['SucRatio', 'Fluency', 'PRatio']
-    qos_desc = ['首次缓冲成功率', '一次不卡比例', '卡用户卡时间比']
+    qos_desc = [u'首次缓冲成功率', u'一次不卡比例', u'卡用户卡时间比']
     view_type = [1, 2, 3, 4]  #(1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")
     for index, qos in enumerate(qos_name):
         for ver in vers:
@@ -106,7 +111,7 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
         for ver in vers:
             begin_time = current_time()
             temp = [0 for i in range(7)]
-            temp[0] = "%s-%s" % (ver, second)
+            temp[0] = u"%s-%s" % (ver, second)
             sql = "SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE \
                 DeviceType='%s' and Date >= '%s' and Date <= '%s' \
                 and Hour=24 and ViewType=%d" % (
@@ -141,11 +146,11 @@ def get_fbuffer_data(begin_date, end_date, beta_ver, master_ver):
 
 def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
     desc = [
-        ['日期: %s - %s' % (begin_date, end_date)],
-        ['%s -- %s' % ('首选版本', beta_ver)]
+        [u'日期: %s - %s' % (begin_date, end_date)],
+        [u'%s -- %s' % ('首选版本', beta_ver)]
         ]
     if len(master_ver)>0:
-        desc.append(['%s -- %s'%('对比版本', master_ver)])
+        desc.append([u'%s -- %s'%('对比版本', master_ver)])
     return desc
 
 def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
@@ -174,7 +179,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 1: records
     #
-    records_headings = ['记录数/版本', '点播', '回看', '直播', '连看', '总计']
+    records_headings = [u'记录数/版本', u'点播', u'回看', u'直播', u'连看', u'总计']
     # prepare data
     records_data = get_records_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, records_headings, records_data, 
@@ -184,7 +189,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 2: single Qos
     #     
-    single_qos_headings = ['单指标QoS/版本', '点播', '回看', '直播', '连看']
+    single_qos_headings = [u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
     single_qos_data = get_single_qos_data2(begin_date, end_date, beta_ver, 
         master_ver)
     rowx = write_xls(book, sheet, rowx, single_qos_headings, single_qos_data, 
@@ -195,7 +200,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 3: playtm
     #    
-    playtm_headings = ['播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
+    playtm_headings = [u'播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
     playtm_data = get_playtm_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, playtm_headings, playtm_data, 
         heading_xf, data_xf)
@@ -205,7 +210,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     # step 4: fbuffer
     #    
-    fbuffer_headings = ['首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
+    fbuffer_headings = [u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
     fbuffer_data = get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, fbuffer_headings, fbuffer_data, 
         heading_xf, data_xf)
@@ -216,9 +221,9 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 5: remarks
     #    
     remark_xf = ezxf('font: name Arial, colour Red')
-    remarks = ['备注: ', '一次不卡比例：无卡顿播放次数/加载成功的播放次数', '卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
-        '缓冲异常值过滤：如果P95<3秒，则认为数据有问题', '播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题', \
-        '多天报表的算均值：算均值可能存在差错']
+    remarks = [u'备注: ', u'一次不卡比例：无卡顿播放次数/加载成功的播放次数', u'卡用户卡时间比：卡顿总时长/卡顿用户播放总时长',\
+        u'缓冲异常值过滤：如果P95<3秒，则认为数据有问题', u'播放时长异常值过滤：如果P95小于30分钟，则认为数据有问题', \
+        u'多天报表的算均值：算均值可能存在差错']
     rowx = write_remarks_to_xls(book, sheet, rowx, remarks, remark_xf)
     rowx += 2
     print "step 4: ", current_time() - begin_time

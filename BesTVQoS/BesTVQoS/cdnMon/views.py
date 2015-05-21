@@ -21,11 +21,11 @@ def show_ms_error(request, dev=""):
     table = HtmlTable()
     table.mtitle = "ms_error信息"
     table.mheader = ["响应码", "ClientIP", "省份", "运营商", 
-        'ServerIP', '省份', '运营商', '次数', 'url']
+        'ServerIP', '省份', '运营商', '次数', 'Content_len', 'url']
     table.msub = []
 
     sql = "select Resp, ClientIP, ClientISP, ClientArea, ServIP, \
-            ServISP, ServArea, Count, URL  \
+            ServISP, ServArea, Count, ContentLen, URL  \
             from ms_error_info where Date='%s'" % date
 
     logger.debug("Server List SQL - %s" % sql)
@@ -38,9 +38,9 @@ def show_ms_error(request, dev=""):
     subs = []
     for row in results:
         sub = []
-        for i in range(8):
+        for i in range(9):
             sub.append(row[i])
-        sub.append('''<a href="%s" target="_blank">%s</a>''' % (row[8], row[8]))
+        sub.append('''<a href="%s" target="_blank">%s</a>''' % (row[9], row[9]))
         subs.append(sub)
 
     table.msub = subs

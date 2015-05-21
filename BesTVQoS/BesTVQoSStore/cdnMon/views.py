@@ -2,7 +2,9 @@
 import json
 import logging
 import MySQLdb
+import urllib2
 import sys
+  
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -10,6 +12,21 @@ from django.http import HttpResponse
 from django.db import IntegrityError
 
 logger = logging.getLogger("django.request")
+
+def get_file_size(url):  
+    """通过content-length头获取文件大小 
+    """  
+    opener = urllib2.build_opener()  
+    request = urllib2.Request(url)  
+    request.get_method = lambda: 'HEAD'  
+    try:  
+        response = opener.open(request)  
+        response.read()  
+    except Exception, e:  
+        print '%s %s' % (url, e)  
+        return 0
+    else:  
+        return dict(response.headers).get('content-length', 0)  
 
 def ms_error_info(request):
     result = "ok"
@@ -20,12 +37,13 @@ def ms_error_info(request):
         try:               
             contents = json.loads(request.body)
             for item in contents:
+                content_len = get_file_size(item['url'])
                 insert_sql = "INSERT INTO ms_error_info(Date, \
                         Resp, TsType, ClientIP, ClientISP, ClientArea, \
-                        ServIP, ServISP, ServArea, URL, Count) \
-                        VALUES ('%s', %s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s \
+                        ServIP, ServISP, ServArea, URL, Count, ContentLen) \
+                        VALUES ('%s', %s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s, %s \
                         )"%(item['date'], item['resp'], item['type'], item['clientip'], item['clientisp'], item['clientarea'], \
-                        item['servip'], item['servisp'], item['servarea'], item['url'], item['count'])
+                        item['servip'], item['servisp'], item['servarea'], item['url'], item['count'], content_len)
                 try:
                     cursor.execute(insert_sql)
                     db.commit()

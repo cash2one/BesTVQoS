@@ -11,8 +11,11 @@ open FILE, "<$filename";
 while(<FILE>) {
 	chomp;
 	@element = split /\|/;
+
+	$count = @element;
+    $code_idx = $count-2;
 	
-	if ($element[7] eq "200") {
+	if ($element[$code_idx] eq "200") {
 		$suc{$key} += 1;
         $suc_time{$key} .= $element[$idx]." ";
 	}
