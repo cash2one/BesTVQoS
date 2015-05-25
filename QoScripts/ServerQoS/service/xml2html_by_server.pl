@@ -95,6 +95,14 @@ foreach $filename (@ARGV) {
 		@element = split /\|/;
 		#$type = $element[0];
 		
+		# just for url
+		if ($subject eq "url") {	
+			$r = index($element[1], "OttService");
+			if ($r == -1) {
+				next;
+			}
+		}	
+		
 		$content .= "<tr>\n";
 
 		foreach $key (@element)
