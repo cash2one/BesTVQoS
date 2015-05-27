@@ -86,9 +86,9 @@ def get_single_qos_data2(view_types, begin_date, end_date, service_type, beta_ve
             for (view, _) in view_types:
                 view_type_data[view] = []
             for item in items:
-                temp = getattr(item,qos)
-                if temp:
-                    view_type_data[item.ViewType].append(getattr(item,qos))
+                qos_value = getattr(item,qos)
+                if qos_value:
+                    view_type_data[item.ViewType].append(qos_value)
             for (view, _) in view_types:
                 temp.append(float("%.3f"%(sum(view_type_data[view])/len(view_type_data[view]))))
                 logger.info("qos count: ver: %s, get %s, count: %s" % (ver, qos, len(view_type_data[view])))
