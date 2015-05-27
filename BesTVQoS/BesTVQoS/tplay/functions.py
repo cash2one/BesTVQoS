@@ -96,6 +96,8 @@ def prepare_hour_data_of_single_Qos(filter_params, view_types, qos_name, base_ra
         data_by_hour[view_type] = []
         for hour in range(24):
             data_by_hour[view_type].append('%.1f' % (view_type_hour.get((str(hour),view_type), 0.0) * base_radix))
+		
+	data_sum = map(sum, zip(*data_by_hour.values()))
 
     return data_by_hour
 @tracefunc

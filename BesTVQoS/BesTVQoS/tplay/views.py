@@ -222,7 +222,7 @@ def show_fbuffer_sucratio(request, dev=""):
     set_default_values_to_cookie(response, context)
     return response
 
-def get_device_type(request):
+def get_device_type(request, dev=""):
     service_type = request.GET.get('service_type')
     begin_date = request.GET.get('begin_date')
     end_date = request.GET.get('end_date')
@@ -231,7 +231,7 @@ def get_device_type(request):
     respStr = json.dumps({"device_types": device_types})
     return HttpResponse(respStr, content_type="text/json")
 
-def get_version(request):
+def get_version(request, dev=""):
     service_type = request.GET.get('service_type')
     device_type = request.GET.get('device_type')
     begin_date = request.GET.get('begin_date')
