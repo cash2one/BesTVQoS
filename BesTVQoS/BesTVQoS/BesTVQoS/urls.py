@@ -19,9 +19,9 @@ urlpatterns = patterns(
     url(r'^m/$', 'common.views.m_home'),
     url(r'^navi/(?P<target_url>\w*)', 'common.views.navi'),
     url(r'^((?P<dev>m)/)?get_device_type$',
-        'common.views.get_device_type'),
+        'tplay.views.get_device_type'),
     url(r'^((?P<dev>m)/)?get_version$',
-        'common.views.get_version'),
+        'tplay.views.get_version'),
 
     url(r'^((?P<dev>m)/)?show_playing_daily$',
         'tplay.views.show_playing_daily'),
