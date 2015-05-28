@@ -240,7 +240,7 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
 
     except Exception, e:
         logger.info("query {0} {1} error: {2}".format(str(table), qos_name, e))
-        raise
+        # raise
 
     context = dict()
     context['default_service_type'] = service_type
