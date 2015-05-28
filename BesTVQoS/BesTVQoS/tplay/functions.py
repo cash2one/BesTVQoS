@@ -1,45 +1,54 @@
 # -*- coding: utf-8 -*-
-from django.db.models import Q
 import logging
 import time
 
-from common.date_time_tool import current_time, today, get_days_region
+from django.db.models import Q
+from common.date_time_tool import current_time, get_days_region
 from common.views import get_default_values_from_cookie
-from tplay.fbuffer_views import NoDataError
-from tplay.models import BestvFbuffer, Title
+from tplay.models import Title
 
 logger = logging.getLogger("django.request")
 SERVICE_TYPES = ["B2B", "B2C"]
-HOUR_XAXIS = range(24)
+HOUR_X_AXIS = range(24)
 
-def tracefunc(func):
-    def wrapper(*args,**kwargs):
-        print "before call {0}({1},{2})".format(func.__name__,args, kwargs)
+def trace_func(func):
+    def wrapper(*args, **kwargs):
+        print "before call {0}({1},{2})".format(func.__name__, args, kwargs)
         result = func(*args, **kwargs)
         print "after call {0}({1},{2}) \nreturn={3}".format(func.__name__,args, kwargs, result)
         return result
     return wrapper
 
+
+class NoDataError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class FilterParams:
-    def __init__(self, table, servicetype, devicetype, begin_date, end_date):
+    def __init__(self, table, service_type, device_type, begin_date, end_date):
         self.table = table
-        self.servicetype = servicetype
-        self.devicetype = devicetype
+        self.service_type = service_type
+        self.device_type = device_type
         self.begin_date = begin_date
         self.end_date = end_date
 
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
 # is viewtype, lists contain each hour's data
-def make_plot_item(key_values, keys, item_idx, xaxis, title, subtitle, ytitle):
+def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title):
     item = {}
     item["index"] = item_idx
-    item["title"] = title  # "首次缓冲成功率"
-    item["subtitle"] = subtitle  # "全天24小时/全类型"
-    item["y_title"] = ytitle  # "成功率"
-    item["xAxis"] = xaxis
+    item["title"] = title
+    item["subtitle"] = subtitle
+    item["y_title"] = y_title
+    item["xAxis"] = x_axis
     item["t_interval"] = 1
-    if len(xaxis) > 30:
-        item["t_interval"] = len(xaxis) / 30
+    if len(x_axis) > 30:
+        item["t_interval"] = len(x_axis) / 30
+
     series = []
     for (i, desc) in keys:
         serie_item = '''{
@@ -47,89 +56,103 @@ def make_plot_item(key_values, keys, item_idx, xaxis, title, subtitle, ytitle):
             yAxis: 0,
             type: 'spline',
             data: [%s]
-        }''' % (desc, ",".join(key_values[i]))
+        }''' % (desc, ",".join(['{0}'.format(v) for v in key_values[i]]))
         series.append(serie_item)
+
     item["series"] = ",".join(series)
+
     return item
 
-@tracefunc
-def prepare_daily_data_of_single_Qos(filter_params, days_region, view_types, Qos_name, hour_flag, base_radix):
-
-    Q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
-    Q_conditions = Q_conditions & Q(DeviceType=filter_params.devicetype)
-    if filter_params.servicetype != "All":
-        Q_conditions = Q_conditions & Q(ServiceType=filter_params.servicetype)
-    Q_conditions = Q_conditions & Q(ViewType__in=[view_type[0] for view_type in view_types])
+@trace_func
+def prepare_daily_data_of_single_qos(filter_params, days_region, view_types, qos_name, hour_flag, base_radix, need_total=False):
+    q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
+    q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
+    q_conditions = q_conditions & Q(ServiceType=filter_params.service_type)
+    if filter_params.service_type == 'B2C':
+        q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
     if hour_flag:
-        Q_conditions = Q_conditions & Q(Hour=24)
+        q_conditions = q_conditions & Q(Hour=24)
 
-    fbuffers = BestvFbuffer.objects.filter(Q_conditions)
+    results = filter_params.table.objects.filter(q_conditions)
+
     view_type_date = {}
-    for fbuffer in fbuffers:
-        view_type_date[(str(fbuffer.Date),fbuffer.ViewType)] = getattr(fbuffer,Qos_name)
+    for row in results:
+        view_type_date[(str(row.Date), getattr(row, 'ViewType', 0))] = getattr(row, qos_name)
 
     data_by_day = {}
     for view_type in [view_type[0] for view_type in view_types]:
         data_by_day[view_type] = []
-        for date in days_region:
-            data_by_day[view_type].append('%.1f' % (view_type_date.get((date,view_type), 0.0) * base_radix))
+        for day in days_region:
+            data_by_day[view_type].append(view_type_date.get((day, view_type), 0.0) * base_radix)
+
+    if need_total:
+        data_by_day[0] = map(sum, zip(*data_by_day.values()))
 
     return data_by_day
-@tracefunc
-def prepare_hour_data_of_single_Qos(filter_params, view_types, qos_name, base_radix):
 
-    Q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
-    Q_conditions = Q_conditions & Q(DeviceType=filter_params.devicetype)
-    if filter_params.servicetype != "All":
-        Q_conditions = Q_conditions & Q(ServiceType=filter_params.servicetype)
-    Q_conditions = Q_conditions & Q(ViewType__in=[view_type[0] for view_type in view_types])
-    Q_conditions = Q_conditions & Q(Hour__lt=24)
+@trace_func
+def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_radix, need_total=False):
+    q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
+    q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
+    q_conditions = q_conditions & Q(ServiceType=filter_params.service_type)
+    if filter_params.service_type == 'B2C':
+        q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+    q_conditions = q_conditions & Q(Hour__lt=24)
 
-    fbuffers = BestvFbuffer.objects.filter(Q_conditions)
+    results = filter_params.table.objects.filter(q_conditions)
 
     view_type_hour = {}
-    for fbuffer in fbuffers:
-        view_type_hour[(str(fbuffer.Hour),fbuffer.ViewType)] = getattr(fbuffer,qos_name)
+    for row in results:
+        view_type_hour[(row.Hour, getattr(row, 'ViewType', 0))] = getattr(row, qos_name)
 
     data_by_hour = {}
     for view_type in [view_type[0] for view_type in view_types]:
         data_by_hour[view_type] = []
         for hour in range(24):
-            data_by_hour[view_type].append('%.1f' % (view_type_hour.get((str(hour),view_type), 0.0) * base_radix))
-		
-	data_sum = map(sum, zip(*data_by_hour.values()))
+            data_by_hour[view_type].append(view_type_hour.get((hour, view_type), 0.0) * base_radix)
+
+    if need_total:
+        data_by_hour[0] = map(sum, zip(*data_by_hour.values()))
+
+    # logger.debug("data_by_hour: {0}".format(data_by_hour))
 
     return data_by_hour
-@tracefunc
+
+@trace_func
 def get_device_types(service_type, begin_date, end_date):
-    Q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
-    Q_conditions = Q_conditions & Q(ServiceType=service_type)
-    Q_conditions = Q_conditions & ~Q(DeviceType__contains=".")
-    titles = Title.objects.filter(Q_conditions)
+    q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
+    q_conditions = q_conditions & Q(ServiceType=service_type)
+    q_conditions = q_conditions & ~Q(DeviceType__contains=".")
+    titles = Title.objects.filter(q_conditions)
     device_types = []
     type_set = set()
     for title in titles:
         type_set.add(title.DeviceType)
-    device_types.extend(sorted(type_set))
-    return device_types
-@tracefunc
-def get_versions(service_type, device_type, begin_date, end_date):
-    Q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
-    Q_conditions = Q_conditions & Q(ServiceType=service_type)
-    Q_conditions = Q_conditions & Q(DeviceType__startswith="{0}_".format(device_type))
 
-    titles = Title.objects.filter(Q_conditions)
-    print(len(titles))
+    device_types.extend(sorted(type_set))
+
+    return device_types
+
+@trace_func
+def get_versions(service_type, device_type, begin_date, end_date):
+    q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
+    q_conditions = q_conditions & Q(ServiceType=service_type)
+    q_conditions = q_conditions & Q(DeviceType__startswith="{0}_".format(device_type))
+
+    titles = Title.objects.filter(q_conditions)
+
     version_pos = len(device_type) + 1
-    #device_types = ["All"]
     versions = set()
     for title in titles:
         version = title.DeviceType[version_pos:]
         versions.add(version)
 
-    return sorted(versions)
+    version_list = ['All']
+    version_list.extend(sorted(versions))
 
-def get_filter_param_values(request, table):
+    return version_list
+
+def get_filter_param_values(request):
     begin_time = current_time()
     filters_map = get_default_values_from_cookie(request)
     service_type = request.GET.get("service_type", filters_map["st"]).encode("utf-8")
@@ -137,8 +160,7 @@ def get_filter_param_values(request, table):
     version = request.GET.get("version", filters_map["vt"]).encode("utf-8")
     begin_date = request.GET.get("begin_date", filters_map["begin"]).encode("utf-8")
     end_date = request.GET.get("end_date", filters_map["end"]).encode("utf-8")
-    logger.info("get_filter_values: %s - %s - %s" %
-                (service_type, device_type, version))
+    logger.info("get_filter_values: %s - %s - %s" % (service_type, device_type, version))
 
     device_types = get_device_types(service_type, begin_date, end_date)
     if len(device_types) == 0:
@@ -147,15 +169,16 @@ def get_filter_param_values(request, table):
 
     if device_type not in device_types:
         device_type = device_types[0]
+
     logger.info("get_filter_param_values1 %s %s, cost: %s" %
                 (device_type, version, (current_time() - begin_time)))
 
     versions = []
     try:
         versions = get_versions(service_type, device_type, begin_date, end_date)
-    except Exception, e:
-        logger.info("get_versions(%s, %s, %s, %s, %s) failed." % (
-            table, service_type, device_type, begin_date, end_date))
+    except:
+        logger.info("get_versions({0}, {1}, {2}, {3}) failed.".format(
+            service_type, device_type, begin_date, end_date))
 
     if len(versions) == 0:
         versions = [""]
@@ -165,54 +188,58 @@ def get_filter_param_values(request, table):
 
     logger.info("get_filter_param_values %s %s, cost: %s" %
                 (device_type, version, (current_time() - begin_time)))
+    
     return service_type, device_type, device_types, version, versions, begin_date, end_date
 
-def process_single_Qos(request, table, qos_name, title, subtitle, ytitle, view_types, hour_flag, base_radix=1):
+def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_types, hour_flag, base_radix=1):
     begin_time = time.time()
     items = []
 
     try:
         (service_type, device_type, device_types,
-            version, versions, begin_date, end_date) = get_filter_param_values(request, table)
+            version, versions, begin_date, end_date) = get_filter_param_values(request)
 
         if device_type == "":
-            raise NoDataError("No data between %s - %s in %s" % (begin_date, end_date, table))
+            raise NoDataError("No data between {0} and {1} in tplay_title".format(begin_date, end_date))
 
         if version == "All":
             device_type_full = device_type
         else:
-            device_type_full = '%s_%s' % (device_type, version)
+            device_type_full = '{0}_{1}'.format(device_type, version)
 
-        filterParams = FilterParams(table, service_type, device_type_full, begin_date, end_date)
+        filter_params = FilterParams(table, service_type, device_type_full, begin_date, end_date)
 
-        # process data from databases;
-        if begin_date == end_date and hour_flag == True:
-            data_by_hour = prepare_hour_data_of_single_Qos(
-                filterParams, view_types, qos_name, base_radix)
+        # ViewType (0, '总体') indicates total, if so, it should be the first item of view_types
+        if 0 in view_types[0] and len(view_types) > 1:
+            need_total = True
+        else:
+            need_total = False
+
+        if begin_date == end_date and hour_flag:
+            data_by_hour = prepare_hour_data_of_single_qos(
+                filter_params, view_types, qos_name, base_radix, need_total)
+
             if data_by_hour is None:
-                raise NoDataError(
-                    "No hour data between %s - %s" % (begin_date, end_date))
-            item = make_plot_item(data_by_hour, view_types,
-                0, HOUR_XAXIS, title, subtitle, ytitle)
+                raise NoDataError("No hour data between {0} and {1}".format(begin_date, end_date))
+
+            item = make_plot_item(data_by_hour, view_types, 0, HOUR_X_AXIS, title, subtitle, y_title)
             items.append(item)
         else:
             days_region = get_days_region(begin_date, end_date)
-            data_by_day = prepare_daily_data_of_single_Qos(
-                filterParams, days_region, view_types, qos_name, hour_flag, base_radix)
+            data_by_day = prepare_daily_data_of_single_qos(
+                filter_params, days_region, view_types, qos_name, hour_flag, base_radix, need_total)
             if data_by_day is None:
-                raise NoDataError(
-                    "No daily data between %s - %s" % (begin_date, end_date))
+                raise NoDataError("No daily data between {0} and {1}".format(begin_date, end_date))
 
             format_days_region = ["%s%s" % (i[5:7], i[8:10]) for i in days_region]
-            item = make_plot_item(data_by_day, view_types, 0,
-                format_days_region, title, subtitle, ytitle)
+            item = make_plot_item(data_by_day, view_types, 0, format_days_region, title, subtitle, y_title)
             items.append(item)
 
     except Exception, e:
-        logger.info("query %s %s error: %s" % (str(table), qos_name, e))
+        logger.info("query {0} {1} error: {2}".format(str(table), qos_name, e))
         raise
 
-    context = {}
+    context = dict()
     context['default_service_type'] = service_type
     context['service_types'] = SERVICE_TYPES
     context['default_device_type'] = device_type
@@ -225,7 +252,141 @@ def process_single_Qos(request, table, qos_name, title, subtitle, ytitle, view_t
     if len(items) > 0:
         context['has_data'] = True
 
-    logger.info("query %s %s, cost: %s" %
-                (str(table), qos_name, (time.time() - begin_time)))
+    logger.info("query {0} {1} cost {2}".format(str(table), qos_name, (time.time() - begin_time)))
+
+    return context
+
+
+# For multi Qos, such as pnvalue, display: multi plots of single view type
+# output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
+def prepare_pnvalue_hour_data(filter_params, view_types, pn_types, base_radix):
+    q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
+    q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
+    q_conditions = q_conditions & Q(ServiceType=filter_params.service_type)
+    if filter_params.service_type == 'B2C':
+        q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+    q_conditions = q_conditions & Q(Hour__lt=24)
+
+    results = filter_params.table.objects.filter(q_conditions)
+
+    view_type_hour = {}
+    for row in results:
+        for (pn, _) in pn_types:
+            view_type_hour[(pn, row.Hour, row.ViewType)] = getattr(row, pn) / base_radix
+
+    data_by_hour = {}
+    for view_type in [view_type[0] for view_type in view_types]:
+        display_data = {}
+        for (pn, _) in pn_types:
+            display_data[pn] = []
+            for hour in range(24):
+                display_data[pn].append(view_type_hour.get((pn, hour, view_type), 0.0))
+
+        data_by_hour[view_type] = display_data
+
+    # logger.debug("data_by_hour: {0}".format(data_by_hour))
+
+    return data_by_hour
+
+# output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
+
+
+def prepare_pnvalue_daily_data(filter_params, days_region, view_types, pn_types, base_radix):
+    q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
+    q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
+    q_conditions = q_conditions & Q(ServiceType=filter_params.service_type)
+    if filter_params.service_type == 'B2C':
+        q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+    q_conditions = q_conditions & Q(Hour=24)
+
+    results = filter_params.table.objects.filter(q_conditions)
+
+    view_type_date = {}
+    for row in results:
+        for (pn, _) in pn_types:
+            view_type_date[(pn, str(row.Date), row.ViewType)] = getattr(row, pn) / base_radix
+
+    data_by_date = {}
+    for view_type in [view_type[0] for view_type in view_types]:
+        display_data = {}
+        for (pn, _) in pn_types:
+            display_data[pn] = []
+            for day in days_region:
+                display_data[pn].append(view_type_date.get((pn, day, view_type), 0.0))
+
+        data_by_date[view_type] = display_data
+
+    # logger.debug("data_by_date: {0}".format(data_by_date))
+
+    return data_by_date
+
+
+def process_multi_plot(request, table, title, subtitle, y_title, view_types, pn_types, base_radix=1):
+    begin_time = current_time()
+    items = []
+
+    try:
+        (service_type, device_type, device_types,
+            version, versions, begin_date, end_date) = get_filter_param_values(request)
+        if device_type == "":
+            raise NoDataError("No data between {0} and {1} in tplay_title".format(begin_date, end_date))
+
+        if version == "All":
+            device_type_full = device_type
+        else:
+            device_type_full = '{0}_{1}'.format(device_type, version)
+
+        filter_params = FilterParams(table, service_type, device_type_full, begin_date, end_date)
+
+        if begin_date == end_date:
+            data_by_hour = prepare_pnvalue_hour_data(filter_params, view_types, pn_types, base_radix)
+
+            if data_by_hour is None:
+                raise NoDataError("No hour data between {0} and {1}".format(begin_date, end_date))
+
+            item_idx = 0
+            for (view_type_idx, view_des) in view_types:
+                if view_type_idx not in data_by_hour:
+                    continue
+
+                item = make_plot_item(data_by_hour[view_type_idx], pn_types, item_idx, HOUR_X_AXIS,
+                                      title, "%s %s" % (subtitle, view_des), y_title)
+                items.append(item)
+                item_idx += 1
+        else:
+            days_region = get_days_region(begin_date, end_date)
+            data_by_day = prepare_pnvalue_daily_data(filter_params, days_region, view_types,
+                                                     pn_types, base_radix)
+            if data_by_day is None:
+                raise NoDataError("No daily data between %s - %s" % (begin_date, end_date))
+
+            format_days_region = ["%s%s" % (i[5:7], i[8:10]) for i in days_region]
+            item_idx = 0
+            for (view_type_idx, view_des) in view_types:
+                if view_type_idx not in data_by_day:
+                    continue
+                item = make_plot_item(data_by_day[view_type_idx], pn_types, item_idx, format_days_region, title,
+                                      "%s %s" % (subtitle, view_des), y_title)
+                items.append(item)
+                item_idx += 1
+
+    except Exception, e:
+        logger.info("query %s multiQos error: %s" % (str(table), e))
+
+    context = dict()
+    context['default_service_type'] = service_type
+    context['service_types'] = SERVICE_TYPES
+    context['default_device_type'] = device_type
+    context['device_types'] = device_types
+    context['default_version'] = version
+    context['versions'] = versions
+    context['default_begin_date'] = str(begin_date)
+    context['default_end_date'] = str(end_date)
+    context['contents'] = items
+    if len(items) > 0:
+        context['has_data'] = True
+
+    logger.info("query %s multiQos, cost: %s" %
+                (str(table), (current_time() - begin_time)))
 
     return context

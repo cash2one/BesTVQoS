@@ -9,7 +9,7 @@ from django.shortcuts import render_to_response
 from common.views import write_xls, write_remarks_to_xls, \
     get_report_filter_param_values, HtmlTable
 from common.date_time_tool import current_time
-from tplay.fbuffer_views import VIEW_TYPES
+from tplay.views import VIEW_TYPES
 
 import sys
   

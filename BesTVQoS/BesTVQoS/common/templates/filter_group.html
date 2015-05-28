@@ -36,7 +36,7 @@ function get_device_type(platform) {
     $.ajax({
         type: "GET",
         dataType: "json",
-        url: "get_device_type",
+        url: "{% url "tplay.views.get_device_type" %}",
         data: { 
             'service_type': service_type,
             'begin_date': begin_date,
@@ -65,7 +65,7 @@ function get_version(device_type) {
     $.ajax({
         type: "GET",
         dataType: "json",
-        url: "get_version",
+        url: "{% url "tplay.views.get_version" %}",
         data: { 
             'service_type': service_type,
             'device_type': device_type,
@@ -74,9 +74,9 @@ function get_version(device_type) {
         },
         success: function (data) {
             $("#version").empty()
-            versions = data["versions"];
+            var versions = data["versions"];
 
-            for(i=0;i<versions.length;i++)
+            for(var i=0; i<versions.length; i++)
             {
                 $("#version").append("<option value='"+versions[i]+"'>"+versions[i]+"</option>");
             }

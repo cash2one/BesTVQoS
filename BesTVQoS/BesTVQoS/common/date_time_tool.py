@@ -54,12 +54,12 @@ def get_day_of_day(n=0):
         return date.today()+timedelta(days=n)
 
 def get_days_region(begin_date, end_date):
-    tmp_begin_date=datetime.strptime(begin_date, '%Y-%m-%d')
-    tmp_end_date=datetime.strptime(end_date, '%Y-%m-%d')
-    days_str_list=[]
+    tmp_begin_date = datetime.strptime(begin_date, '%Y-%m-%d')
+    tmp_end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    days_str_list = []
     for i in range((tmp_end_date - tmp_begin_date).days + 1):
-        day=tmp_begin_date+timedelta(days=i)
-        days_str_list.append("%s"%day.strftime('%Y-%m-%d'))
+        datum = tmp_begin_date + timedelta(days=i)
+        days_str_list.append("{0}".format(datum.strftime('%Y-%m-%d')))
 
     return days_str_list
 

@@ -19,64 +19,63 @@
 						<li>
 							<div class="header">
 								<span class="label" style="background-image: url(images/messages.png);">
-								     <a href="/show_playing_daily" target="main" style="color: #FFFFFF">观看数</a>
+								     <a href="{% url "tplay.views.show_playing_daily" %}" target="main" style="color: #FFFFFF">观看数</a>
 								</span>
 								<span class="arrow up"></span>
 							</div>
 							<ul class="menu">
-								<li><a href="/show_playing_daily" target="main">单日统计</a></li>
-								<li><a href="/show_playing_trend" target="main">趋势</a></li>	
+								<li><a href="{% url "tplay.views.show_playing_daily" %}" target="main">单日统计</a></li>
+								<li><a href="{% url "tplay.views.show_playing_trend" %}" target="main">趋势</a></li>
 							</ul>
 						</li>
 						<li>
 							<div class="header">
 								<span class="label" style="background-image: url(images/user.png);">
-								    <a href="/show_play_time" style="color: #FFFFFF" target="main">播放时长</a>
+								    <a href="{% url "tplay.views.show_play_time" %}" style="color: #FFFFFF" target="main">播放时长</a>
 								</span>
 								<span class="arrow up"></span>
 							</div>
 							<ul class="menu">
-								<li><a href="/show_play_time" target="main">播放时长</a></li>
+								<li><a href="{% url "tplay.views.show_play_time" %}" target="main">播放时长</a></li>
 							</ul>
 						</li>
 						<li>
 							<div class="header">
 								<span class="label" style="background-image: url(images/pc.png);">
-								   <a href="/show_fbuffer_sucratio" style="color: #FFFFFF" target="main">首次缓冲</a>
+								   <a href="{% url "tplay.views.show_fbuffer_sucratio" %}" style="color: #FFFFFF" target="main">首次缓冲</a>
 								</span>
 								<span class="arrow down"></span>
 							</div>
 							<ul class="menu" style="display:none">
-								<li><a href="/show_fbuffer_sucratio" target="main">首次缓冲成功率</a></li>
-                                <li><a href="{% url "tplay.views.show_fbuffer_sucratio" %}" target="main">首次缓冲成功率(新)</a></li>
-                                <li><a href="/show_fbuffer_time" target="main">首次缓冲时长</a></li>
+								<li><a href="{% url "tplay.views.show_fbuffer_sucratio" %}" target="main">首次缓冲成功率</a></li>
+                                <li><a href="{% url "tplay.views.show_fbuffer_time" %}" target="main">首次缓冲时长</a></li>
 							</ul>
 						</li>
 						<li>
 							<div class="header">
 								<span class="label" style="background-image: url(images/search.png);">
-								    <a href="/show_fluency" style="color: #FFFFFF" target="main">流畅度</a>
+								    <a href="{% url "tplay.views.show_fluency" %}" style="color: #FFFFFF" target="main">流畅度</a>
 								</span>
 								<span class="arrow down"></span>
 							</div>
 							<ul class="menu" style="display:none">
-								<li><a href="/show_fluency" target="main">一次不卡比例</a></li>
-								<li><a href="/show_fluency_pratio" target="main">卡用户卡时间占比</a></li>
-								<li><a href="/show_fluency_allpratio" target="main">所有用户卡时间占比</a></li>
-					            <li><a href="/show_fluency_avgcount" target="main">卡顿播放平均卡次数</a></li>
+								<li><a href="{% url "tplay.views.show_fluency" %}" target="main">一次不卡比例</a></li>
+								<li><a href="{% url "tplay.views.show_fluency_pratio" %}" target="main">卡用户卡时间占比</a></li>
+								<li><a href="{% url "tplay.views.show_fluency_allpratio" %}" target="main">所有用户卡时间占比</a></li>
+					            <li><a href="{% url "tplay.views.show_fluency_avgcount" %}" target="main">卡顿播放平均卡次数</a></li>
 							</ul>
 						</li>
 						<li>
 							<div class="header">
 								<span class="label" style="background-image: url(images/search.png);">
-								    <a href="/show_3sratio" style="color: #FFFFFF" target="main">Bestv现有指标</a>
+								    <a href="{% url "tplay.views.show_3sratio" %}" style="color: #FFFFFF" target="main">Bestv现有指标</a>
 								</span>
 								<span class="arrow down"></span>
 							</div>
 							<ul class="menu" style="display:none">
-								<li><a href="/show_3sratio" target="main">3秒起播占比</a></li>	
-								<li><a href="/show_avg_pcount" target="main">每小时播放卡顿平均次数</a></li>
-                                <li><a href="/show_avg_ptime" target="main">每小时播放卡顿平均时长</a></li>	
+								<li><a href="{% url "tplay.views.show_3sratio" %}" target="main">3秒起播占比</a></li>
+								<li><a href="{% url "tplay.views.show_avg_pcount" %}" target="main">每小时播放卡顿平均次数</a></li>
+                                <li><a href="{% url "tplay.views.show_avg_ptime" %}" target="main">每小时播放卡顿平均时长</a></li>
 							</ul>
 						</li>
                         <li>
@@ -122,7 +121,7 @@
 			</ul>
 		</div>
 		<div id="content_div">
-			<iframe name="main" src="/show_playing_daily" width="100%" height="100%" frameborder="0" style="overflow-x:hidden"></iframe>
+			<iframe name="main" src="{% url "tplay.views.show_playing_daily" %}" width="100%" height="100%" frameborder="0" style="overflow-x:hidden"></iframe>
 		</div>
 	<div>
 </body>
