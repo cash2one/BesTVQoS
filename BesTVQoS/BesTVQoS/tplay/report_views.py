@@ -6,9 +6,9 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
-from common.views import write_xls, write_remarks_to_xls, \
-    get_report_filter_param_values, HtmlTable
+from common.views import write_xls, write_remarks_to_xls, HtmlTable
 from common.date_time_tool import current_time
+from tplay.functions import get_filter_param_values
 from tplay.views import VIEW_TYPES
 from tplay.models import BestvPlayinfo, BestvFbuffer, BestvFluency, \
     BestvPlaytime
@@ -459,3 +459,9 @@ def download_daily_reporter(request, dev=""):
         % (version, begin_date)
     xlwt_wb.save(response)
     return response
+
+def get_report_filter_param_values(request, table):
+    service_type, device_type, device_types, version, versions, begin_date, end_date = get_filter_param_values(request)
+    version2 = request.GET.get("version2", "").encode("utf-8")
+    versions2 = versions
+    return service_type, device_type, device_types, version, versions, version2, versions2, begin_date, end_date

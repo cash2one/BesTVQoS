@@ -28,6 +28,7 @@ class PlayInfo:
         self.service_type_filter = ""
         self.device_type_filter = ""
         self.date_filter = ""
+        self.min_rec_filter = ""
 
         self.cu = connection.cursor()
 
@@ -138,7 +139,7 @@ def get_play_profile_history(context, play_profile):
     else:
         filters = filters + play_profile.min_rec_filter
         sql_command = "select ServiceType, DeviceType, Records, Users, \
-            AverageTime, (Records/Users) %s" % (filters)
+            AverageTime, (Records/Users) %s" % filters
         sql_command += play_profile.profile_exclude
         sql_command += " order by Records desc"
         play_profile.cu.execute(sql_command)

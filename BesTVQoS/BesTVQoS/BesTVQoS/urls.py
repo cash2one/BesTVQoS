@@ -61,9 +61,6 @@ urlpatterns = patterns(
     # realtime data interface
     url(r'^update/realtime/base$', 'realtime.views.baseinfo'),
 
-    # flush redis cache
-    url(r'^flushdb2$', 'common.views.flushdb2'),
-
     url(r'^login/$',
         'django.contrib.auth.views.login',
         {
