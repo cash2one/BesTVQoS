@@ -172,7 +172,7 @@ def get_filter_param_values(request):
     if device_type not in device_types:
         device_type = device_types[0]
 
-    logger.info("get_filter_param_values1 %s %s, cost: %s" %
+    logger.info("get_filter_param_values device_types %s %s, cost: %s" %
                 (device_type, version, (current_time() - begin_time)))
 
     versions = []
@@ -188,7 +188,7 @@ def get_filter_param_values(request):
     if version not in versions:
         version = versions[0]
 
-    logger.info("get_filter_param_values %s %s, cost: %s" %
+    logger.info("get_filter_param_values versions %s %s, cost: %s" %
                 (device_type, version, (current_time() - begin_time)))
     
     return service_type, device_type, device_types, version, versions, begin_date, end_date

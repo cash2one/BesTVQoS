@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.http import HttpResponse
 from common.views import *
 from common.date_time_tool import *
 from tplay.functions import process_single_qos, get_device_types, get_versions, process_multi_plot
