@@ -36,10 +36,11 @@ class FilterParams:
         self.begin_date = begin_date
         self.end_date = end_date
 
+
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
 # is viewtype, lists contain each hour's data
 def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title):
-    item = {}
+    item = dict()
     item["index"] = item_idx
     item["title"] = title
     item["subtitle"] = subtitle
@@ -63,7 +64,7 @@ def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title)
 
     return item
 
-@trace_func
+# @trace_func
 def prepare_daily_data_of_single_qos(filter_params, days_region, view_types, qos_name, hour_flag, base_radix, need_total=False):
     q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
     q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
@@ -90,7 +91,7 @@ def prepare_daily_data_of_single_qos(filter_params, days_region, view_types, qos
 
     return data_by_day
 
-@trace_func
+# @trace_func
 def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_radix, need_total=False):
     q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
     q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
@@ -118,7 +119,7 @@ def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_ra
 
     return data_by_hour
 
-@trace_func
+# @trace_func
 def get_device_types(service_type, begin_date, end_date):
     q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
     q_conditions = q_conditions & Q(ServiceType=service_type)
@@ -133,7 +134,7 @@ def get_device_types(service_type, begin_date, end_date):
 
     return device_types
 
-@trace_func
+# @trace_func
 def get_versions(service_type, device_type, begin_date, end_date):
     q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
     q_conditions = q_conditions & Q(ServiceType=service_type)
@@ -151,6 +152,7 @@ def get_versions(service_type, device_type, begin_date, end_date):
     version_list.extend(sorted(versions))
 
     return version_list
+
 
 def get_filter_param_values(request):
     begin_time = current_time()
@@ -190,6 +192,7 @@ def get_filter_param_values(request):
                 (device_type, version, (current_time() - begin_time)))
     
     return service_type, device_type, device_types, version, versions, begin_date, end_date
+
 
 def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_types, hour_flag, base_radix=1):
     begin_time = time.time()

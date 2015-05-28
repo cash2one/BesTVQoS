@@ -14,43 +14,11 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     # Examples:
-    url(r'^$', 'common.views.home', name='home'),
-    url(r'^p/$', 'common.views.p_home'),
+    # url(r'^$', 'common.views.home', name='home'),
+    # url(r'^p/$', 'common.views.p_home'),
+    url(r'^$', 'common.views.p_home'),
     url(r'^m/$', 'common.views.m_home'),
     url(r'^navi/(?P<target_url>\w*)', 'common.views.navi'),
-    # url(r'^((?P<dev>m)/)?get_device_type$',
-    #     'tplay.views.get_device_type'),
-    # url(r'^((?P<dev>m)/)?get_version$',
-    #     'tplay.views.get_version'),
-
-    # url(r'^((?P<dev>m)/)?show_playing_daily$',
-    #     'tplay.views.show_playing_daily'),
-    # url(r'^((?P<dev>m)/)?show_playing_trend$',
-    #     'tplay.views.show_playing_trend'),
-
-    # url(r'^((?P<dev>m)/)?show_play_time$',
-    #     'tplay.fbuffer_views.show_play_time'),
-
-    # url(r'^((?P<dev>m)/)?show_fbuffer_sucratio$',
-    #     'tplay.fbuffer_views.show_fbuffer_sucratio'),
-    # url(r'^((?P<dev>m)/)?show_fbuffer_time$',
-    #     'tplay.fbuffer_views.show_fbuffer_time'),
-
-    # url(r'^((?P<dev>m)/)?show_fluency$',
-    #     'tplay.fbuffer_views.show_fluency'),
-    # url(r'^((?P<dev>m)/)?show_fluency_pratio$',
-    #     'tplay.fbuffer_views.show_fluency_pratio'),
-    # url(r'^((?P<dev>m)/)?show_fluency_allpratio$',
-    #     'tplay.fbuffer_views.show_fluency_allpratio'),
-    # url(r'^((?P<dev>m)/)?show_fluency_avgcount$',
-    #     'tplay.fbuffer_views.show_fluency_avgcount'),
-    #
-    # url(r'^((?P<dev>m)/)?show_3sratio$',
-    #     'tplay.fbuffer_views.show_3sratio'),
-    # url(r'^((?P<dev>m)/)?show_avg_pcount$',
-    #     'tplay.fbuffer_views.show_avg_pcount'),
-    # url(r'^((?P<dev>m)/)?show_avg_ptime$',
-    #     'tplay.fbuffer_views.show_avg_ptime'),
 
     url(r'^((?P<dev>m)/)?day_reporter$',
         'tplay.report_views.pre_day_reporter'),    

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-import xlwt as xlwt
-import MySQLdb
+import xlwt
 
+from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
@@ -10,9 +10,10 @@ from common.views import write_xls, write_remarks_to_xls, \
     get_report_filter_param_values, HtmlTable
 from common.date_time_tool import current_time
 from tplay.views import VIEW_TYPES
+from tplay.models import BestvPlayinfo, BestvFbuffer, BestvFluency, \
+    BestvPlaytime
 
 import sys
-  
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -20,10 +21,7 @@ ezxf=xlwt.easyxf
 
 logger = logging.getLogger("django.request")
 
-def get_records_data(begin_date, end_date, beta_ver, master_ver):
-    mysql_db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
-    cursor = mysql_db.cursor()
-
+def get_records_data(view_types, begin_date, end_date, service_type, beta_ver, master_ver):
     qos_data = []
     vers = []
     if len(beta_ver)>0:
@@ -31,32 +29,34 @@ def get_records_data(begin_date, end_date, beta_ver, master_ver):
     if len(master_ver)>0:
         vers.append(master_ver)
 
-    view_type = [1, 2, 3, 4] #(1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")
-    for ver in vers:
+    for ver in vers:        
+        Q_conditions = Q(ServiceType=service_type) & Q(DeviceType=ver)
+        if service_type == "B2C":
+            Q_conditions = Q_conditions & Q(ISP='all') & Q(Area='all')
+        Q_conditions = Q_conditions & Q(ViewType__in=[view_type[0] for view_type in view_types]) 
+        Q_conditions = Q_conditions & \
+            Q(Date__gte=begin_date) & Q(Date__lte=end_date)        
+        Q_conditions = Q_conditions & Q(Hour=24)
+
+        begin_time = current_time()
+        playinfos = BestvPlayinfo.objects.filter(Q_conditions)
+        view_type_data = {}
+        for (view, _) in view_types:
+            view_type_data[view] = 0
+        for playinfo in playinfos:
+            view_type_data[playinfo.ViewType] += playinfo.Records
+
         temp = []
         temp.append("%s"%(ver))
-        total = 0
-        for view in view_type:
-            sql = "SELECT Records FROM playinfo WHERE DeviceType='%s' and \
-                Date >= '%s' and Date <= '%s' and Hour=24 and ViewType=%d" % (
-                    ver, begin_date, end_date, view)
-            cursor.execute(sql)
-            results = cursor.fetchall()
-            record_sum = 0
-            for row in results:
-                record_sum += row[0]
-            temp.append(record_sum)
-            total += record_sum
-        temp.append(total)
+        for (view, _) in view_types:
+            temp.append(view_type_data[view])
+        temp.append(sum(view_type_data))
         qos_data.append(temp)
+        logger.info("execute sql: ver: %s, get records, cost: %s" % (ver, (current_time() - begin_time)))
 
-    mysql_db.close()
     return qos_data
 
-def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
-    mysql_db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
-    cursor = mysql_db.cursor()
-
+def get_single_qos_data2(view_types, begin_date, end_date, service_type, beta_ver, master_ver):
     qos_data = []
     vers = []
     if len(beta_ver)>0:
@@ -64,42 +64,46 @@ def get_single_qos_data2(begin_date, end_date, beta_ver, master_ver):
     if len(master_ver)>0:
         vers.append(master_ver)
     
-    single_qos = ['fbuffer', 'fluency', 'fluency']
+    single_qos = [BestvFbuffer, BestvFluency, BestvFluency]
     qos_name = ['SucRatio', 'Fluency', 'PRatio']
     qos_desc = [u'首次缓冲成功率', u'一次不卡比例', u'卡用户卡时间比']
-    view_type = [1, 2, 3, 4]  #(1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")
     for index, qos in enumerate(qos_name):
         for ver in vers:
             temp = []
             temp.append("%s-%s"%(qos_desc[index], ver))
-            for view in view_type:
-                begin_time = current_time()                
-                qos_sum = 0
-                count = 0
-                sql = "SELECT %s FROM %s WHERE DeviceType='%s' and Date >= '%s' \
-                    and Date <= '%s' and Hour=24 and ViewType=%d" % (
-                    qos, single_qos[index], ver, begin_date, end_date, view)
-                cursor.execute(sql)
-                results = cursor.fetchall()
-                for row in results:
-                    qos_sum += row[0]
-                    count += 1
-                avg = 0
-                if count > 0:
-                    avg = qos_sum/count
-                temp.append(float("%.3f"%(avg)))
-                logger.info("execute sql:  %s, cost: %s" % (sql, 
-                    (current_time() - begin_time)))
-            qos_data.append(temp)
 
-    mysql_db.close()
+            Q_conditions = Q(ServiceType=service_type) & Q(DeviceType=ver)
+            if service_type == "B2C":
+                Q_conditions = Q_conditions & Q(ISP='all') & Q(Area='all')
+            Q_conditions = Q_conditions & Q(ViewType__in=[view_type[0] for view_type in view_types]) 
+            Q_conditions = Q_conditions & \
+                Q(Date__gte=begin_date) & Q(Date__lte=end_date)            
+            Q_conditions = Q_conditions & Q(Hour=24)
+
+            begin_time = current_time()      
+            items = single_qos[index].objects.filter(Q_conditions)
+            view_type_data = {}
+            for (view, _) in view_types:
+                view_type_data[view] = []
+            for item in items:
+                qos_value = getattr(item,qos)
+                if qos_value:
+                    view_type_data[item.ViewType].append(qos_value)
+            for (view, _) in view_types:
+                if view_type_data[view]:
+                    temp.append(float("%.3f"%(sum(view_type_data[view])/len(view_type_data[view]))))
+                else:
+                    temp.append(0)
+                logger.info("qos count: ver: %s, get %s, count: %s" % (ver, qos, len(view_type_data[view])))
+            qos_data.append(temp)
+            logger.info("execute sql: ver: %s, get %s, cost: %s" % (ver, qos, 
+                    (current_time() - begin_time)))
+
     return qos_data
 
 # p25, 50, 75, 90, 95, avg
-def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master_ver, p95_exception_value, base_radis=1):
-    mysql_db = MySQLdb.connect('localhost', 'root', 'funshion', 'BesTVQoS')
-    cursor = mysql_db.cursor()
-
+def get_multi_qos_data(table, view_types, begin_date, end_date, 
+    service_type, beta_ver, master_ver, p95_exception_value, base_radis=1):
     qos_data = []
     vers = []
     if len(beta_ver)>0:
@@ -112,37 +116,44 @@ def get_multi_qos_data(table, view_types, begin_date, end_date, beta_ver, master
             begin_time = current_time()
             temp = [0 for i in range(7)]
             temp[0] = u"%s-%s" % (ver, second)
-            sql = "SELECT P25, P50, P75, P90, P95, AverageTime FROM %s WHERE \
-                DeviceType='%s' and Date >= '%s' and Date <= '%s' \
-                and Hour=24 and ViewType=%d" % (
-                table, ver, begin_date, end_date, view)
-            cursor.execute(sql)
-            results = cursor.fetchall()
-            count = 0
-            for row in results:
-                if row[4] < p95_exception_value:
-                    continue
-                for i in range(6):
-                    temp[i+1] += row[i]
-                count += 1
 
+            Q_conditions = Q(ServiceType=service_type) & Q(DeviceType=ver)
+            if service_type == "B2C":
+                Q_conditions = Q_conditions & Q(ISP='all') & Q(Area='all')
+            Q_conditions = Q_conditions & Q(ViewType=view) 
+            Q_conditions = Q_conditions & \
+                Q(Date__gte=begin_date) & Q(Date__lte=end_date)            
+            Q_conditions = Q_conditions & Q(Hour=24)
+
+            count = 0
+            items = table.objects.filter(Q_conditions)
+            for item in items:
+                if item.P95 < p95_exception_value:
+                    continue
+                temp[1]+=item.P25
+                temp[2]+=item.P50
+                temp[3]+=item.P75
+                temp[4]+=item.P90
+                temp[5]+=item.P95
+                temp[6]+=item.AverageTime
+                count += 1
             if count > 0:
                 for i in range(6):
                     temp[i+1] = temp[i+1]/count/base_radis
-            logger.info("execute sql:  %s, cost: %s" % (sql, 
-                    (current_time() - begin_time)))
 
             qos_data.append(temp)
-    mysql_db.close()
+            logger.info("execute sql: ver: %s, pnvalues, cost: %s" % (ver, 
+                    (current_time() - begin_time)))
+
     return qos_data
 
-def get_playtm_data(begin_date, end_date, beta_ver, master_ver):
-    return get_multi_qos_data("playtime", VIEW_TYPES[1:4], begin_date, 
-        end_date, beta_ver, master_ver, 1800, 60)
+def get_playtm_data(begin_date, end_date, service_type, beta_ver, master_ver):
+    return get_multi_qos_data(BestvPlaytime, VIEW_TYPES[1:4], 
+        begin_date, end_date, service_type, beta_ver, master_ver, 1800, 60)
 
-def get_fbuffer_data(begin_date, end_date, beta_ver, master_ver):
-    return get_multi_qos_data("fbuffer", VIEW_TYPES[1:4], begin_date, 
-        end_date, beta_ver, master_ver, 3)
+def get_fbuffer_data(begin_date, end_date, service_type, beta_ver, master_ver):
+    return get_multi_qos_data(BestvFbuffer, VIEW_TYPES[1:4],
+        begin_date, end_date, service_type, beta_ver, master_ver, 3)
 
 def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
     desc = [
@@ -153,7 +164,7 @@ def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
         desc.append([u'%s -- %s'%('对比版本', master_ver)])
     return desc
 
-def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
+def generate_report(wb, begin_date, end_date, service_type, beta_ver, master_ver=""):
     begin_time = current_time()
     book = wb
     sheet = book.add_sheet("version-report")
@@ -181,7 +192,8 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     #
     records_headings = [u'记录数/版本', u'点播', u'回看', u'直播', u'连看', u'总计']
     # prepare data
-    records_data = get_records_data(begin_date, end_date, beta_ver, master_ver)
+    records_data = get_records_data(VIEW_TYPES[1:5], begin_date, end_date, service_type, \
+        beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, records_headings, records_data, 
         heading_xf, data_xf)
     rowx += 2
@@ -190,8 +202,8 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 2: single Qos
     #     
     single_qos_headings = [u'单指标QoS/版本', u'点播', u'回看', u'直播', u'连看']
-    single_qos_data = get_single_qos_data2(begin_date, end_date, beta_ver, 
-        master_ver)
+    single_qos_data = get_single_qos_data2(VIEW_TYPES[1:5], begin_date, end_date, service_type, 
+        beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, single_qos_headings, single_qos_data, 
         heading_xf, data_xf)
     rowx += 2
@@ -201,7 +213,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 3: playtm
     #    
     playtm_headings = [u'播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
-    playtm_data = get_playtm_data(begin_date, end_date, beta_ver, master_ver)
+    playtm_data = get_playtm_data(begin_date, end_date, service_type, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, playtm_headings, playtm_data, 
         heading_xf, data_xf)
     rowx += 2
@@ -211,7 +223,7 @@ def generate_report(wb, begin_date, end_date, beta_ver, master_ver=""):
     # step 4: fbuffer
     #    
     fbuffer_headings = [u'首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', u'均值']
-    fbuffer_data = get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
+    fbuffer_data = get_fbuffer_data(begin_date, end_date, service_type, beta_ver, master_ver)
     rowx = write_xls(book, sheet, rowx, fbuffer_headings, fbuffer_data, 
         heading_xf, data_xf)
     rowx += 2
@@ -240,7 +252,7 @@ def pre_day_reporter(request, dev=""):
         = get_report_filter_param_values(request, "playinfo")
     context = {}
     context['default_service_type'] = service_type
-    context['service_types'] = ["All", "B2B", "B2C"]
+    context['service_types'] = ["B2B", "B2C"]
     context['default_device_type'] = device_type
     context['device_types'] = device_types
     context['default_version'] = version
@@ -253,8 +265,8 @@ def pre_day_reporter(request, dev=""):
     response = render_to_response('show_daily_report.html', context)
     return response
 
-def get_records_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
-    datas = get_records_data(begin_date, end_date, beta_ver, master_ver)
+def get_records_data_for_table(urls_suffix, begin_date, end_date, service_type, beta_ver, master_ver):
+    datas = get_records_data(VIEW_TYPES[1:5], begin_date, end_date, service_type, beta_ver, master_ver)
     tables = []
     for i, data in enumerate(datas):
         item = {}
@@ -264,8 +276,8 @@ def get_records_data_for_table(urls_suffix, begin_date, end_date, beta_ver, mast
         tables.append(item)
     return tables
 
-def get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
-    datas = get_single_qos_data2(begin_date, end_date, beta_ver, master_ver)
+def get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, service_type, beta_ver, master_ver):
+    datas = get_single_qos_data2(VIEW_TYPES[1:5], begin_date, end_date, service_type, beta_ver, master_ver)
     tables = []
     urls_prefix = ['show_fbuffer_sucratio?', 'show_fluency?', 
         'show_fluency_pratio?']
@@ -283,8 +295,8 @@ def get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, beta_ver, 
         tables.append(item)
     return tables
 
-def get_playtm_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
-    datas = get_playtm_data(begin_date, end_date, beta_ver, master_ver)
+def get_playtm_data_for_table(urls_suffix, begin_date, end_date, service_type, beta_ver, master_ver):
+    datas = get_playtm_data(begin_date, end_date, service_type, beta_ver, master_ver)
     tables = []
     for i, data in enumerate(datas):
         if len(datas)==6:
@@ -298,8 +310,8 @@ def get_playtm_data_for_table(urls_suffix, begin_date, end_date, beta_ver, maste
         tables.append(item)
     return tables
 
-def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, beta_ver, master_ver):
-    datas = get_fbuffer_data(begin_date, end_date, beta_ver, master_ver)
+def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, service_type, beta_ver, master_ver):
+    datas = get_fbuffer_data(begin_date, end_date, service_type, beta_ver, master_ver)
     tables = []
     for i, data in enumerate(datas):
         if len(datas)==6:
@@ -313,7 +325,7 @@ def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, beta_ver, mast
         tables.append(item)
     return tables
 
-def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_ver=""):
+def get_daily_report_tables(urls_suffix, begin_date, end_date, service_type, beta_ver, master_ver=""):
     tables = []
     # 0. date-ver table
     table = HtmlTable()
@@ -335,7 +347,7 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
     table.mtitle = "日期版本信息"
     table.mheader = ['记录数/版本', '点播', '回看', '直播', '连看', '总计'] 
     table.msub = get_records_data_for_table(urls_suffix, begin_date, 
-        end_date, beta_ver, master_ver)
+        end_date, service_type, beta_ver, master_ver)
     tables.append(table)
 
     # 2. single Qos table
@@ -343,7 +355,7 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
     table.mtitle = "SingleQos信息"
     table.mheader = ['单指标QoS/版本', '点播', '回看', '直播', '连看']
     table.msub = get_single_qos_data2_for_table(urls_suffix, 
-        begin_date, end_date, beta_ver, master_ver)
+        begin_date, end_date, service_type, beta_ver, master_ver)
     tables.append(table)
 
     # 3. playtm table
@@ -351,7 +363,7 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
     table.mtitle = "playtm信息"
     table.mheader = ['播放时长(分钟)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     table.msub = get_playtm_data_for_table(urls_suffix, 
-        begin_date, end_date, beta_ver, master_ver)
+        begin_date, end_date, service_type, beta_ver, master_ver)
     tables.append(table)
 
     # 4. fbuffer table
@@ -359,7 +371,7 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, beta_ver, master_
     table.mtitle = "fbuffer信息"
     table.mheader = ['首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     table.msub = get_fbuffer_data_for_table(urls_suffix, 
-        begin_date, end_date, beta_ver, master_ver)
+        begin_date, end_date, service_type, beta_ver, master_ver)
     tables.append(table)
 
     # 5. remarks table
@@ -406,7 +418,7 @@ def display_daily_reporter(request, dev=""):
         = get_report_filter_param_values(request, "playinfo")
     context = {}
     context['default_service_type'] = service_type
-    context['service_types'] = ["All", "B2B", "B2C"]
+    context['service_types'] = ["B2B", "B2C"]
     context['default_device_type'] = device_type
     context['device_types'] = device_types
     context['default_version'] = version
@@ -423,7 +435,7 @@ def display_daily_reporter(request, dev=""):
     (version, version2)=get_version_version2(device_type, version, version2)
 
     tables = get_daily_report_tables(urls_suffix, begin_date, end_date, 
-        version, version2)
+        service_type, version, version2)
     context['has_table'] = True
     context['tables'] = tables
 
@@ -440,35 +452,10 @@ def download_daily_reporter(request, dev=""):
     (version, version2)=get_version_version2(device_type, version, version2)
 
     xlwt_wb = xlwt.Workbook()
-    generate_report(xlwt_wb, begin_date, end_date, version, version2)
+    generate_report(xlwt_wb, begin_date, end_date, service_type, version, version2)
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=%s_report_%s.xls' \
         % (version, begin_date)
-    xlwt_wb.save(response)
-    return response
-
-@login_required
-def day_reporter(request, dev=""):
-    xlwt_wb = xlwt.Workbook()
-    generate_report(xlwt_wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
-        "BesTV_Lite_A_2.6.4.2")
-
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=day_report_%s.xls' \
-        % ('2015-04-22')
-    xlwt_wb.save(response)
-    return response
-
-
-@login_required
-def week_reporter(request, dev=""):
-    xlwt_wb = xlwt.Workbook()
-    generate_report(xlwt_wb, "2015-04-23", "2015-04-23", "BesTV_Lite_A_2.6.4.9", 
-        "BesTV_Lite_A_2.6.4.2")
-
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=week_report_%s.xls'\
-        % ('2015-04-22')
     xlwt_wb.save(response)
     return response

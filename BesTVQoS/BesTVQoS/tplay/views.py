@@ -98,7 +98,7 @@ def get_play_info_today(context, playinfo):
         playinfo.cu.execute(sql_command)
 
         for item in playinfo.cu.fetchall():
-            sub = []
+            sub = list()
             sub.append(item[0])
             sub.append(item[1])
             sub.append(item[2])
@@ -144,7 +144,7 @@ def get_play_profile_history(context, play_profile):
         play_profile.cu.execute(sql_command)
 
         for item in play_profile.cu.fetchall():
-            sub = []
+            sub = list()
             sub.append(item[0])
             sub.append(item[1])
             sub.append(item[2])
