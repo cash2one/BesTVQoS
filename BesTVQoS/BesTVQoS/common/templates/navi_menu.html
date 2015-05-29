@@ -19,13 +19,12 @@
 						<li>
 							<div class="header">
 								<span class="label" style="background-image: url(images/messages.png);">
-								     <a href="{% url "tplay.views.show_playing_daily" %}" target="main" style="color: #FFFFFF">观看数</a>
+								     <a href="{% url "tplay.views.show_playing_stat" %}" target="main" style="color: #FFFFFF">观看数</a>
 								</span>
 								<span class="arrow up"></span>
 							</div>
 							<ul class="menu">
-								<li><a href="{% url "tplay.views.show_playing_daily" %}" target="main">单日统计</a></li>
-                                <li><a href="{% url "tplay.views.show_playing_stat" %}" target="main">单日统计1</a></li>
+                                <li><a href="{% url "tplay.views.show_playing_stat" %}" target="main">单日统计</a></li>
 								<li><a href="{% url "tplay.views.show_playing_trend" %}" target="main">趋势</a></li>
 							</ul>
 						</li>
@@ -122,7 +121,7 @@
 			</ul>
 		</div>
 		<div id="content_div">
-			<iframe name="main" src="{% url "tplay.views.show_playing_daily" %}" width="100%" height="100%" frameborder="0" style="overflow-x:hidden"></iframe>
+			<iframe name="main" src="{% url "tplay.views.show_playing_stat" %}" width="100%" height="100%" frameborder="0" style="overflow-x:hidden"></iframe>
 		</div>
 	<div>
 </body>
