@@ -249,6 +249,7 @@ def get_playing_stat_history(service_type, date_str, min_rec):
 
 @login_required
 def show_playing_stat(request):
+    begin_time = current_time()
     service_type = request.GET.get('service_type', 'All')
     date_str = request.GET.get('date', todaystr())
     min_rec = request.GET.get('min_rec', 0)
@@ -265,10 +266,14 @@ def show_playing_stat(request):
     context['default_service_type'] = service_type
     context['service_types'] = SERVICE_TYPES
 
+    cost_time = current_time() - begin_time
+    logger.debug('show_playing_stat {0} cost {1}s'.format(date_str, cost_time))
+
     return render_to_response('show_playing_daily.html', context)
 
 @login_required
 def show_playing_daily(request):
+    begin_time = current_time()
     context = {}
 
     play_profile = PlayInfo(request)
@@ -284,6 +289,9 @@ def show_playing_daily(request):
     context['default_min_rec'] = play_profile.min_rec
     context['default_service_type'] = play_profile.service_type
     context['service_types'] = SERVICE_TYPES
+
+    cost_time = current_time() - begin_time
+    logger.debug('show_playing_daily {0} cost {1}s'.format(play_profile.end_date, cost_time))
 
     return render_to_response('show_playing_daily.html', context)
 
