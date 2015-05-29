@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.http import HttpResponse
+from django.db.models import Sum, Q
 from common.views import *
 from common.date_time_tool import *
 from tplay.functions import process_single_qos, get_device_types, get_versions, process_multi_plot
@@ -119,6 +120,7 @@ def get_play_profile_history(context, play_profile):
     filters = "from playprofile where %s" % (play_profile.common_filter)
     sql_command = "select sum(Records), sum(Users) %s" % (filters)
     sql_command += play_profile.profile_exclude
+    logger.debug('get history records_total SQL: {0}'.format(sql_command))
     play_profile.cu.execute(sql_command)
 
     table.mtitle = "%s 用户播放统计信息" % play_profile.end_date.encode('utf-8')
@@ -143,6 +145,7 @@ def get_play_profile_history(context, play_profile):
             AverageTime, (Records/Users) %s" % filters
         sql_command += play_profile.profile_exclude
         sql_command += " order by Records desc"
+        logger.debug('get history datas SQL: {0}'.format(sql_command))
         play_profile.cu.execute(sql_command)
 
         for item in play_profile.cu.fetchall():
@@ -163,6 +166,106 @@ def get_play_profile_history(context, play_profile):
 
     return table
 
+
+def get_playing_stat_today(service_type, date_str, min_rec):
+    table = HtmlTable()
+    table.mtitle = "今日用户播放统计信息（每小时更新）"
+    table.mheader = ["服务类型", "设备类型", "播放数", '播放百分比%']
+    table.msub = []
+    subs = []
+
+    q_conditions = Q(Date=date_str) & Q(DeviceType__contains='.')
+    if service_type != 'All':
+        q_conditions = q_conditions & Q(ServiceType=service_type)
+        if service_type == 'B2C':
+            q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+
+    records_total = BestvPlayinfo.objects.filter(q_conditions).aggregate(Sum('Records')).get('Records__sum')
+
+    if records_total:
+        q_conditions = q_conditions & Q(Records__gte=min_rec)
+        results = BestvPlayinfo.objects.filter(q_conditions)\
+            .values('ServiceType', 'DeviceType')\
+            .annotate(Sum('Records')).order_by('-Records__sum')
+
+        for row in results:
+            sub = list()
+            sub.append(row['ServiceType'])
+            sub.append(row['DeviceType'])
+            sub.append(row['Records__sum'])
+            sub.append(round(100.0 * float(row['Records__sum']) / records_total, 2))
+            subs.append(sub)
+            table.msub.append(sub)
+    else:
+        logger.error("Unexpected Value: records_total: {0}".format(records_total))
+
+    return table
+
+
+def get_playing_stat_history(service_type, date_str, min_rec):
+    table = HtmlTable()
+    table.mtitle = "{0} 用户播放统计信息".format(date_str)
+    table.mheader = ['服务类型', '设备类型', '播放数', '播放百分比%',
+                     '用户数', '用户百分比%', '人均播放时间', '人均播放次数']
+    table.msub = []
+    subs = []
+
+    q_conditions = Q(Date=date_str) & Q(DeviceType__contains='.')
+    if service_type != 'All':
+        q_conditions = q_conditions & Q(ServiceType=service_type)
+        if service_type == 'B2C':
+            q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+
+    totals = BestvPlayprofile.objects.filter(q_conditions).aggregate(Sum('Records'), Sum('Users'))
+    records_total = totals.get('Records__sum')
+    users_total = totals.get('Users__sum')
+
+    if records_total and users_total:
+        q_conditions = q_conditions & Q(Records__gte=min_rec)
+        results = BestvPlayprofile.objects.filter(q_conditions)\
+            .values('ServiceType', 'DeviceType', 'Records', 'Users', 'AverageTime')\
+            .order_by('-Records')
+
+        for row in results:
+            sub = list()
+            sub.append(row['ServiceType'])
+            sub.append(row['DeviceType'])
+            sub.append(row['Records'])
+            sub.append(round(100.0 * float(row['Records']) / records_total, 2))
+            sub.append(row['Users'])
+            sub.append(round(100.0 * float(row['Users']) / users_total, 2))
+            sub.append(row['AverageTime'])
+            if row['Users'] > 0:
+                sub.append(row['Records'] / row['Users'])
+            else:
+                sub.append(0)
+            subs.append(sub)
+            table.msub.append(sub)
+    else:
+        logger.error("Unexpected Value: records_total: {0}, users_total: {1}".format(records_total, users_total))
+
+    return table
+
+
+@login_required
+def show_playing_stat(request):
+    service_type = request.GET.get('service_type', 'All')
+    date_str = request.GET.get('date', todaystr())
+    min_rec = request.GET.get('min_rec', 0)
+
+    if date_str == todaystr():
+        table = get_playing_stat_today(service_type, date_str, min_rec)
+    else:
+        table = get_playing_stat_history(service_type, date_str, min_rec)
+
+    context = dict()
+    context['table'] = table
+    context['default_date'] = date_str
+    context['default_min_rec'] = min_rec
+    context['default_service_type'] = service_type
+    context['service_types'] = SERVICE_TYPES
+
+    return render_to_response('show_playing_daily.html', context)
 
 @login_required
 def show_playing_daily(request):
