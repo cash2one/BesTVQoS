@@ -61,6 +61,17 @@ urlpatterns = patterns(
     # realtime data interface
     url(r'^update/realtime/base$', 'realtime.views.baseinfo'),
 
+    # server log
+    url(r'^update/log/respcode$', 'loganalyze.update_views.respcode'),
+    url(r'^update/log/urlinfo$', 'loganalyze.update_views.urlinfo'),
+    url(r'^update/log/respdelay$', 'loganalyze.update_views.respdelay'),
+    url(r'^update/log/reqdelay$', 'loganalyze.update_views.reqdelay'),
+
+    # cdn Monitor
+    url(r'^update/mon/mserror$', 'cdnMon.update_views.ms_error_info'),
+    url(r'^update/mon/ts_delay$', 'cdnMon.update_views.ts_delay'),
+    url(r'^update/mon/province_geo$', 'cdnMon.update_views.province_geo'),
+
     url(r'^login/$',
         'django.contrib.auth.views.login',
         {
