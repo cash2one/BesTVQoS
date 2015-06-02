@@ -271,7 +271,7 @@ def get_records_data_for_table(urls_suffix, begin_date, end_date, service_type, 
     for i, data in enumerate(datas):
         item = {}
         item['click'] = True
-        item['url'] = "show_playing_trend?%s" % (urls_suffix[i])
+        item['url'] = "tplay/show_playing_trend?%s" % (urls_suffix[i])
         item['data'] = data
         tables.append(item)
     return tables
@@ -290,7 +290,7 @@ def get_single_qos_data2_for_table(urls_suffix, begin_date, end_date, service_ty
             i = 0
         item = {}
         item['click'] = True
-        item['url'] = "%s%s" % (urls_prefix[j], urls_suffix[i])
+        item['url'] = "tplay/%s%s" % (urls_prefix[j], urls_suffix[i])
         item['data'] = data
         tables.append(item)
     return tables
@@ -305,7 +305,7 @@ def get_playtm_data_for_table(urls_suffix, begin_date, end_date, service_type, b
             i = 0
         item = {}
         item['click'] = True
-        item['url'] = "show_play_time?%s" % (urls_suffix[i])
+        item['url'] = "tplay/show_play_time?%s" % (urls_suffix[i])
         item['data'] = data
         tables.append(item)
     return tables
@@ -320,7 +320,7 @@ def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, service_type, 
             i = 0
         item = {}
         item['click'] = True
-        item['url'] = "show_fbuffer_time?%s" % (urls_suffix[i])
+        item['url'] = "tplay/show_fbuffer_time?%s" % (urls_suffix[i])
         item['data'] = data
         tables.append(item)
     return tables
