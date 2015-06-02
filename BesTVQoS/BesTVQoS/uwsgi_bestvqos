@@ -5,7 +5,7 @@
 # chkconfig: 2345 55 25
 # description: bestvqos
 #
-# processname: uwsgi-bestvqos
+# processname: uwsgi_bestvqos
 #
 
 
@@ -18,8 +18,8 @@ done
 
 
 
-NAME=uwsgi-bestvqos
-COMMAND=/usr/local/bin/uwsgi
+NAME=uwsgi_bestvqos
+COMMAND=/usr/bin/uwsgi
 CONFDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 CONFINI=uwsgi.ini
 PID=/var/run/${NAME}.pid
