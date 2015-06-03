@@ -7,7 +7,7 @@ import redis
 from django.http import HttpResponse
 from realtime.models import RealtimeBaseInfo
 
-logger = logging.getLogger("django.request")
+logger = logging.getLogger("django.update")
 
 # redis_host = '192.168.182.129'
 redis_host = 'localhost'

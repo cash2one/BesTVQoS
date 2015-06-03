@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.db import IntegrityError
 from tplay.models import *
 
-logger = logging.getLogger("django.request")
+logger = logging.getLogger("django.update")
 
 
 def playprofile(request):

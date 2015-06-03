@@ -9,7 +9,7 @@ sys.setdefaultencoding("utf-8")
 from django.http import HttpResponse
 # from django.db import IntegrityError
 
-logger = logging.getLogger("django.request")
+logger = logging.getLogger("django.update")
 
 
 def execute_insert(db, cursor, insert_sql, update_sql=""):

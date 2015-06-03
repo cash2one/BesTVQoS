@@ -6,12 +6,11 @@ import urllib2
 import sys
   
 reload(sys)
-sys.setdefaultencoding( "utf-8" )
+sys.setdefaultencoding("utf-8")
 
 from django.http import HttpResponse
-from django.db import IntegrityError
 
-logger = logging.getLogger("django.request")
+logger = logging.getLogger("django.update")
 
 def get_file_size(url):  
     """通过content-length头获取文件大小 
@@ -26,7 +25,8 @@ def get_file_size(url):
         print '%s %s' % (url, e)  
         return 0
     else:  
-        return dict(response.headers).get('content-length', 0)  
+        return dict(response.headers).get('content-length', 0)
+
 
 def ms_error_info(request):
     result = "ok"
@@ -51,7 +51,7 @@ def ms_error_info(request):
                     logger.debug("error insert: %s: %s" % (insert_sql, e))
                     db.rollback() 
         except ValueError, e:
-            result = "valueerror: %s" % e
+            result = "value error: %s" % e
         except Exception, e:
             result = "error: %s|%s" % (e, contents)
 

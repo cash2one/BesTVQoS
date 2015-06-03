@@ -192,7 +192,13 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': './debug.log',
+            'filename': './logs/debug.log',
+            'formatter': 'verbose'
+        },
+        'file_update': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './logs/updated.log',
             'formatter': 'verbose'
         },
         'console': {
@@ -204,6 +210,11 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.update': {
+            'handlers': ['file_update', 'console'],
             'level': 'DEBUG',
             'propagate': True,
         },
