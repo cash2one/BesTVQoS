@@ -132,7 +132,7 @@ def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_ra
 
 # @trace_func
 @time_func
-def get_device_types(service_type, begin_date, end_date):
+def get_device_types(service_type):
     q_conditions = Q(ServiceType=service_type)
     titles = Title.objects.filter(q_conditions).values('DeviceType').distinct()
     device_types = []
@@ -146,7 +146,7 @@ def get_device_types(service_type, begin_date, end_date):
 
 # @trace_func
 @time_func
-def get_versions(service_type, device_type, begin_date, end_date):
+def get_versions(service_type, device_type):
     q_conditions = Q(ServiceType=service_type) & Q(DeviceType=device_type)
 
     titles = Title.objects.filter(q_conditions).values('Version')
@@ -170,7 +170,7 @@ def get_filter_param_values(request):
     end_date = request.GET.get("end_date", filters_map["end"]).encode("utf-8")
     # logger.info("get_filter_values: %s - %s - %s" % (service_type, device_type, version))
 
-    device_types = get_device_types(service_type, begin_date, end_date)
+    device_types = get_device_types(service_type)
     if len(device_types) == 0:
         device_types = [""]
         device_type = ""
@@ -180,7 +180,7 @@ def get_filter_param_values(request):
 
     versions = []
     try:
-        versions = get_versions(service_type, device_type, begin_date, end_date)
+        versions = get_versions(service_type, device_type)
     except:
         logger.info("get_versions({0}, {1}, {2}, {3}) failed.".format(
             service_type, device_type, begin_date, end_date))

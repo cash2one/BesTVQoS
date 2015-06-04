@@ -232,9 +232,9 @@ def show_fbuffer_time(request):
 
 def get_device_type(request):
     service_type = request.GET.get('service_type')
-    begin_date = request.GET.get('begin_date')
-    end_date = request.GET.get('end_date')
-    device_types = get_device_types(service_type, begin_date, end_date)
+    # begin_date = request.GET.get('begin_date')
+    # end_date = request.GET.get('end_date')
+    device_types = get_device_types(service_type)
     resp_str = json.dumps({"device_types": device_types})
 
     return HttpResponse(resp_str, content_type="text/json")
@@ -243,9 +243,9 @@ def get_device_type(request):
 def get_version(request):
     service_type = request.GET.get('service_type')
     device_type = request.GET.get('device_type')
-    begin_date = request.GET.get('begin_date')
-    end_date = request.GET.get('end_date')
-    versions = get_versions(service_type, device_type, begin_date, end_date)
+    # begin_date = request.GET.get('begin_date')
+    # end_date = request.GET.get('end_date')
+    versions = get_versions(service_type, device_type)
     resp_str = json.dumps({"versions": versions})
 
     return HttpResponse(resp_str, content_type="text/json")
