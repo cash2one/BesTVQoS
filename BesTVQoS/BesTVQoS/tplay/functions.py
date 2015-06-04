@@ -130,8 +130,6 @@ def get_device_types(service_type, begin_date, end_date):
 
     device_types.extend(sorted(type_set, key=unicode.lower))
 
-    logger.debug('get_device_types({0}) return {1}'.format(service_type, device_types))
-
     return device_types
 
 # @trace_func
@@ -147,8 +145,6 @@ def get_versions(service_type, device_type, begin_date, end_date):
     version_list = ['All']
     version_list.extend(sorted(versions))
 
-    logger.debug('get_versions({0}, {1}) return {2}'.format(service_type, device_type, version_list))
-
     return version_list
 
 
@@ -160,7 +156,7 @@ def get_filter_param_values(request):
     version = request.GET.get("version", filters_map["vt"]).encode("utf-8")
     begin_date = request.GET.get("begin_date", filters_map["begin"]).encode("utf-8")
     end_date = request.GET.get("end_date", filters_map["end"]).encode("utf-8")
-    logger.info("get_filter_values: %s - %s - %s" % (service_type, device_type, version))
+    # logger.info("get_filter_values: %s - %s - %s" % (service_type, device_type, version))
 
     device_types = get_device_types(service_type, begin_date, end_date)
     if len(device_types) == 0:
