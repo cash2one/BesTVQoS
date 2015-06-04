@@ -140,7 +140,7 @@ def get_device_types(service_type):
     for title in titles:
         type_set.add(title['DeviceType'])
 
-    device_types.extend(sorted(type_set, key=unicode.lower))
+    device_types.extend(sorted(type_set))
 
     return device_types
 
@@ -240,7 +240,7 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
 
     except Exception, e:
         logger.info("query {0} {1} error: {2}".format(table.__name__, qos_name, e))
-        # raise
+        raise
 
     context = dict()
     context['default_service_type'] = service_type
