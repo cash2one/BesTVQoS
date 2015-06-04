@@ -13,9 +13,9 @@ HOUR_X_AXIS = range(24)
 
 def trace_func(func):
     def wrapper(*args, **kwargs):
-        print "before call {0}({1},{2})".format(func.__name__, args, kwargs)
+        logger.debug("before call {0}({1},{2})".format(func.__name__, args, kwargs))
         result = func(*args, **kwargs)
-        print "after call {0}({1},{2}) \nreturn={3}".format(func.__name__,args, kwargs, result)
+        logger.debug("after call {0}({1},{2}) \nreturn={3}".format(func.__name__,args, kwargs, result))
         return result
     return wrapper
 
@@ -64,7 +64,7 @@ def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title)
 
     return item
 
-@trace_func
+# @trace_func
 def prepare_daily_data_of_single_qos(filter_params, days_region, view_types, qos_name, hour_flag, base_radix, need_total=False):
     q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
     q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
@@ -91,7 +91,7 @@ def prepare_daily_data_of_single_qos(filter_params, days_region, view_types, qos
 
     return data_by_day
 
-@trace_func
+# @trace_func
 def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_radix, need_total=False):
     q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
     q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
@@ -261,7 +261,7 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
 # For multi Qos, such as pnvalue, display: multi plots of single view type
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
 
-@trace_func
+# @trace_func
 def prepare_pnvalue_hour_data(filter_params, view_types, pn_types, base_radix):
     q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
     q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
@@ -293,7 +293,7 @@ def prepare_pnvalue_hour_data(filter_params, view_types, pn_types, base_radix):
 
 # output: key-values: key: viewType, values:{"P25":[xxx], "P50":[xxx], ...}
 
-@trace_func
+# @trace_func
 def prepare_pnvalue_daily_data(filter_params, days_region, view_types, pn_types, base_radix):
     q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
     q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
