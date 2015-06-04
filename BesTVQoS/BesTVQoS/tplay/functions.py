@@ -20,6 +20,17 @@ def trace_func(func):
     return wrapper
 
 
+def time_func(func):
+    def wrapper(*args, **kwargs):
+        begin_time = current_time()
+        result = func(*args, **kwargs)
+        cost_time = current_time() - begin_time
+        logger.debug("{0}({1},{2}) cost {3}s".format(func.__name__, args, kwargs, cost_time))
+        return result
+
+    return wrapper
+
+
 class NoDataError(Exception):
     def __init__(self, value):
         self.value = value
@@ -120,6 +131,7 @@ def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_ra
     return data_by_hour
 
 # @trace_func
+@time_func
 def get_device_types(service_type, begin_date, end_date):
     q_conditions = Q(ServiceType=service_type)
     titles = Title.objects.filter(q_conditions).values('DeviceType').distinct()
@@ -133,6 +145,7 @@ def get_device_types(service_type, begin_date, end_date):
     return device_types
 
 # @trace_func
+@time_func
 def get_versions(service_type, device_type, begin_date, end_date):
     q_conditions = Q(ServiceType=service_type) & Q(DeviceType=device_type)
 
@@ -149,7 +162,6 @@ def get_versions(service_type, device_type, begin_date, end_date):
 
 
 def get_filter_param_values(request):
-    begin_time = current_time()
     filters_map = get_default_values_from_cookie(request)
     service_type = request.GET.get("service_type", filters_map["st"]).encode("utf-8")
     device_type = request.GET.get("device_type", filters_map["dt"]).encode("utf-8")
@@ -166,9 +178,6 @@ def get_filter_param_values(request):
     if device_type not in device_types:
         device_type = device_types[0]
 
-    logger.info("get_filter_param_values device_types %s %s, cost: %s" %
-                (device_type, version, (current_time() - begin_time)))
-
     versions = []
     try:
         versions = get_versions(service_type, device_type, begin_date, end_date)
@@ -181,9 +190,6 @@ def get_filter_param_values(request):
         version = ""
     if version not in versions:
         version = versions[0]
-
-    logger.info("get_filter_param_values versions %s %s, cost: %s" %
-                (device_type, version, (current_time() - begin_time)))
     
     return service_type, device_type, device_types, version, versions, begin_date, end_date
 
@@ -233,7 +239,7 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
             items.append(item)
 
     except Exception, e:
-        logger.info("query {0} {1} error: {2}".format(str(table), qos_name, e))
+        logger.info("query {0} {1} error: {2}".format(table.__name__, qos_name, e))
         # raise
 
     context = dict()
@@ -249,7 +255,7 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
     if len(items) > 0:
         context['has_data'] = True
 
-    logger.info("query {0} {1} cost {2}".format(str(table), qos_name, (time.time() - begin_time)))
+    logger.info("query {0} {1} cost {2}".format(table.__name__, qos_name, (time.time() - begin_time)))
 
     return context
 
@@ -370,7 +376,7 @@ def process_multi_plot(request, table, title, subtitle, y_title, view_types, pn_
                 item_idx += 1
 
     except Exception, e:
-        logger.info("query %s multiQos error: %s" % (str(table), e))
+        logger.info("query %s multiQos error: %s" % (table.__name__, e))
 
     context = dict()
     context['default_service_type'] = service_type
@@ -386,6 +392,6 @@ def process_multi_plot(request, table, title, subtitle, y_title, view_types, pn_
         context['has_data'] = True
 
     logger.info("query %s multiQos, cost: %s" %
-                (str(table), (current_time() - begin_time)))
+                (table.__name__, (current_time() - begin_time)))
 
     return context
