@@ -121,35 +121,33 @@ def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_ra
 
 # @trace_func
 def get_device_types(service_type, begin_date, end_date):
-    q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
-    q_conditions = q_conditions & Q(ServiceType=service_type)
-    q_conditions = q_conditions & ~Q(DeviceType__contains=".")
-    titles = Title.objects.filter(q_conditions)
+    q_conditions = Q(ServiceType=service_type)
+    titles = Title.objects.filter(q_conditions).values('DeviceType').distinct()
     device_types = []
     type_set = set()
     for title in titles:
-        type_set.add(title.DeviceType)
+        type_set.add(title['DeviceType'])
 
-    device_types.extend(sorted(type_set))
+    device_types.extend(sorted(type_set, key=unicode.lower))
+
+    logger.debug('get_device_types({0}) return {1}'.format(service_type, device_types))
 
     return device_types
 
 # @trace_func
 def get_versions(service_type, device_type, begin_date, end_date):
-    q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
-    q_conditions = q_conditions & Q(ServiceType=service_type)
-    q_conditions = q_conditions & Q(DeviceType__startswith="{0}_".format(device_type))
+    q_conditions = Q(ServiceType=service_type) & Q(DeviceType=device_type)
 
-    titles = Title.objects.filter(q_conditions)
+    titles = Title.objects.filter(q_conditions).values('Version')
 
-    version_pos = len(device_type) + 1
     versions = set()
     for title in titles:
-        version = title.DeviceType[version_pos:]
-        versions.add(version)
+        versions.add(title['Version'])
 
     version_list = ['All']
     version_list.extend(sorted(versions))
+
+    logger.debug('get_versions({0}, {1}) return {2}'.format(service_type, device_type, version_list))
 
     return version_list
 

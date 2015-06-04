@@ -68,13 +68,13 @@ class Migration(SchemaMigration):
         db.create_table(u'tplay_title', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('ServiceType', self.gf('django.db.models.fields.CharField')(max_length=30)),
-            ('DeviceType', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('Date', self.gf('django.db.models.fields.DateField')()),
+            ('DeviceType', self.gf('django.db.models.fields.CharField')(max_length=60)),
+            ('Version', self.gf('django.db.models.fields.CharField')(max_length=40)),
         ))
         db.send_create_signal(u'tplay', ['Title'])
 
-        # Adding unique constraint on 'Title', fields ['ServiceType', 'DeviceType', 'Date']
-        db.create_unique(u'tplay_title', ['ServiceType', 'DeviceType', 'Date'])
+        # Adding unique constraint on 'Title', fields ['ServiceType', 'DeviceType', 'Version']
+        db.create_unique(u'tplay_title', ['ServiceType', 'DeviceType', 'Version'])
 
         # Adding model 'BestvFbuffer'
         db.create_table('fbuffer', (
@@ -164,8 +164,8 @@ class Migration(SchemaMigration):
         # Removing unique constraint on 'BestvFbuffer', fields ['ServiceType', 'DeviceType', 'ISP', 'Area', 'ViewType', 'Date', 'Hour']
         db.delete_unique('fbuffer', ['ServiceType', 'DeviceType', 'ISP', 'Area', 'ViewType', 'Date', 'Hour'])
 
-        # Removing unique constraint on 'Title', fields ['ServiceType', 'DeviceType', 'Date']
-        db.delete_unique(u'tplay_title', ['ServiceType', 'DeviceType', 'Date'])
+        # Removing unique constraint on 'Title', fields ['ServiceType', 'DeviceType', 'Version']
+        db.delete_unique(u'tplay_title', ['ServiceType', 'DeviceType', 'Version'])
 
         # Removing unique constraint on 'BestvPlaytime', fields ['ServiceType', 'DeviceType', 'ISP', 'Area', 'ViewType', 'Date', 'Hour']
         db.delete_unique('playtime', ['ServiceType', 'DeviceType', 'ISP', 'Area', 'ViewType', 'Date', 'Hour'])
@@ -298,10 +298,10 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         u'tplay.title': {
-            'Date': ('django.db.models.fields.DateField', [], {}),
-            'DeviceType': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'Meta': {'unique_together': "(('ServiceType', 'DeviceType', 'Date'),)", 'object_name': 'Title'},
+            'DeviceType': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
+            'Meta': {'unique_together': "(('ServiceType', 'DeviceType', 'Version'),)", 'object_name': 'Title'},
             'ServiceType': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
+            'Version': ('django.db.models.fields.CharField', [], {'max_length': '40'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         }
     }

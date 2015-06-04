@@ -67,11 +67,11 @@ class BestvPlaytime(models.Model):
 
 class Title(models.Model):
     ServiceType = models.CharField(max_length=30)
-    DeviceType = models.CharField(max_length=255)
-    Date = models.DateField()
+    DeviceType = models.CharField(max_length=60)
+    Version = models.CharField(max_length=40)
+
     class Meta:
-        unique_together = (
-            'ServiceType', 'DeviceType', 'Date',)
+        unique_together = ('ServiceType', 'DeviceType', 'Version')
 
 class BestvFbuffer(models.Model):
     ServiceType = models.CharField(max_length=30)
