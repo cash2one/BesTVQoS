@@ -134,7 +134,7 @@ def prepare_hour_data_of_single_qos(filter_params, view_types, qos_name, base_ra
 @time_func
 def get_device_types(service_type):
     q_conditions = Q(ServiceType=service_type)
-    titles = Title.objects.filter(q_conditions).values('DeviceType').distinct()
+    titles = Title.objects.filter(q_conditions).values('DeviceType')
     device_types = []
     type_set = set()
     for title in titles:

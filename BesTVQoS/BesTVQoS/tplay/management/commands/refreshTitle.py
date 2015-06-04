@@ -21,14 +21,13 @@ def refreshTitle():
     for title in titles:
         titles_names.add("{0}{1}{2}".format(title.ServiceType, title.DeviceType, title.Version))
 
-    records = BestvFbuffer.objects.values("ServiceType", "DeviceType").filter(DeviceType__contains='.').distinct()
+    records = BestvFbuffer.objects.values("ServiceType", "DeviceType").filter(DeviceType__contains='.')
     for record in records:
         rst = re.search(version_pattern, record["DeviceType"])
         if rst:
             version = rst.group(1)
+            # '\x7f' is Backspace, which is not visual, a special version contains this character
             device_type = record["DeviceType"][:-len(version)].rstrip('_').rstrip('\x7f')
-            # Patch: Only some real-time play version use 'Bestv_Lite_A'
-            device_type = device_type.replace('Bestv_Lite_A', 'BesTV_Lite_A')
             key = "{0}{1}{2}".format(record["ServiceType"], device_type, version)
             if key not in titles_names:
                 title = Title(ServiceType=record["ServiceType"],
