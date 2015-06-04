@@ -27,6 +27,8 @@ def refreshTitle():
         if rst:
             version = rst.group(1)
             device_type = record["DeviceType"][:-len(version)].rstrip('_').rstrip('\x7f')
+            # Patch: Only some real-time play version use 'Bestv_Lite_A'
+            device_type = device_type.replace('Bestv_Lite_A', 'BesTV_Lite_A')
             key = "{0}{1}{2}".format(record["ServiceType"], device_type, version)
             if key not in titles_names:
                 title = Title(ServiceType=record["ServiceType"],
