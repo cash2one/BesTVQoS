@@ -50,7 +50,7 @@ def get_records_data(view_types, begin_date, end_date, service_type, beta_ver, m
         temp.append("%s"%(ver))
         for (view, _) in view_types:
             temp.append(view_type_data[view])
-        temp.append(sum(view_type_data))
+        temp.append(sum(view_type_data.values()))
         qos_data.append(temp)
         logger.info("execute sql: ver: %s, get records, cost: %s" % (ver, (current_time() - begin_time)))
 
