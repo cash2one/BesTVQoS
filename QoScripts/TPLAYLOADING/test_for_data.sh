@@ -1,6 +1,6 @@
 #! /bin/bash
 date=$1
-for i in $(seq 0 1)
+for i in $(seq 0 11)
 do
 	k=$(printf "%02d" $i)
 	echo "$k\n\n\n\n"
@@ -8,4 +8,4 @@ do
 	sleep 3
 done
 
-bash stat_tplayloading.sh $date
+#bash stat_tplayloading.sh $date

@@ -1,12 +1,12 @@
 #! /bin/bash
 
-date=$1
-#date=$(date -d -1hour +"%Y%m%d")
-hour=$2
-#hour=$(date -d -1hour +%H)
+#date=$1
+date=$(date -d -1hour +"%Y%m%d")
+#hour=$2
+hour=$(date -d -1hour +%H)
 
-#SRV_TYPE=('OTT' 'ANHUIYD' 'FUJIANDX' 'JIANGSUYD')
-SRV_TYPE=('OTT')
+SRV_TYPE=('OTT' 'ANHUIYD' 'FUJIANDX' 'JIANGSUYD')
+#SRV_TYPE=('OTT')
 
 for srv_type in ${SRV_TYPE[@]}
 do 

@@ -42,18 +42,23 @@ while(<FILE>) {
 	# $16 loading
 	# $9 video type
 	# $6 version type
+	$version=$elements[6];
+	$len = length $version;
+	if($len<1){
+		next;
+	}
+	
+	$idx = rindex $elements[6], "_";
+	$version2 = substr $elements[6], 0, $idx;
+	$version2 = $version2."_All";
+	
+	$video=$elements[9];
 		
 	@loadings = split /;/, $elements[16];
 	foreach $loading(@loadings){
 
 		@subitems = split /,/, $loading;
 		if(@subitems == 5){  #subitems[4] loading_type
-			$version=$elements[6];
-			$idx = rindex $elements[6], "_";
-			$version2 = substr $elements[6], 0, $idx;
-			$version2 = $version2."_All";
-			
-			$video=$elements[9];
 			$load=$subitems[4];
 			$id="${version}_${video}_${load}_${date}";
 			$id2="${version2}_${video}_${load}_${date}";

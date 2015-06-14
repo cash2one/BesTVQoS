@@ -1,14 +1,18 @@
 #! /bin/bash
 
-#date=$(date -d "1day ago" +%Y%m%d)
-date=$1
+date=$(date -d "1day ago" +%Y%m%d)
+#date=$1
 olddate=$(date -d "2day ago" +%Y%m%d)
 
-#SRV_TYPE=('OTT' 'ANHUIYD' 'FUJIANDX' 'JIANGSUYD')
-SRV_TYPE=('OTT')
+SRV_TYPE=('OTT' 'ANHUIYD' 'FUJIANDX' 'JIANGSUYD')
+#SRV_TYPE=('OTT')
 
 for srv_type in ${SRV_TYPE[@]}
 do 
+	mkdir -p "temp/${srv_type}/${date}"
+	mkdir -p "out/${srv_type}/total"
+	mkdir -p "out/${srv_type}/${date}"
+
 	filename="./data/${srv_type}/${srv_type}_${date}.csv"
 	# 1. merge data from hourly data
 	if [ -d ./data/${srv_type}/${date} ]
@@ -16,13 +20,10 @@ do
 	    cat ./data/${srv_type}/${date}/*.log > ${filename}
 	fi
 
-	mkdir -p "temp/${srv_type}/${date}"
-	mkdir -p "out/${srv_type}/total"
-	mkdir -p "out/${srv_type}/${date}"
 	# 2. filter dbuffer by version, view type, loading type
 	echo "filter dbuffer by version"
 	versions_file="out/${srv_type}/${date}/versions_dist_24"
-	playtm_file="out/${date}/playtm_${date}_24"
+	playtm_file="out/${srv_type}/${date}/playtm_${date}_24"
 	if [ -f ${playtm_file} ]
 	then 
 		rm -f ${playtm_file}
