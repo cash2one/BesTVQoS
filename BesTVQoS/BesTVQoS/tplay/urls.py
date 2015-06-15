@@ -3,12 +3,12 @@
 
 from django.conf.urls import patterns, url
 
-urlpatterns = patterns('tplay.views',
-    # url(r"show_fbuffer_sucratio/get_version", "get_version",),
-    # url(r"show_fbuffer_sucratio/get_device_type", "get_device_type",),
-    # url(r"show_fbuffer_sucratio1/", "show_fbuffer_sucratio1",),
-    url(r'get_device_type$', "get_device_type"),
-    url(r'get_version$', "get_version"),
+urlpatterns = patterns(
+    'tplay.views',
+
+    url(r'show_version_analyze', 'show_version_analyze'),
+    url(r'get_device_type$', 'get_device_type'),
+    url(r'get_version$', 'get_version'),
     url(r'show_playing_trend$', 'show_playing_trend'),
     url(r'show_playing_stat$', 'show_playing_stat'),
     url(r'show_play_time$', 'show_play_time'),

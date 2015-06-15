@@ -1,0 +1,87 @@
+<link rel="stylesheet" type="text/css" href="/static/js/multiselectSrc/jquery.multiselect.css" />
+<link rel="stylesheet" type="text/css" href="/static/js/ui/jquery-ui.css" />
+<script type="text/javascript" src="/static/js/ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/js/ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/multiselectSrc/jquery.multiselect.js"></script>
+
+<script type="text/javascript">
+$(function(){
+    $("#service_type").multiselect({
+        selectedList:1,
+        height:110,
+        multiple:false,
+        header:false,
+        minWidth:100
+    });
+    $("#device_type").multiselect({
+        selectedList:1,
+        height:150,
+        multiple:false,
+        header:false,
+        minWidth:100
+    });
+    $("#version").multiselect({
+        selectedList:1,
+        height:120,
+        multiple:false,
+        header:false,
+        minWidth:100
+    });
+});
+
+function get_device_type(platform) {
+    var service_type = $("#service_type").val()
+    var begin_date = $("#begin_date").val()
+    var end_date = $("#end_date").val()
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "{% url "tplay.views.get_device_type" %}",
+        data: {
+            'service_type': service_type,
+            'begin_date': begin_date,
+            'end_date': end_date,
+        },
+        success: function (data) {
+            $("#device_type").empty()
+            device_types = data["device_types"];
+
+            for(i=0;i<device_types.length;i++)
+            {
+                $("#device_type").append("<option value='"+device_types[i]+"'>"+device_types[i]+"</option>");
+            }
+            get_version(device_types[0]);
+            $("#device_type").multiselect('refresh');
+
+        }
+    });
+}
+
+function get_version(device_type) {
+    var service_type = $("#service_type").val()
+    var device_type = $("#device_type").val()
+    var begin_date = $("#begin_date").val()
+    var end_date = $("#end_date").val()
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "{% url "tplay.views.get_version" %}",
+        data: {
+            'service_type': service_type,
+            'device_type': device_type,
+            'begin_date': begin_date,
+            'end_date': end_date,
+        },
+        success: function (data) {
+            $("#version").empty()
+            var versions = data["versions"];
+
+            for(var i=0; i<versions.length; i++)
+            {
+                $("#version").append("<option value='"+versions[i]+"'>"+versions[i]+"</option>");
+            }
+            $("#version").multiselect('refresh');
+        }
+    });
+}
+</script>

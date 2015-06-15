@@ -1,0 +1,155 @@
+{% include 'top.html' %}
+
+<div id ="content" >
+    {% include 'filter_group_single_date.html' %}
+
+    <h3>1. {{ items.0 }}</h3>
+    <div class="pageitem">
+        <label><p><strong>{{ play_records.mtitle }}</strong></p></label>
+        <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+            {% for header in play_records.mheader%}
+                <th>{{header}}</th>
+            {% endfor %}
+
+            {% for row in play_records.msub %}
+                <tr>
+                {% for col in row %}
+                    {% if forloop.counter == 3 or forloop.counter == 4 %}
+                        {% if col > 0 %}
+                            <td bgcolor="red">
+                        {% elif col < 0 %}
+                            <td bgcolor="green">
+                        {% else %}
+                            <td>
+                        {% endif %}
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{col}}
+                    </td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+
+        <label><p><strong>{{ play_time.mtitle }}</strong></p></label>
+        <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+            {% for header in play_time.mheader%}
+                <th>{{header}}</th>
+            {% endfor %}
+
+            {% for row in play_time.msub %}
+                <tr>
+                {% for col in row %}
+                    {% if forloop.counter == 3 or forloop.counter == 4 %}
+                        {% if col > 0 %}
+                            <td bgcolor="red">
+                        {% elif col < 0 %}
+                            <td bgcolor="green">
+                        {% else %}
+                            <td>
+                        {% endif %}
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{col}}
+                    </td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% include 'highcharts_area_percent_stack.html' %}
+        <div class="pageitem" id="area_stack_container" style="min-width:320px;height:300px" ></div>
+    </div>
+
+    <h3>2. {{ items.1 }}</h3>
+    <div class="pageitem">
+        <label><p><strong>{{ user_activity.mtitle }}</strong></p></label>
+        <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+            {% for header in user_activity.mheader%}
+                <th>{{header}}</th>
+            {% endfor %}
+
+            {% for row in user_activity.msub %}
+                <tr>
+                {% for col in row %}
+                    {% if forloop.counter == 3 or forloop.counter == 4 %}
+                        {% if col > 0 %}
+                            <td bgcolor="red">
+                        {% elif col < 0 %}
+                            <td bgcolor="green">
+                        {% else %}
+                            <td>
+                        {% endif %}
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{col}}
+                    </td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <h3>3. {{ items.2 }}</h3>
+    <div class="pageitem">
+        {% for item in qos %}
+            <label><p><strong>{{ item.mtitle }}</strong></p></label>
+            <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+                {% for header in item.mheader%}
+                    <th>{{header}}</th>
+                {% endfor %}
+
+                {% for row in item.msub %}
+                    <tr>
+                    {% for col in row %}
+                        {% if forloop.counter == 3 or forloop.counter == 4 %}
+                            {% if col > 0 %}
+                                <td bgcolor="red">
+                            {% elif col < 0 %}
+                                <td bgcolor="green">
+                            {% else %}
+                                <td>
+                            {% endif %}
+                        {% else %}
+                            <td>
+                        {% endif %}
+                            {{col}}
+                        </td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endfor %}
+
+        <label><p><strong>{{ fbuffer.mtitle }}</strong></p></label>
+        <table class="bordered" border="1" cellspacing="0" cellpadding="1" style="border-collapse:collapse" >
+            {% for header in fbuffer.mheader%}
+                <th>{{header}}</th>
+            {% endfor %}
+
+            {% for row in fbuffer.msub %}
+                <tr>
+                {% for col in row %}
+                    {% if forloop.counter == 3 or forloop.counter == 4 %}
+                        {% if col > 0 %}
+                            <td bgcolor="red">
+                        {% elif col < 0 %}
+                            <td bgcolor="green">
+                        {% else %}
+                            <td>
+                        {% endif %}
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{col}}
+                    </td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+	
+</div>

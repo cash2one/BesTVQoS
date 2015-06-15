@@ -168,7 +168,6 @@ def get_filter_param_values(request):
     version = request.GET.get("version", filters_map["vt"]).encode("utf-8")
     begin_date = request.GET.get("begin_date", filters_map["begin"]).encode("utf-8")
     end_date = request.GET.get("end_date", filters_map["end"]).encode("utf-8")
-    # logger.info("get_filter_values: %s - %s - %s" % (service_type, device_type, version))
 
     device_types = get_device_types(service_type)
     if len(device_types) == 0:
@@ -178,16 +177,7 @@ def get_filter_param_values(request):
     if device_type not in device_types:
         device_type = device_types[0]
 
-    versions = []
-    try:
-        versions = get_versions(service_type, device_type)
-    except:
-        logger.info("get_versions({0}, {1}, {2}, {3}) failed.".format(
-            service_type, device_type, begin_date, end_date))
-
-    if len(versions) == 0:
-        versions = [""]
-        version = ""
+    versions = get_versions(service_type, device_type)
     if version not in versions:
         version = versions[0]
     
