@@ -15,6 +15,12 @@ while(<FILE>) {
 		next;
 	}
 
+	$version = $elements[6];
+	$len = length $version;
+	if($len<1){
+		next;
+	}
+
 	$video=$elements[9];
 	if($video !=1 && $video !=2 && $video !=3 && $video !=4){
 		next;
