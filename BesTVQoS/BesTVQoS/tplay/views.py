@@ -317,10 +317,13 @@ def pn_values_analyze_summary(datum):
             wow += ' {0}{1}{2}'.format(pn, (flags[0] if wow_v > 0 else flags[1]), abs(wow_v))
 
     # tip = '其他各值变化幅度小于10%'
-    values = '具体数值(AVG/P50/P75/P90)'
-    values += ' 当日:{0}/{1}/{2}/{3}'.format(datum['AVG'][0], datum['P50'][0], datum['P75'][0], datum['P90'][0])
-    values += ' 一周均值:{0}/{1}/{2}/{3}'.format(datum['AVG'][3], datum['P50'][3], datum['P75'][3], datum['P90'][3])
-    values += ' 一周峰值:{0}/{1}/{2}/{3}'.format(datum['AVG'][4], datum['P50'][4], datum['P75'][4], datum['P90'][4])
+    try:
+        values = '具体数值(AVG/P50/P75/P90)'
+        values += ' 当日:{0}/{1}/{2}/{3}'.format(datum['AVG'][0], datum['P50'][0], datum['P75'][0], datum['P90'][0])
+        values += ' 一周均值:{0}/{1}/{2}/{3}'.format(datum['AVG'][3], datum['P50'][3], datum['P75'][3], datum['P90'][3])
+        values += ' 一周峰值:{0}/{1}/{2}/{3}'.format(datum['AVG'][4], datum['P50'][4], datum['P75'][4], datum['P90'][4])
+    except:
+        values = '具体数据详见对应页面'
 
     # summary = '{0}; {1}; {2}; {3}'.format(dod, wow, tip, values)
     summary = '⑴{0}; ⑵{1}; ⑶{2}'.format(dod, wow, values)
@@ -341,8 +344,7 @@ def play_time_analyze(service_type, device_type, end_date):
     for view_type, desc in VIEW_TYPES[1:]:
         datum = {}
         for pn, pn_desc in PN_LIST:
-            # if any(data_by_day[view_type][pn]) > 0:
-            if True:
+            if any(data_by_day[view_type][pn]) > 0:
                 value = int(data_by_day[view_type][pn][-1])
                 day_on_day = get_growth_percent(value, data_by_day[view_type][pn][-2])
                 week_on_week = get_growth_percent(value, data_by_day[view_type][pn][0])
@@ -483,8 +485,7 @@ def qos_fbuffer_analyze(service_type, device_type, end_date):
     for v, v_desc in view_types:
         datum = {}
         for pn, pn_desc in PN_LIST:
-            # if any(fbuffer_by_day[v][pn]) > 0:
-            if True:
+            if any(fbuffer_by_day[v][pn]) > 0:
                 value = int(fbuffer_by_day[v][pn][-1])
                 day_on_day = get_growth_percent(value, fbuffer_by_day[v][pn][-2])
                 week_on_week = get_growth_percent(value, fbuffer_by_day[v][pn][0])
