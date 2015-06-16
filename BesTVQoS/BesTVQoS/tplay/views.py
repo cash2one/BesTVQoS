@@ -341,7 +341,8 @@ def play_time_analyze(service_type, device_type, end_date):
     for view_type, desc in VIEW_TYPES[1:]:
         datum = {}
         for pn, pn_desc in PN_LIST:
-            if any(data_by_day[view_type][pn]) > 0:
+            # if any(data_by_day[view_type][pn]) > 0:
+            if True:
                 value = int(data_by_day[view_type][pn][-1])
                 day_on_day = get_growth_percent(value, data_by_day[view_type][pn][-2])
                 week_on_week = get_growth_percent(value, data_by_day[view_type][pn][0])
@@ -482,7 +483,8 @@ def qos_fbuffer_analyze(service_type, device_type, end_date):
     for v, v_desc in view_types:
         datum = {}
         for pn, pn_desc in PN_LIST:
-            if any(fbuffer_by_day[v][pn]) > 0:
+            # if any(fbuffer_by_day[v][pn]) > 0:
+            if True:
                 value = int(fbuffer_by_day[v][pn][-1])
                 day_on_day = get_growth_percent(value, fbuffer_by_day[v][pn][-2])
                 week_on_week = get_growth_percent(value, fbuffer_by_day[v][pn][0])
