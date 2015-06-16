@@ -8,7 +8,15 @@
             {% include 'filter_versions.html'%}
         <div class="ctrlbox">
             <div class="ctrlitem">  
-                <label>日期</label>
+                <label>起始日期</label>
+                {% if is_mobile %}
+                    <input name="begin_date" type="date" value="{{default_begin_date}}" id="begin_date">
+                {% else %}
+                    <input class="Wdate" name="begin_date" type="text" value="{{default_begin_date}}" onClick="WdatePicker({isShowWeek:true,highLineWeekDay:true})" id="begin_date">
+                {% endif %}
+            </div>
+            <div class="ctrlitem">  
+                <label>结束日期</label>
                 {% if is_mobile %}
                     <input name="end_date" type="date" value="{{default_end_date}}" id="end_date">
                 {% else %}

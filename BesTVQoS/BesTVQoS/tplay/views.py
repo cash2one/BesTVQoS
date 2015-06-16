@@ -242,6 +242,7 @@ def get_growth_percent(v1, v2):
     return result
 
 
+@time_func
 def get_version_analyze_param(model, service_type, device_type, end_date):
     date_fmt = '%Y-%m-%d'
     end_date_tm = datetime.strptime(end_date, date_fmt)
@@ -252,6 +253,7 @@ def get_version_analyze_param(model, service_type, device_type, end_date):
     return filter_params, days_region
 
 
+@time_func
 def play_records_analyze(service_type, device_type, end_date):
     header = ['类型', '数据', '环比上日(%)', '同比上周(%)', '一周均值', '一周峰值', '峰值日期']
     play_records = HtmlTable()
@@ -274,9 +276,20 @@ def play_records_analyze(service_type, device_type, end_date):
             play_records.msub.append([desc, records_end_date, day_on_day, week_on_week,
                                       avg_week, int(max_week), max_date])
 
-    return play_records
+    series = list()
+    for view_type, desc in VIEW_TYPES[1:]:
+        series.append({'name': desc, 'data': [int(v) for v in data_by_day[view_type]]})
+
+    distribution = dict()
+    distribution['title'] = '各观看类型所占比例'
+    distribution['subtitle'] = ''
+    distribution['x'] = days_region
+    distribution['series'] = series
+
+    return play_records, distribution
 
 
+@time_func
 def pn_values_analyze_summary(datum):
     """
     P25: play_time_end_date 294, day_on_day 0.0, week_on_week 2.08, avg 302, max 328, date 2015-06-04
@@ -314,6 +327,7 @@ def pn_values_analyze_summary(datum):
 
     return summary
 
+@time_func
 def play_time_analyze(service_type, device_type, end_date):
     play_time = HtmlTable()
     play_time.mtitle = '播放时长'
@@ -342,6 +356,7 @@ def play_time_analyze(service_type, device_type, end_date):
     return play_time
 
 
+@time_func
 def user_activity_analyze(service_type, device_type, end_date):
     # 版本活跃度
     user_activity = HtmlTable()
@@ -388,6 +403,7 @@ def user_activity_analyze(service_type, device_type, end_date):
     return user_activity
 
 
+@time_func
 def qos_fbuffer_analyze(service_type, device_type, end_date):
     # 服务质量
     view_types = VIEW_TYPES[1:]
@@ -441,7 +457,7 @@ def qos_fbuffer_analyze(service_type, device_type, end_date):
                 value = qos_by_day[(v, i)][-1]
                 day_on_day = get_growth_percent(value, qos_by_day[(v, i)][-2])
                 week_on_week = get_growth_percent(value, qos_by_day[(v, i)][0])
-                avg_week = int(sum(qos_by_day[(v, i)][1:])/7)
+                avg_week = round(sum(qos_by_day[(v, i)][1:])/7, 2)
                 max_week, max_date = max(zip(qos_by_day[(v, i)][1:], days_region[1:]), key=lambda x: x[0])
                 qos[-1].msub.append([i_desc, value, day_on_day, week_on_week, avg_week, int(max_week), max_date])
         if not has_data:
@@ -498,7 +514,7 @@ def show_version_analyze(request):
 
     # 播放量与播放时长
     context['items'] = ['播放量与播放时长']
-    context['play_records'] = play_records_analyze(service_type, device_type_full, end_date)
+    context['play_records'], context['distribution'] = play_records_analyze(service_type, device_type_full, end_date)
     context['play_time'] = play_time_analyze(service_type, device_type_full, end_date)
 
     # 版本活跃度
@@ -517,10 +533,11 @@ def show_version_analyze(request):
     context['default_device_type'] = device_type
     context['versions'] = versions
     context['default_version'] = version
+    context['default_begin_date'] = begin_date if begin_date <= end_date else end_date
     context['default_end_date'] = end_date
 
     response = render_to_response('show_version_analyze.html', context)
-    # set_default_values_to_cookie(response, context)
+    set_default_values_to_cookie(response, context)
 
     return response
 
