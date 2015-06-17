@@ -565,3 +565,15 @@ def get_version(request):
 
     return HttpResponse(resp_str, content_type="text/json")
 
+def get_one_day_users(request, date_str):
+    results = BestvPlayprofile.objects.filter(Date=date_str).values('ServiceType', 'DeviceType', 'Users')
+
+    users_list = [row for row in results]
+
+    # noinspection PyBroadException
+    try:
+        resp = json.dumps(users_list)
+    except:
+        resp = list()
+
+    return HttpResponse(resp, content_type="text/json")

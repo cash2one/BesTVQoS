@@ -22,4 +22,6 @@ urlpatterns = patterns(
     url(r'show_3sratio$', 'show_3sratio'),
     url(r'show_avg_pcount$', 'show_avg_pcount'),
     url(r'show_avg_ptime$', 'show_avg_ptime'),
+
+    url(r'get_users/(?P<date_str>.*)$', 'get_one_day_users')
 )
