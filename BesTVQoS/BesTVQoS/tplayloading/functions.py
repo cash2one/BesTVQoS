@@ -9,7 +9,7 @@ from tplay.functions import NoDataError, FilterParams, HOUR_X_AXIS
 from tplayloading.models import *
 
 logger = logging.getLogger("django.request")
-SERVICE_TYPES = ["B2B", "B2C"]
+SERVICE_TYPES = ["B2C", 'ANHUIYD', 'FUJIANDX', 'JIANGSUYD']
 
 def get_device_types1(service_type, begin_date, end_date, min_rec):
     begin_time = time.time()
@@ -65,6 +65,9 @@ def get_loading_param_values(request):
     if begin_date == str(today()) and end_date == str(today()):
         begin_date_temp = str(get_day_of_day(-1))
         end_date_temp = begin_date_temp
+    else:
+        begin_date_temp = begin_date
+        end_date_temp = end_date
 
     device_types = get_device_types1(service_type, begin_date_temp, end_date_temp, min_rec)
     if len(device_types) == 0:
