@@ -137,7 +137,8 @@ INSTALLED_APPS = (
     'cdnMon',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    'south',    
+    'south',
+    'logstore',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
