@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "BesTVQoS", "BesTVQoS\BesTVQoS.pyproj", "{AB49FC6D-4853-43AE-9208-ED9D5C296D11}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "BesTVQoSStore", "BesTVQoSStore\BesTVQoSStore.pyproj", "{A15B8A00-5931-41C1-8506-5EA8FE8DED0C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,10 +13,6 @@ Global
 		{AB49FC6D-4853-43AE-9208-ED9D5C296D11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB49FC6D-4853-43AE-9208-ED9D5C296D11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB49FC6D-4853-43AE-9208-ED9D5C296D11}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A15B8A00-5931-41C1-8506-5EA8FE8DED0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A15B8A00-5931-41C1-8506-5EA8FE8DED0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A15B8A00-5931-41C1-8506-5EA8FE8DED0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A15B8A00-5931-41C1-8506-5EA8FE8DED0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
