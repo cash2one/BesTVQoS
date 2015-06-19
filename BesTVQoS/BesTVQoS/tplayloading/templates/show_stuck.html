@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+{% include 'top.html' %}
+
+<div id ="content" >
+    {% include 'filter_group_loading.html' %}
+	
+	{% if has_data %}
+	    {% include 'highcharts_plot.html' %}
+	    {% for item in contents %}
+	    <div id="tabs_{{item.index}}" style="min-width:320px;height:400px" >
+	    </div>
+	    {% endfor %}
+    {% else %}
+        {% include 'no_data.html' %}
+    {% endif %}
+</div>
+
+</html>
