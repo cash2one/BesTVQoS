@@ -62,11 +62,11 @@ def get_loading_param_values(request):
     else:
         min_rec = int(min_rec)
 
-    if begin_date >= str(today()):
-        begin_date = str(get_day_of_day(-1))
-        end_date = begin_date
+    if begin_date == str(today()) and end_date == str(today()):
+        begin_date_temp = str(get_day_of_day(-1))
+        end_date_temp = begin_date_temp
 
-    device_types = get_device_types1(service_type, begin_date, end_date, min_rec)
+    device_types = get_device_types1(service_type, begin_date_temp, end_date_temp, min_rec)
     if len(device_types) == 0:
         device_types = [""]
         device_type = ""
@@ -76,7 +76,7 @@ def get_loading_param_values(request):
 
     versions = []
     try:
-        versions = get_versions1(service_type, device_type, begin_date, end_date, min_rec)
+        versions = get_versions1(service_type, device_type, begin_date_temp, end_date_temp, min_rec)
     except:
         logger.info("get_versions({0}, {1}, {2}, {3}) failed.".format(
             service_type, device_type, begin_date, end_date))
