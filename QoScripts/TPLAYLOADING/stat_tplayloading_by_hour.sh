@@ -48,6 +48,12 @@ do
 		echo $i;
 		perl get_pnvalues_by_hour.pl ${date} ${hour} ${srv_type} $i ${pnvalues_file}
 	done
+
+	if [ -f ${pnvalues_file} ]
+	then
+		python post_tplayloading_info.py ${date} ${pnvalues_file}
+	fi
+
 done
 #4. done
 echo "stat tplayloading by hour done..."
