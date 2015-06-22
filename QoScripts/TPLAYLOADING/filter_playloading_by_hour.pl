@@ -57,7 +57,6 @@ while(<FILE>) {
 		
 	@loadings = split /;/, $elements[16];
 	foreach $loading(@loadings){
-
 		@subitems = split /,/, $loading;
 		if(@subitems == 5){  #subitems[4] loading_type
 			$load=$subitems[4];

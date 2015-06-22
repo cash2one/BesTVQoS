@@ -68,6 +68,18 @@
 						</li>
 						<li>
 							<div class="header">
+								<span class="label" style="background-image: url(/static/images/pc.png);">
+								   <a href="{% url "tplayloading.views.show_stuck" %}" style="color: #FFFFFF" target="main">卡缓冲</a>
+								</span>
+								<span class="arrow down"></span>
+							</div>
+							<ul class="menu" style="display:none">
+								<li><a href="{% url "tplayloading.views.show_stuck" %}" target="main">卡缓冲</a></li>
+                                <li><a href="{% url "tplayloading.views.show_dbuffer" %}" target="main">拖动缓冲</a></li>
+							</ul>
+						</li>
+						<li>
+							<div class="header">
 								<span class="label" style="background-image: url(/static/images/search.png);">
 								    <a href="{% url "tplay.views.show_3sratio" %}" style="color: #FFFFFF" target="main">Bestv现有指标</a>
 								</span>

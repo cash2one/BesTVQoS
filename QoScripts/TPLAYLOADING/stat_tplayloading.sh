@@ -34,6 +34,8 @@ do
 		perl stat_versions_dist.pl $date ${srv_type} ${filename} ${versions_file}
 		perl filter_playloading_by_version_view_load.pl $date ${srv_type} ${versions_file} ${filename}
 		perl get_playtm.pl ${date} 24 ${srv_type} ${filename} ${playtm_file}
+
+		python post_tplayloading_title.py $date ${versions_file}
 	fi
 
 	# 3. get pnvalues of dbuffer by version, view type, loading type
@@ -48,6 +50,11 @@ do
 		echo $i;
 		perl get_pnvalues_by_version_view_load.pl ${date} ${srv_type} $i ${pnvalues_file}
 	done
+
+	if [ -f ${pnvalues_file} ]
+	then
+		python post_tplayloading_info.py ${date} ${pnvalues_file}
+	fi
 
 	# 4. remove old files
 	if [ -d ./data/${srv_type}/${olddate} ]
