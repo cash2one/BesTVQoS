@@ -26,6 +26,8 @@ def handle_uploaded_file(cd):
         if not os.path.isdir(path):
             os.makedirs(path)
         dest_file = path + file_name
+        if os.path.exists(dest_file):
+            os.remove(dest_file)
         destination = open(dest_file, 'wb+')
         for chunk in file_content.chunks():
             destination.write(chunk)
@@ -46,7 +48,12 @@ def get_img(request):
             return HttpResponse("Error: No such image %s."%name)
         else:
             image_data = open("./logdata/%s/%s"%(date, name), 'rb').read()
-            return HttpResponse(image_data, content_type="image/jpeg")
+            f,e = os.path.splitext(name)
+            if e == ".png":
+                ct = "image/png"
+            else:
+                ct = "image/jpeg"
+            return HttpResponse(image_data, content_type=ct)
 
 def get_log(request):
     date = request.GET.get("date", "")
