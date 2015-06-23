@@ -12,6 +12,7 @@ from tplay.functions import get_filter_param_values
 from tplay.views import VIEW_TYPES
 from tplay.models import BestvPlayinfo, BestvFbuffer, BestvFluency, \
     BestvPlaytime
+from tplayloading.models import VersionInfo, TPlayloadingInfo
 
 import sys
 reload(sys)
@@ -20,6 +21,9 @@ sys.setdefaultencoding( "utf-8" )
 ezxf=xlwt.easyxf
 
 logger = logging.getLogger("django.request")
+
+STUCK = 2
+DBUFFER = 3
 
 def get_records_data(view_types, begin_date, end_date, service_type, beta_ver, master_ver):
     qos_data = []
@@ -164,8 +168,10 @@ def get_desc_for_daily_report(begin_date, end_date, beta_ver, master_ver=""):
         desc.append([u'%s -- %s'%('对比版本', master_ver)])
     return desc
 
-def generate_report(wb, begin_date, end_date, service_type, beta_ver, master_ver=""):
+def generate_report(wb, begin_date, end_date, service_type, device_type, version, version2=""):
     begin_time = current_time()
+    (beta_ver, master_ver)=get_version_version2(device_type, version, version2)
+
     book = wb
     sheet = book.add_sheet("version-report")
     sheet.col(0).width=10000
@@ -229,6 +235,22 @@ def generate_report(wb, begin_date, end_date, service_type, beta_ver, master_ver
     rowx += 2
     print "step 4: ", current_time() - begin_time
     
+    # stuck
+    stuck_headings = [u'卡缓冲', 'P25', 'P50', 'P75', 'P90', 'P95']
+    stuck_data = get_tplayloading_data(begin_date, end_date, service_type, device_type, 
+        version, version2, STUCK)
+    rowx = write_xls(book, sheet, rowx, stuck_headings, stuck_data, 
+        heading_xf, data_xf)
+    rowx += 2
+
+    # dbuffer
+    dbuffer_headings = [u'拖动缓冲', 'P25', 'P50', 'P75', 'P90', 'P95']
+    dbuffer_data = get_tplayloading_data(begin_date, end_date, service_type, device_type, 
+        version, version2, DBUFFER)
+    rowx = write_xls(book, sheet, rowx, dbuffer_headings, dbuffer_data, 
+        heading_xf, data_xf)
+    rowx += 2
+
     #
     # step 5: remarks
     #    
@@ -325,8 +347,84 @@ def get_fbuffer_data_for_table(urls_suffix, begin_date, end_date, service_type, 
         tables.append(item)
     return tables
 
-def get_daily_report_tables(urls_suffix, begin_date, end_date, service_type, beta_ver, master_ver=""):
+def get_tplayloading_data(begin_date, end_date, service_type, device_type, version, version2, ttype):
+    qos_data = []
+    vers = []
+    if len(version)>0:
+        vers.append(version)
+    if version != version2:
+        vers.append(version2)
+    view_types = VIEW_TYPES[1:2]
+    for (view, second) in view_types:
+        for ver in vers:
+            begin_time = current_time()
+            temp = [0 for i in range(6)]
+            temp[0] = u"%s_%s-%s" % (device_type, ver, second)
+
+            try:
+                q_conditions = Q(ServiceType=service_type)
+                q_conditions = q_conditions & Q(DeviceType=device_type)
+                q_conditions = q_conditions & Q(VersionType=ver)
+                version_id = VersionInfo.objects.get(q_conditions)
+
+                q_conditions = Q(VersionId=version_id)
+                q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+                q_conditions = q_conditions & Q(Hour=24) & Q(ChokeType=ttype)
+                q_conditions = q_conditions & Q(Date__gte=begin_date) & Q(Date__lte=end_date)
+                q_conditions = q_conditions & Q(ViewType=view)
+
+                count = 0
+                items = TPlayloadingInfo.objects.filter(q_conditions)
+                for item in items:
+                    if item.Records > 0:
+                        temp[1]+=item.P25
+                        temp[2]+=item.P50
+                        temp[3]+=item.P75
+                        temp[4]+=item.P90
+                        temp[5]+=item.P95
+                        count += 1
+                if count > 0:
+                    for i in range(6):
+                        temp[i+1] = temp[i+1]/count
+            except Exception, e:
+                logger.info("tplayloading sql query exception, %s" % e)
+
+            qos_data.append(temp)
+            logger.info("execute tplayloading sql: ver: %s_%s, pnvalues, cost: %s" % (device_type, ver, 
+                    (current_time() - begin_time)))
+
+    return qos_data
+
+def get_stuck_data_for_table(urls_suffix, begin_date, end_date, service_type, device_type, version, version2):
+    datas = get_tplayloading_data(begin_date, end_date, service_type, device_type, version, version2, STUCK)
+    tables  = []
+    for i, data in enumerate(datas):
+        i %= 2
+        item = {}
+        item['click'] = True
+        item['url'] = "tplayloading/show_stuck?%s" % (urls_suffix[i])
+        item['data'] = data
+        tables.append(item)
+
+    return tables
+
+def get_dbuffer_data_for_table(urls_suffix, begin_date, end_date, service_type, device_type, version, version2):
+    datas = get_tplayloading_data(begin_date, end_date, service_type, device_type, version, version2, DBUFFER)
     tables = []
+    for i, data in enumerate(datas):
+        i %= 2
+        item = {}
+        item['click'] = True
+        item['url'] = 'tplayloading/show_dbuffer?%s' % (urls_suffix[i])
+        item['data'] = data
+        tables.append(item)
+
+    return tables
+
+
+def get_daily_report_tables(urls_suffix, begin_date, end_date, service_type, device_type, version, version2=""):
+    tables = []
+    (beta_ver, master_ver)=get_version_version2(device_type, version, version2)
     # 0. date-ver table
     table = HtmlTable()
     table.mtitle = "records信息"
@@ -372,6 +470,22 @@ def get_daily_report_tables(urls_suffix, begin_date, end_date, service_type, bet
     table.mheader = ['首次缓冲时长(秒)', 'P25', 'P50', 'P75', 'P90', 'P95', '均值']
     table.msub = get_fbuffer_data_for_table(urls_suffix, 
         begin_date, end_date, service_type, beta_ver, master_ver)
+    tables.append(table)
+
+    # stcuk 
+    table = HtmlTable()
+    table.mtitle = "卡缓冲"
+    table.mheader = ['卡缓冲(秒)', 'P25', 'P50', 'P75', 'P90', 'P95']
+    table.msub = get_stuck_data_for_table(urls_suffix, 
+        begin_date, end_date, service_type, device_type, version, version2)
+    tables.append(table)
+
+    # dbuffer
+    table = HtmlTable()
+    table.mtitle = "拖动缓冲"
+    table.mheader = ['拖动缓冲(秒)', 'P25', 'P50', 'P75', 'P90', 'P95']
+    table.msub = get_dbuffer_data_for_table(urls_suffix,
+        begin_date, end_date, service_type, device_type, version, version2)
     tables.append(table)
 
     # 5. remarks table
@@ -428,14 +542,13 @@ def display_daily_reporter(request, dev=""):
     context['default_begin_date'] = str(begin_date)
     context['default_end_date'] = str(end_date)
 
-    urls_suffix = ['device_type=%s&version=%s&begin_date=%s&end_date=%s ' \
-        % (device_type, version, begin_date, end_date), \
-        'device_type=%s&version=%s&begin_date=%s&end_date=%s' \
-        % (device_type, version2, begin_date, end_date),]
-    (version, version2)=get_version_version2(device_type, version, version2)
+    urls_suffix = ['service_type=%s&device_type=%s&version=%s&begin_date=%s&end_date=%s ' \
+        % (service_type, device_type, version, begin_date, end_date), \
+        'service_type=%s&device_type=%s&version=%s&begin_date=%s&end_date=%s' \
+        % (service_type, device_type, version2, begin_date, end_date),]
 
     tables = get_daily_report_tables(urls_suffix, begin_date, end_date, 
-        service_type, version, version2)
+        service_type, device_type, version, version2)
     context['has_table'] = True
     context['tables'] = tables
 
@@ -449,10 +562,8 @@ def download_daily_reporter(request, dev=""):
     (service_type, device_type, device_types, version, versions, version2, \
         versions2, begin_date, end_date) = get_report_filter_param_values(request, "playinfo")
 
-    (version, version2)=get_version_version2(device_type, version, version2)
-
     xlwt_wb = xlwt.Workbook()
-    generate_report(xlwt_wb, begin_date, end_date, service_type, version, version2)
+    generate_report(xlwt_wb, begin_date, end_date, service_type, device_type, version, version2)
 
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=%s_report_%s.xls' \
