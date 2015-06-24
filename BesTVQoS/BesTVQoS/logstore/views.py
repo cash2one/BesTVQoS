@@ -66,7 +66,7 @@ def get_log(request):
     else:
         dest_file = "./logdata/%s/%s"%(date, name)
         if not os.path.exists(dest_file):
-            return HttpResponseNotFound("<h1>Log %s Not Fount</h1>"%name)
+            return HttpResponseNotFound("<h1>Log %s Not Found</h1>"%name)
         else:
             wrapper = FileWrapper(open(dest_file))
             response = HttpResponse(wrapper, content_type="text/plain")
