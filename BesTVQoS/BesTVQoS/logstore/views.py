@@ -1,4 +1,6 @@
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
+from django.http import HttpResponseBadRequest
 from django.core.servers.basehttp import FileWrapper
 import os
 import shutil
@@ -12,9 +14,9 @@ def update_log(request):
             handle_uploaded_file(cd)
             return HttpResponse("Ok: File %s update success."%cd['name'])
         else:
-            return HttpResponse("Error: Need more arguments.")
+            return HttpResponseBadRequest("<h1>Need more arguments</h1>")
     else:
-        return HttpResponse("Error: wrong request type.")
+        return HttpResponseBadRequest("<h1>Wrong request type</h1>")
 
 def handle_uploaded_file(cd):
     file_name = cd['name']
@@ -42,10 +44,10 @@ def get_img(request):
     name = request.GET.get("name", "")
 
     if not date or not name:
-        return HttpResponse("Error: Need more arguments.")
+        return HttpResponseBadRequest("<h1>Need more arguments</h1>")
     else:
         if not os.path.exists("./logdata/%s/%s"%(date, name)):
-            return HttpResponse("Error: No such image %s."%name)
+            return HttpResponseNotFound("<h1>Image %s Not Found</h1>"%name)
         else:
             image_data = open("./logdata/%s/%s"%(date, name), 'rb').read()
             f,e = os.path.splitext(name)
@@ -60,11 +62,11 @@ def get_log(request):
     name = request.GET.get("name", "")
 
     if not date or not name:
-        return HttpResponse("Error: Need more arguments.")
+        return HttpResponseBadRequest("<h1>Need more arguments</h1>")
     else:
         dest_file = "./logdata/%s/%s"%(date, name)
         if not os.path.exists(dest_file):
-            return HttpResponse("Error: No such log %s."%name)
+            return HttpResponseNotFound("<h1>Log %s Not Fount</h1>"%name)
         else:
             wrapper = FileWrapper(open(dest_file))
             response = HttpResponse(wrapper, content_type="text/plain")
@@ -78,18 +80,18 @@ def delete(request):
     name = request.GET.get("name", "")
 
     if not date:
-        return HttpResponse("Error: Need date argument.")
+        return HttpResponseBadRequest("<h1>Need more argument</h1>")
     elif not name:
         path = "./logdata/%s/"%date
         if not os.path.isdir(path):
-            return HttpResponse("Error: No such directory %s."%date)
+            return HttpResponseBadRequest("<h1>No such directory %s</h1>"%date)
         else:
             shutil.rmtree(path)
             return HttpResponse("Ok: Logs in %s deleted success."%date)
     else:
         file = "./logdata/%s/%s"%(date, name)
         if not os.path.exists(file):
-            return HttpResponse("Error: No such file %s."%name)
+            return HttpResponseNotFound("<h1>File %s Not Found</h1>"%name)
         else:
             os.remove(file)
             return HttpResponse("Ok: File %s deleted success."%name)
