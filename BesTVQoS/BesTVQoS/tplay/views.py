@@ -14,7 +14,7 @@ from tplay.models import *
 
 logger = logging.getLogger("django.request")
 
-SERVICE_TYPES = ["All", "B2B", "B2C"]
+# SERVICE_TYPES = ["B2B", "B2C"]
 VIEW_TYPES = [(0, "总体"), (1, "点播"), (2, "回看"), (3, "直播"), (4, "连看"), (5, "未知")]
 PN_LIST = [("P25", "P25"), ("P50", "P50"), ("P75", "P75"),
            ("P90", "P90"), ("P95", "P95"), ("AverageTime", "AVG")]
