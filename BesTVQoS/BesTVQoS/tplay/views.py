@@ -6,6 +6,8 @@ from django.db.models import Sum
 from common.views import *
 from common.date_time_tool import *
 
+from loganalyze.server_views import get_multidays_interval
+
 # from tplay.functions import process_single_qos, get_device_types, get_versions, process_multi_plot
 from tplay.functions import *
 from tplay.models import *
@@ -233,15 +235,6 @@ def show_fbuffer_time(request):
     return response
 
 
-def get_growth_percent(v1, v2):
-    try:
-        result = round(100.0 * (v1 - v2) / v2, 2)
-    except ZeroDivisionError:
-        result = None
-
-    return result
-
-
 @time_func
 def get_version_analyze_param(model, service_type, device_type, end_date):
     date_fmt = '%Y-%m-%d'
@@ -255,249 +248,171 @@ def get_version_analyze_param(model, service_type, device_type, end_date):
 
 @time_func
 def play_records_analyze(service_type, device_type, end_date):
-    header = ['类型', '数据', '环比上日(%)', '同比上周(%)', '一周均值', '一周峰值', '峰值日期']
-    play_records = HtmlTable()
-    play_records.mtitle = '播放量'
-    play_records.mheader = header
-    play_records.msub = []
-
     filter_params, days_region = get_version_analyze_param(BestvPlayinfo, service_type, device_type, end_date)
-
     data_by_day = prepare_daily_data_of_single_qos(filter_params, days_region, VIEW_TYPES,
                                                    'Records', True, 1, True)
 
-    for view_type, desc in VIEW_TYPES:
-        if any(data_by_day[view_type]) > 0:
-            records_end_date = int(data_by_day[view_type][-1])
-            day_on_day = get_growth_percent(records_end_date, data_by_day[view_type][-2])
-            week_on_week = get_growth_percent(records_end_date, data_by_day[view_type][0])
-            avg_week = int(sum(data_by_day[view_type][1:])/7)
-            max_week, max_date = max(zip(data_by_day[view_type][1:], days_region[1:]), key=lambda x: x[0])
-            play_records.msub.append([desc, records_end_date, day_on_day, week_on_week,
-                                      avg_week, int(max_week), max_date])
-
     series = list()
     for view_type, desc in VIEW_TYPES[1:]:
-        series.append({'name': desc, 'data': [int(v) for v in data_by_day[view_type]]})
+        if any(data_by_day[view_type]):
+            series.append({'name': desc, 'data': [int(v) for v in data_by_day[view_type]]})
 
     distribution = dict()
-    distribution['title'] = '各观看类型所占比例'
+    distribution['title'] = '各观看类型占比'
     distribution['subtitle'] = ''
     distribution['x'] = days_region
     distribution['series'] = series
 
-    return play_records, distribution
+    return distribution
 
 
 @time_func
-def pn_values_analyze_summary(datum):
-    """
-    P25: play_time_end_date 294, day_on_day 0.0, week_on_week 2.08, avg 302, max 328, date 2015-06-04
-    P50: play_time_end_date 1484, day_on_day 11.5, week_on_week 12.51, avg 1375, max 1484, date 2015-06-08
-    P75: play_time_end_date 2615, day_on_day 0.54, week_on_week 0.65, avg 2607, max 2615, date 2015-06-08
-    P90: play_time_end_date 4531, day_on_day -7.21, week_on_week 0.15, avg 4581, max 4953, date 2015-06-06
-    P95: play_time_end_date 6862, day_on_day -1.68, week_on_week 7.76, avg 6696, max 7012, date 2015-06-06
-    AVG: play_time_end_date 2241, day_on_day 1.91, week_on_week 7.69, avg 2174, max 2241, date 2015-06-08
-
-    环比 p50:+11.5 p90:-7.21; 同比 p50:+12.51 p95:+7.76 AVG:+7.69; 其他各值变化幅度小于10%;
-    具体数值(AVG/P50/P75/P90) 当日:2241/1484/2615/4531 一周均值:2174/1375/2607/4581 一周峰值:2241/1484/2615/4953
-    """
-
-    threshold = 10
-    flags = ['↑', '↓']
-    dod = '环比'
-    wow = '同比'
-    for pn in datum:
-        data = datum[pn]
-        dod_v = data[1]
-        wow_v = data[2]
-        if dod_v and abs(dod_v) >= threshold:
-            dod += ' {0}{1}{2}'.format(pn, (flags[0] if dod_v > 0 else flags[1]), abs(dod_v))
-        if wow_v and abs(wow_v) >= threshold:
-            wow += ' {0}{1}{2}'.format(pn, (flags[0] if wow_v > 0 else flags[1]), abs(wow_v))
-
-    # tip = '其他各值变化幅度小于10%'
-    try:
-        values = '具体数值(AVG/P50/P75/P90)'
-        values += ' 当日:{0}/{1}/{2}/{3}'.format(datum['AVG'][0], datum['P50'][0], datum['P75'][0], datum['P90'][0])
-        values += ' 一周均值:{0}/{1}/{2}/{3}'.format(datum['AVG'][3], datum['P50'][3], datum['P75'][3], datum['P90'][3])
-        values += ' 一周峰值:{0}/{1}/{2}/{3}'.format(datum['AVG'][4], datum['P50'][4], datum['P75'][4], datum['P90'][4])
-    except:
-        values = '具体数据详见对应页面'
-
-    # summary = '{0}; {1}; {2}; {3}'.format(dod, wow, tip, values)
-    summary = '⑴{0}; ⑵{1}; ⑶{2}'.format(dod, wow, values)
-
-    return summary
-
-@time_func
-def play_time_analyze(service_type, device_type, end_date):
-    play_time = HtmlTable()
-    play_time.mtitle = '播放时长'
-    play_time.mheader = ['类型', '概述']
-    play_time.msub = []
-
-    filter_params, days_region = get_version_analyze_param(BestvPlaytime, service_type, device_type, end_date)
-
-    data_by_day = prepare_pnvalue_daily_data(filter_params, days_region, VIEW_TYPES[1:], PN_LIST, 1)
-
-    for view_type, desc in VIEW_TYPES[1:]:
-        datum = {}
-        for pn, pn_desc in PN_LIST:
-            if any(data_by_day[view_type][pn]) > 0:
-                value = int(data_by_day[view_type][pn][-1])
-                day_on_day = get_growth_percent(value, data_by_day[view_type][pn][-2])
-                week_on_week = get_growth_percent(value, data_by_day[view_type][pn][0])
-                avg_week = int(sum(data_by_day[view_type][pn][1:])/7)
-                max_week, max_date = max(zip(data_by_day[view_type][pn][1:], days_region[1:]), key=lambda x: x[0])
-                datum[pn_desc] = [value, day_on_day, week_on_week, avg_week, max_week, max_date]
-
-        if datum:
-            summary = pn_values_analyze_summary(datum)
-            play_time.msub.append([desc, summary])
-
-    return play_time
-
-
-@time_func
-def user_activity_analyze(service_type, device_type, end_date):
-    # 版本活跃度
-    user_activity = HtmlTable()
-    header = ['类型', '数据', '环比上日(%)', '同比上周(%)', '一周均值', '一周峰值', '峰值日期']
-    user_activity.mtitle = '用户活跃度'
-    user_activity.mheader = header
-    user_activity.msub = []
-
-    filter_params, days_region = get_version_analyze_param(BestvPlayprofile, service_type, device_type, end_date)
-
-    q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
-    q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
-    q_conditions = q_conditions & Q(ServiceType=filter_params.service_type)
-    if filter_params.service_type == 'B2C':
-        q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
-
-    results = filter_params.table.objects.filter(q_conditions)
-
-    process_items = [(0, '用户数'), (1, '人均播放时长'), (2, '人均播放次数'), (3, '单次观看时长')]
-    data_date = {}
-    for row in results:
-        d = str(row.Date)
-        data_date[(d, 0)] = row.Users
-        data_date[(d, 1)] = row.AverageTime
-        data_date[(d, 2)] = row.Records / row.Users
-        data_date[(d, 3)] = row.AverageTime * row.Users / row.Records
-
-    data_by_day = {}
-    for i, desc in process_items:
-        data_by_day[i] = []
-        for d in days_region:
-            data_by_day[i].append(data_date.get((d, i), 0))
-
-    for i, desc in process_items:
-        if any(data_by_day[i]) > 0:
-            value = int(data_by_day[i][-1])
-            day_on_day = get_growth_percent(value, data_by_day[i][-2])
-            week_on_week = get_growth_percent(value, data_by_day[i][0])
-            avg_week = int(sum(data_by_day[i][1:])/7)
-            max_week, max_date = max(zip(data_by_day[i][1:], days_region[1:]), key=lambda x: x[0])
-            user_activity.msub.append([desc, value, day_on_day, week_on_week,
-                                      avg_week, int(max_week), max_date])
-
-    return user_activity
-
-
-@time_func
-def qos_fbuffer_analyze(service_type, device_type, end_date):
-    # 服务质量
+def qos_fbuffer_analyze(service_type, device_type, begin_date, end_date, index=0):
     view_types = VIEW_TYPES[1:]
-    process_items = [(0, '缓冲成功率'), (1, '一次不卡比例'), (2, '卡用户卡时长占比'), (3, '卡播放平均卡次数')]
+    x_alis_day = get_days_region(begin_date, end_date)
+    x_alis = []
+    for d in x_alis_day:
+        x_alis_hour = ["%s:00" % i for i in range(24)]
+        x_alis_hour[0] = d
+        x_alis += x_alis_hour
 
-    filter_params, days_region = get_version_analyze_param(None, service_type, device_type, end_date)
-    q_conditions = Q(Date__gte=filter_params.begin_date) & Q(Date__lte=filter_params.end_date)
-    q_conditions = q_conditions & Q(DeviceType=filter_params.device_type)
-    q_conditions = q_conditions & Q(ServiceType=filter_params.service_type)
-    if filter_params.service_type == 'B2C':
+    data_count = len(x_alis)
+
+    q_conditions = Q(Date__gte=begin_date) & Q(Date__lte=end_date)
+    q_conditions = q_conditions & Q(DeviceType=device_type)
+    q_conditions = q_conditions & Q(ServiceType=service_type)
+    if service_type == 'B2C':
         q_conditions = q_conditions & Q(ISP='all') & Q(Area='all')
+    q_conditions &= Q(Hour__lt=24)
 
-    # data_date[(date, type 0/1, view_type, index)]
-    # @type 0: for qos
-    # @type 1: for fbuffer
-    data_date = {}
+    # initial fbuffer: P50, P90, AverageTime
+    pn_list = [('P50', 'P50'), ('P90', 'P90'), ('AverageTime', 'AVG')]
+    datas_fbuffer = {}
+    for view, desc in view_types:
+        datas_fbuffer[view] = {}
+        for i, _ in pn_list:
+            datas_fbuffer[view][i] = [0 for _ in range(data_count)]
 
-    results = BestvFbuffer.objects.filter(q_conditions)
-    for row in results:
-        d = str(row.Date)
-        data_date[(d, 0, row.ViewType, 0)] = 100*row.SucRatio
-        for (pn, _) in PN_LIST:
-            data_date[(d, 1, row.ViewType, pn)] = getattr(row, pn)
-
-    results1 = BestvFluency.objects.filter(q_conditions)
-    for row in results1:
-        d = str(row.Date)
-        data_date[(d, 0, row.ViewType, 1)] = 100*row.Fluency
-        data_date[(d, 0, row.ViewType, 2)] = 100*row.PRatio
-        data_date[(d, 0, row.ViewType, 3)] = row.AvgCount
-
-    # qos
-    qos_by_day = {}
-    for v, v_desc in view_types:
-        for i, i_desc in process_items:
-            qos_by_day[(v, i)] = []
-            for d in days_region:
-                qos_by_day[(v, i)].append(data_date.get((d, 0, v, i), 0.0))
-
-    header = ['类型', '数据', '环比上日(%)', '同比上周(%)', '一周均值', '一周峰值', '峰值日期']
-    qos = list()
-    for v, v_desc in view_types:
-        qos.append(HtmlTable())
-        qos[-1].mtitle = '{0}服务质量'.format(v_desc)
-        qos[-1].mheader = header
-        qos[-1].msub = []
-        has_data = False
-        for i, i_desc in process_items:
-            if any(qos_by_day[(v, i)]) > 0:
-                has_data = True
-                value = qos_by_day[(v, i)][-1]
-                day_on_day = get_growth_percent(value, qos_by_day[(v, i)][-2])
-                week_on_week = get_growth_percent(value, qos_by_day[(v, i)][0])
-                avg_week = round(sum(qos_by_day[(v, i)][1:])/7, 2)
-                max_week, max_date = max(zip(qos_by_day[(v, i)][1:], days_region[1:]), key=lambda x: x[0])
-                qos[-1].msub.append([i_desc, value, day_on_day, week_on_week, avg_week, int(max_week), max_date])
-        if not has_data:
-            qos.pop()
+    # initial qos: '缓冲成功率', '一次不卡比例', '卡用户卡时长占比'
+    qos_items = [('suc_ratio', '缓冲成功率'), ('fluency', '一次不卡比例'), ('p_ratio', '卡用户卡时长占比')]
+    datas_qos = {}
+    for view, desc in view_types:
+        datas_qos[view] = {}
+        for i, _ in qos_items:
+            datas_qos[view][i] = [0 for _ in range(data_count)]
 
     # fbuffer
-    fbuffer = HtmlTable()
-    fbuffer.mtitle = '首次缓冲时长'
-    fbuffer.mheader = ['类型', '概述']
-    fbuffer.msub = []
+    q_extra = Q(AverageTime__gt=0) | Q(P90__gt=0) | Q(P50__gt=0)
+    results = BestvFbuffer.objects.filter(q_conditions).filter(q_extra)\
+        .values('ViewType', 'Date', 'Hour', 'SucRatio', 'P50', 'P90', 'AverageTime')
+    for row in results:
+        i = get_days_offset(begin_date, str(row['Date'])) * 24 + row['Hour']
+        datas_qos[row['ViewType']]['suc_ratio'][i] = 100*row['SucRatio']
+        datas_fbuffer[row['ViewType']]['P50'][i] = row['P50']
+        datas_fbuffer[row['ViewType']]['P90'][i] = row['P90']
+        datas_fbuffer[row['ViewType']]['AverageTime'][i] = row['AverageTime']
 
-    fbuffer_by_day = {}
-    for v, v_desc in view_types:
-        pn_values = {}
-        for (pn, _) in PN_LIST:
-            pn_values[pn] = []
-            for d in days_region:
-                pn_values[pn].append(data_date.get((d, 1, v, pn), 0))
+    # qos
+    q_extra = Q(Fluency__gt=0) | Q(PRatio__gt=0)
+    results1 = BestvFluency.objects.filter(q_conditions).filter(q_extra)\
+        .values('ViewType', 'Date', 'Hour', 'Fluency', 'PRatio')
+    for row in results1:
+        i = get_days_offset(begin_date, str(row['Date'])) * 24 + row['Hour']
+        datas_qos[row['ViewType']]['fluency'][i] = 100*row['Fluency']
+        datas_qos[row['ViewType']]['p_ratio'][i] = 100*row['PRatio']
 
-        fbuffer_by_day[v] = pn_values
+    items_qos_fb = []
+    interval = get_multidays_interval(len(x_alis)/24)
+    for (v, desc) in view_types:
+        item = make_plot_item(datas_qos[v], qos_items, index, x_alis, '{0} QoS'.format(desc),
+                              '', '百分比(%)', interval)
+        if item:
+            items_qos_fb.append(item)
+            index += 1
 
-    for v, v_desc in view_types:
-        datum = {}
-        for pn, pn_desc in PN_LIST:
-            if any(fbuffer_by_day[v][pn]) > 0:
-                value = int(fbuffer_by_day[v][pn][-1])
-                day_on_day = get_growth_percent(value, fbuffer_by_day[v][pn][-2])
-                week_on_week = get_growth_percent(value, fbuffer_by_day[v][pn][0])
-                avg_week = int(sum(fbuffer_by_day[v][pn][1:])/7)
-                max_week, max_date = max(zip(fbuffer_by_day[v][pn][1:], days_region[1:]), key=lambda x: x[0])
-                datum[pn_desc] = [value, day_on_day, week_on_week, avg_week, max_week, max_date]
+        item = make_plot_item(datas_fbuffer[v], pn_list, index, x_alis, '{0} fbuffer'.format(desc),
+                              '', '秒(s)', interval)
+        if item:
+            items_qos_fb.append(item)
+            index += 1
 
-        if datum:
-            summary = pn_values_analyze_summary(datum)
-            fbuffer.msub.append([v_desc, summary])
+    return items_qos_fb
 
-    return qos, fbuffer
+
+def prepare_hourly_play_records(service_type, device_type, begin_date, end_date, x_alis, view_types):
+    data_count = len(x_alis)
+
+    q_condition = Q(ServiceType=service_type) & Q(DeviceType=device_type)
+    if service_type == 'B2C':
+        q_condition &= Q(ISP='all') & Q(Area='all')
+    q_condition &= Q(Date__gte=begin_date) & Q(Date__lte=end_date)
+    q_condition &= Q(Hour__lt=24) & Q(Records__gt=0)
+
+    results = BestvPlayinfo.objects.filter(q_condition).values('Date', 'Hour', 'ViewType', 'Records')
+
+    datas = {}
+    for view, desc in view_types:
+        datas[view] = [0 for _ in range(data_count)]
+
+    for row in results:
+        index = get_days_offset(begin_date, str(row['Date'])) * 24 + row['Hour']
+        datas[row['ViewType']][index] = row['Records']
+
+    datas[0] = map(sum, zip(*datas.values()))
+
+    return datas
+
+
+def get_play_records(service_type, device_type, begin_date, end_date, index=0):
+    view_types = VIEW_TYPES
+
+    x_alis_day = get_days_region(begin_date, end_date)
+    x_alis = []
+    for d in x_alis_day:
+        x_alis_hour = ["%s:00" % i for i in range(24)]
+        x_alis_hour[0] = d
+        x_alis += x_alis_hour
+
+    datas = prepare_hourly_play_records(service_type, device_type, begin_date, end_date, x_alis, view_types)
+    interval = get_multidays_interval(len(x_alis)/24)
+    item = make_plot_item(datas, view_types, index, x_alis, '各类型观看量(已隐藏无观看量的类型)',
+                          '', '记录数', interval, remove_zero_serie=True)
+
+    return item
+
+
+def prepare_daily_users(service_type, device_type, begin_date, end_date, x_alis, keys):
+    data_count = len(x_alis)
+
+    q_condition = Q(ServiceType=service_type) & Q(DeviceType=device_type)
+    if service_type == 'B2C':
+        q_condition &= Q(ISP='all') & Q(Area='all')
+    q_condition &= Q(Date__gte=begin_date) & Q(Date__lte=end_date)
+    q_condition &= Q(Records__gt=0) & Q(Users__gt=0)
+
+    results = BestvPlayprofile.objects.filter(q_condition).values('Date', 'Records', 'Users')
+
+    datas = {}
+    for k, desc in keys:
+        datas[k] = [0 for _ in range(data_count)]
+
+    for row in results:
+        index = get_days_offset(begin_date, str(row['Date']))
+        datas['Records'][index] = row['Records']
+        datas['Users'][index] = row['Users']
+
+    return datas
+
+
+def get_users(service_type, device_type, begin_date, end_date, index=0):
+    keys = [('Records', "记录数"), ('Users', "用户数")]
+
+    x_alis = get_days_region(begin_date, end_date)
+    datas = prepare_daily_users(service_type, device_type, begin_date, end_date, x_alis, keys)
+    item = make_plot_item(datas, keys, index, x_alis, '总观看量及用户数',
+                          '', 'Num', remove_zero_serie=True)
+
+    return item
 
 
 @login_required
@@ -507,8 +422,9 @@ def show_version_analyze(request):
     (service_type, device_type, device_types,
      version, versions, begin_date, end_date) = get_filter_param_values(request)
 
-    if device_type == "":
-        raise NoDataError("No data on {0} in tplay_title".format(end_date))
+    date_fmt = '%Y-%m-%d'
+    end_date_tm = datetime.strptime(end_date, date_fmt)
+    one_week_ago = (end_date_tm - timedelta(days=7)).strftime(date_fmt)
 
     if version == "All":
         device_type_full = device_type
@@ -516,20 +432,23 @@ def show_version_analyze(request):
         device_type_full = '{0}_{1}'.format(device_type, version)
 
     # 播放量与播放时长
-    context['items'] = ['播放量与播放时长']
-    context['play_records'], context['distribution'] = play_records_analyze(service_type, device_type_full, end_date)
-    context['play_time'] = play_time_analyze(service_type, device_type_full, end_date)
+    context['items'] = ['播放量与用户数']
+    items = []
+    play_records = get_play_records(service_type, device_type_full, one_week_ago, end_date, len(items))
+    items.append(play_records)
 
-    # 版本活跃度
-    context['items'].append('版本活跃度')
-    context['user_activity'] = user_activity_analyze(service_type, device_type_full, end_date)
+    users = get_users(service_type, device_type_full, one_week_ago, end_date, len(items))
+    items.append(users)
+
+    context['distribution'] = play_records_analyze(service_type, device_type_full, end_date)
 
     # 服务质量
     context['items'].append('服务质量')
-    qos, fbuffer = qos_fbuffer_analyze(service_type, device_type_full, end_date)
-    context['qos'] = qos
-    context['fbuffer'] = fbuffer
+    items_qos_fb = qos_fbuffer_analyze(service_type, device_type_full, one_week_ago, end_date, len(items))
+    items.extend(items_qos_fb)
+    context['items_qos_fb_index'] = [i+2 for i in range(len(items_qos_fb))]
 
+    context['contents'] = items
     context['service_types'] = SERVICE_TYPES
     context['default_service_type'] = service_type
     context['device_types'] = device_types

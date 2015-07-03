@@ -50,19 +50,26 @@ class FilterParams:
 
 # key_values: {1:[...], 2:[xxx], 3:[...]} sucratio of all viewtypes:  key
 # is viewtype, lists contain each hour's data
-def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title):
+def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title, interval=1, remove_zero_serie=False):
     item = dict()
     item["index"] = item_idx
     item["title"] = title
     item["subtitle"] = subtitle
     item["y_title"] = y_title
     item["xAxis"] = x_axis
-    item["t_interval"] = 1
+    item["t_interval"] = interval
     if len(x_axis) > 30:
         item["t_interval"] = len(x_axis) / 30
 
     series = []
+    is_blank = True
     for (i, desc) in keys:
+        if not any(key_values[i]):
+            if remove_zero_serie:
+                continue
+        else:
+            is_blank = False
+
         serie_item = '''{
             name: '%s',
             yAxis: 0,
@@ -71,9 +78,11 @@ def make_plot_item(key_values, keys, item_idx, x_axis, title, subtitle, y_title)
         }''' % (desc, ",".join(['{0}'.format(v) for v in key_values[i]]))
         series.append(serie_item)
 
-    item["series"] = ",".join(series)
-
-    return item
+    if is_blank:
+        return None
+    else:
+        item["series"] = ",".join(series)
+        return item
 
 # @trace_func
 def prepare_daily_data_of_single_qos(filter_params, days_region, view_types, qos_name, hour_flag, base_radix, need_total=False):
@@ -170,16 +179,16 @@ def get_filter_param_values(request):
     end_date = request.GET.get("end_date", filters_map["end"]).encode("utf-8")
 
     device_types = get_device_types(service_type)
-    if len(device_types) == 0:
-        device_types = [""]
-        device_type = ""
+    if device_types:
+        if device_type not in device_types:
+            device_type = device_types[0]
 
-    if device_type not in device_types:
-        device_type = device_types[0]
-
-    versions = get_versions(service_type, device_type)
-    if version not in versions:
-        version = versions[0]
+        versions = get_versions(service_type, device_type)
+        if version not in versions:
+            version = versions[0]
+    else:
+        device_types = ['']
+        versions = ['']
     
     return service_type, device_type, device_types, version, versions, begin_date, end_date
 
@@ -215,7 +224,8 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
             if data_by_hour is None:
                 raise NoDataError("No hour data between {0} and {1}".format(begin_date, end_date))
 
-            item = make_plot_item(data_by_hour, view_types, 0, HOUR_X_AXIS, title, subtitle, y_title)
+            item = make_plot_item(data_by_hour, view_types, 0, HOUR_X_AXIS, title, subtitle, y_title,
+                                  remove_zero_serie=True)
             items.append(item)
         else:
             days_region = get_days_region(begin_date, end_date)
@@ -225,12 +235,13 @@ def process_single_qos(request, table, qos_name, title, subtitle, y_title, view_
                 raise NoDataError("No daily data between {0} and {1}".format(begin_date, end_date))
 
             format_days_region = ["%s%s" % (i[5:7], i[8:10]) for i in days_region]
-            item = make_plot_item(data_by_day, view_types, 0, format_days_region, title, subtitle, y_title)
+            item = make_plot_item(data_by_day, view_types, 0, format_days_region, title, subtitle, y_title,
+                                  remove_zero_serie=True)
             items.append(item)
 
     except Exception, e:
         logger.info("query {0} {1} error: {2}".format(table.__name__, qos_name, e))
-        raise
+        # raise
 
     context = dict()
     context['default_service_type'] = service_type
@@ -344,10 +355,11 @@ def process_multi_plot(request, table, title, subtitle, y_title, view_types, pn_
                 if view_type_idx not in data_by_hour:
                     continue
 
-                item = make_plot_item(data_by_hour[view_type_idx], pn_types, item_idx, HOUR_X_AXIS,
-                                      title, "%s %s" % (subtitle, view_des), y_title)
-                items.append(item)
-                item_idx += 1
+                item = make_plot_item(data_by_hour[view_type_idx], pn_types, item_idx, HOUR_X_AXIS, title,
+                                      "%s %s" % (subtitle, view_des), y_title)
+                if item:
+                    items.append(item)
+                    item_idx += 1
         else:
             days_region = get_days_region(begin_date, end_date)
             data_by_day = prepare_pnvalue_daily_data(filter_params, days_region, view_types,
@@ -362,8 +374,9 @@ def process_multi_plot(request, table, title, subtitle, y_title, view_types, pn_
                     continue
                 item = make_plot_item(data_by_day[view_type_idx], pn_types, item_idx, format_days_region, title,
                                       "%s %s" % (subtitle, view_des), y_title)
-                items.append(item)
-                item_idx += 1
+                if item:
+                    items.append(item)
+                    item_idx += 1
 
     except Exception, e:
         logger.info("query %s multiQos error: %s" % (table.__name__, e))
