@@ -24,7 +24,7 @@ def handle_uploaded_file(cd):
     file_content = cd['content']
 
     try:
-        path = "./logdata/%s/"%file_date
+        path = "/mnt/resource/data/logdata/%s/"%file_date
         if not os.path.isdir(path):
             os.makedirs(path)
         dest_file = path + file_name
@@ -46,10 +46,10 @@ def get_img(request):
     if not date or not name:
         return HttpResponseBadRequest("<h1>Need more arguments</h1>")
     else:
-        if not os.path.exists("./logdata/%s/%s"%(date, name)):
+        if not os.path.exists("/mnt/resource/data/logdata/%s/%s"%(date, name)):
             return HttpResponseNotFound("<h1>Image %s Not Found</h1>"%name)
         else:
-            image_data = open("./logdata/%s/%s"%(date, name), 'rb').read()
+            image_data = open("/mnt/resource/data/logdata/%s/%s"%(date, name), 'rb').read()
             f,e = os.path.splitext(name)
             if e == ".png":
                 ct = "image/png"
@@ -64,7 +64,7 @@ def get_log(request):
     if not date or not name:
         return HttpResponseBadRequest("<h1>Need more arguments</h1>")
     else:
-        dest_file = "./logdata/%s/%s"%(date, name)
+        dest_file = "/mnt/resource/data/logdata/%s/%s"%(date, name)
         if not os.path.exists(dest_file):
             return HttpResponseNotFound("<h1>Log %s Not Found</h1>"%name)
         else:
@@ -82,14 +82,14 @@ def delete(request):
     if not date:
         return HttpResponseBadRequest("<h1>Need more argument</h1>")
     elif not name:
-        path = "./logdata/%s/"%date
+        path = "/mnt/resource/data/logdata/%s/"%date
         if not os.path.isdir(path):
             return HttpResponseBadRequest("<h1>No such directory %s</h1>"%date)
         else:
             shutil.rmtree(path)
             return HttpResponse("Ok: Logs in %s deleted success."%date)
     else:
-        file = "./logdata/%s/%s"%(date, name)
+        file = "/mnt/resource/data/logdata/%s/%s"%(date, name)
         if not os.path.exists(file):
             return HttpResponseNotFound("<h1>File %s Not Found</h1>"%name)
         else:
