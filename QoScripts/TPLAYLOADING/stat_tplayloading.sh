@@ -62,6 +62,11 @@ do
 		rm -rf ./data/${srv_type}/${olddate}
 	fi
 
+	if [ -f ./data/${srv_type}/${srv_type}_${olddate}.csv ]
+	then
+		rm -rf ./data/${srv_type}/${srv_type}_${olddate}.csv
+	fi
+
 	if [ -d ./temp/${srv_type}/${olddate} ]
 	then
 		rm -rf ./temp/${srv_type}/${olddate}
