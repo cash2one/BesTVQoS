@@ -58,7 +58,12 @@ while(<FILE>) {
 		if($watch_time<0 || $watch_time>36000) {
             next;
         }
-		
+	
+		# pchoke time > play time
+		if($element[16]>$watch_time) {
+			next;
+		}	
+	
 		if ($element[17] == 0) {
 			$suc{$key} += 1;
 		}
