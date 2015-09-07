@@ -137,7 +137,9 @@ INSTALLED_APPS = (
     'cdnMon',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    'south',    
+    'south',
+    'logstore',   
+    'tplayloading',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -192,13 +194,13 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': './logs/debug.log',
+            'filename': '/mnt/resource/data/logs/debug.log',
             'formatter': 'verbose'
         },
         'file_update': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': './logs/updated.log',
+            'filename': '/mnt/resource/data/logs/updated.log',
             'formatter': 'verbose'
         },
         'console': {

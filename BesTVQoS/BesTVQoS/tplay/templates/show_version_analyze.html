@@ -1,0 +1,31 @@
+{% include 'top.html' %}
+
+<div id ="content" >
+    {% include 'filter_group_single_date.html' %}
+    {% include 'highcharts_plot.html' %}
+    {% include 'highcharts_area_percent_stack.html' %}
+
+    <h3>1. {{ items.0 }}</h3>
+    <div class="pageitem">
+        <div id="tabs_0" style="min-width:320px; height:230px" ></div>
+        <HR style="FILTER: alpha(opacity=50,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=1>
+
+        <div id="tabs_1" style="min-width:320px; height:230px" ></div>
+        <HR style="FILTER: alpha(opacity=50,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=1>
+
+        <div id="area_stack_container" style="min-width:320px;height:300px" ></div>
+    </div>
+
+    <h3>2. {{ items.1 }}</h3>
+    <div class="pageitem">
+        {% for i in items_qos_fb_index %}
+            <div id="tabs_{{ i }}" style="min-width:320px; height:230px" ></div>
+            {% if not forloop.last %}
+                <HR style="FILTER: alpha(opacity=50,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=1>
+            {% endif %}
+        {% empty %}
+            "No Data!"
+        {% endfor %}
+    </div>
+	
+</div>

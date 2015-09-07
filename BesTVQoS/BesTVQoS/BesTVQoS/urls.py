@@ -72,6 +72,12 @@ urlpatterns = patterns(
     url(r'^update/mon/ts_delay$', 'cdnMon.update_views.ts_delay'),
     url(r'^update/mon/province_geo$', 'cdnMon.update_views.province_geo'),
 
+    # log store server
+    url(r'^update/logstore', 'logstore.views.update_log'),
+    url(r'^log/get_img', 'logstore.views.get_img'),
+    url(r'^log/get_log', 'logstore.views.get_log'),
+    url(r'^log/delete', 'logstore.views.delete'),
+
     url(r'^login/$',
         'django.contrib.auth.views.login',
         {
@@ -97,4 +103,5 @@ urlpatterns = patterns(
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
     url(r'^tplay/', include("tplay.urls")),
+    url(r'^tplayloading/', include("tplayloading.urls")),
 )

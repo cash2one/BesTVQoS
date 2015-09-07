@@ -24,6 +24,7 @@
 								<span class="arrow up"></span>
 							</div>
 							<ul class="menu">
+                                <li><a href="{% url "tplay.views.show_version_analyze" %}" target="main">版本分析</a></li>
                                 <li><a href="{% url "tplay.views.show_playing_stat" %}" target="main">单日统计</a></li>
 								<li><a href="{% url "tplay.views.show_playing_trend" %}" target="main">趋势</a></li>
 							</ul>
@@ -63,6 +64,18 @@
 								<li><a href="{% url "tplay.views.show_fluency_pratio" %}" target="main">卡用户卡时间占比</a></li>
 								<li><a href="{% url "tplay.views.show_fluency_allpratio" %}" target="main">所有用户卡时间占比</a></li>
 					            <li><a href="{% url "tplay.views.show_fluency_avgcount" %}" target="main">卡顿播放平均卡次数</a></li>
+							</ul>
+						</li>
+						<li>
+							<div class="header">
+								<span class="label" style="background-image: url(/static/images/pc.png);">
+								   <a href="{% url "tplayloading.views.show_stuck" %}" style="color: #FFFFFF" target="main">卡缓冲</a>
+								</span>
+								<span class="arrow down"></span>
+							</div>
+							<ul class="menu" style="display:none">
+								<li><a href="{% url "tplayloading.views.show_stuck" %}" target="main">卡缓冲</a></li>
+                                <li><a href="{% url "tplayloading.views.show_dbuffer" %}" target="main">拖动缓冲</a></li>
 							</ul>
 						</li>
 						<li>

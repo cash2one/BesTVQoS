@@ -22,13 +22,13 @@ logger = logging.getLogger("django.request")
 business_types = ["ALL", "AAA", "EPG", "BSD", "PS"]
 
 
-def make_plot_item2(key_values, keys, item_idx, xAlis, title, subtitle, ytitle1, interval=1, ytitle2=""):
+def make_plot_item2(key_values, keys, item_idx, xAlis, title, subtitle, ytitle, interval=1, ytitle1=""):
     item = {}
     item["index"] = item_idx
     item["title"] = title
     item["subtitle"] = subtitle
+    item["y_title"] = ytitle
     item["y_title1"] = ytitle1
-    item["y_title2"] = ytitle2
     item["xAxis"] = xAlis
     item["t_interval"] = interval
 
